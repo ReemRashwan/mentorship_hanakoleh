@@ -4,15 +4,15 @@ services:
     container_name: hanakoleh-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-hanakoleh_db}
-      POSTGRES_USER: ${DB_USER:-hanakoleh_app}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-hanakoleh_app_password}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hanakoleh_app} -d ${DB_NAME:-hanakoleh_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,18 +27,18 @@ services:
       APP_PORT: ${APP_PORT:-8080}
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-hanakoleh_db}
-      DB_USER: ${DB_USER:-hanakoleh_app}
-      DB_PASSWORD: ${DB_PASSWORD:-change_me}
-      LOG_LEVEL_ROOT: ${LOG_LEVEL_ROOT:-INFO}
-      LOG_LEVEL_APP: ${LOG_LEVEL_APP:-DEBUG}
-      LOG_FILE: ${LOG_FILE:-hanakoleh.log}
-      LOG_FILE_PATH: ${LOG_FILE_PATH:-/var/log/app}
-      HIBERNATE_SQL_LOG_LEVEL: ${HIBERNATE_SQL_LOG_LEVEL:-DEBUG}
-      HIBERNATE_BIND_LOG_LEVEL: ${HIBERNATE_BIND_LOG_LEVEL:-TRACE}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      LOG_LEVEL_ROOT: ${LOG_LEVEL_ROOT}
+      LOG_LEVEL_APP: ${LOG_LEVEL_APP}
+      LOG_FILE: ${LOG_FILE}
+      LOG_FILE_PATH: ${LOG_FILE_PATH}
+      HIBERNATE_SQL_LOG_LEVEL: ${HIBERNATE_SQL_LOG_LEVEL}
+      HIBERNATE_BIND_LOG_LEVEL: ${HIBERNATE_BIND_LOG_LEVEL}
     volumes:
       # Mounts local ./logs to the container log path
-      - ${LOG_FILE_PATH:-./logs}:${LOG_FILE_PATH:-/var/log/app}
+      - ${LOG_FILE_PATH}:${LOG_FILE_PATH}
     depends_on:
       postgres:
         condition: service_healthy
