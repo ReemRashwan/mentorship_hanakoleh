@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java"/>
+
+    <module name="TreeWalker">
+
+        <!-- 1. Package Names: lowercase -->
+        <module name="PackageName">
+            <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+            <message key="name.invalidPattern"
+                     value="Package name ''{0}'' must be all lowercase (e.g., com.example.project)."/>
+        </module>
+
+        <!-- 2. Class, Interface, Enum Names: PascalCase -->
+        <module name="TypeName">
+            <property name="format" value="^[A-Z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="Type name ''{0}'' must be in PascalCase (e.g., MyClass)."/>
+        </module>
+
+        <!-- 3. Method Names: camelCase -->
+        <module name="MethodName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="Method name ''{0}'' must be in camelCase (e.g., calculateTotal)."/>
+        </module>
+
+        <!-- 4. Constants (static final): UPPER_SNAKE_CASE OR log/logger -->
+        <module name="ConstantName">
+            <!-- Allows standard UPPER_SNAKE_CASE or 'log' or 'logger' -->
+            <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log)$"/>
+            <message key="name.invalidPattern"
+                     value="Constant ''{0}'' must be in UPPER_SNAKE_CASE or named 'log'."/>
+        </module>
+
+        <!-- 5. Instance Variables: camelCase -->
+        <module name="MemberName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="Field ''{0}'' must be in camelCase (e.g., userEmail)."/>
+        </module>
+
+        <!-- 6. Static non-final Variables: camelCase -->
+        <module name="StaticVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="Static field ''{0}'' must be in camelCase."/>
+        </module>
+
+        <!-- 7. Local Variables: camelCase -->
+        <module name="LocalVariableName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="Local variable ''{0}'' must be in camelCase."/>
+        </module>
+
+        <!-- 8. Method Parameters: camelCase -->
+        <module name="ParameterName">
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <message key="name.invalidPattern"
+                     value="Parameter ''{0}'' must be in camelCase."/>
+        </module>
+
+        <!-- 9. Generic Type Parameters -->
+        <module name="ClassTypeParameterName">
+            <property name="format" value="^[A-Z][0-9]?$"/>
+        </module>
+        <module name="MethodTypeParameterName">
+            <property name="format" value="^[A-Z][0-9]?$"/>
+        </module>
+
+    </module>
+</module>

@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hanakoleh-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-hanakoleh_db}
+      POSTGRES_USER: ${DB_USER:-hanakoleh_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hanakoleh_app_password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hanakoleh_app} -d ${DB_NAME:-hanakoleh_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  app:
+    build: .
+    container_name: hanakoleh-app
+    ports:
+      - "${APP_PORT:-8080}:${APP_PORT:-8080}"
+    environment:
+      APP_PORT: ${APP_PORT:-8080}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-hanakoleh_db}
+      DB_USER: ${DB_USER:-hanakoleh_app}
+      DB_PASSWORD: ${DB_PASSWORD:-change_me}
+      LOG_LEVEL_ROOT: ${LOG_LEVEL_ROOT:-INFO}
+      LOG_LEVEL_APP: ${LOG_LEVEL_APP:-DEBUG}
+      LOG_FILE: ${LOG_FILE:-hanakoleh.log}
+      LOG_FILE_PATH: ${LOG_FILE_PATH:-/var/log/app}
+      HIBERNATE_SQL_LOG_LEVEL: ${HIBERNATE_SQL_LOG_LEVEL:-DEBUG}
+      HIBERNATE_BIND_LOG_LEVEL: ${HIBERNATE_BIND_LOG_LEVEL:-TRACE}
+    volumes:
+      # Mounts local ./logs to the container log path
+      - ${LOG_FILE_PATH:-./logs}:${LOG_FILE_PATH:-/var/log/app}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
