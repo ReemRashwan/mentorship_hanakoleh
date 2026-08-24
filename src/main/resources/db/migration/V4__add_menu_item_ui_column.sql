@@ -1,0 +1,1 @@
+ALTER TABLE menu_item ADD mene_item_ui_order INTEGER NOT NULL DEFAULT 0;

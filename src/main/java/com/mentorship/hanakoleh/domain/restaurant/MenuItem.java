@@ -64,6 +64,12 @@ public class MenuItem {
     private Integer availableQuantity;
 
     @Builder.Default
+    @Column(name = "menu_item_ui_order", nullable = false)
+    @NotNull
+    @Min(0)
+    private Integer uiOrder = 0;
+
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "menu_item_on_demand_status", nullable = false, length = 50)
     @NotNull

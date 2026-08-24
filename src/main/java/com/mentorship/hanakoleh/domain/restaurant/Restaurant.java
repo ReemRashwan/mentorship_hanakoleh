@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +47,18 @@ public class Restaurant {
     @Size(max = 255)
     private String email;
 
+    @Column(name = "restaurant_rating", precision = 3, scale = 2)
+    private BigDecimal rating;
+
+    @Column(name = "restaurant_longitude", precision = 9, scale = 6)
+    private BigDecimal longitude;
+
+    @Column(name = "restaurant_latitude", precision = 9, scale = 6)
+    private BigDecimal latitude;
+
+    @Column(name = "restaurant_avg_preparation_time_in_mins")
+    private Integer avgPreparationTimeInMins;
+
     @Column(name = "restaurant_created_at", nullable = false)
     @NotNull
     private OffsetDateTime createdAt;
@@ -54,6 +67,14 @@ public class Restaurant {
     private void prePersist() {
         if (createdAt == null) {
             createdAt = OffsetDateTime.now();
+        }
+
+        if (rating == null) {
+            rating = BigDecimal.ZERO;
+        }
+
+        if (avgPreparationTimeInMins == null) {
+            avgPreparationTimeInMins = 0;
         }
     }
 
