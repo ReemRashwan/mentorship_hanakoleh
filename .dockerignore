@@ -1,0 +1,8 @@
+target
+logs
+.git
+.idea
+.vscode
+.env
+.env.*
+!/.env.template
