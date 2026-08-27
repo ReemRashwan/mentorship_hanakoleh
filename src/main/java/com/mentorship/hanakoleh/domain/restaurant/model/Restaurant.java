@@ -1,14 +1,23 @@
 package com.mentorship.hanakoleh.domain.restaurant.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "restaurant")
@@ -74,9 +83,10 @@ public class Restaurant {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof Restaurant restaurant)) {
+        if (!(other instanceof Restaurant)) {
             return false;
         }
+        Restaurant restaurant = (Restaurant) other;
         return id != null && id.equals(restaurant.id);
     }
 

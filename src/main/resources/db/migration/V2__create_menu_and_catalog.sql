@@ -43,5 +43,4 @@ CREATE TABLE IF NOT EXISTS menu_item (
 );
 
 CREATE INDEX idx__menu__item_menu_id ON menu_item (menu_id);
-CREATE INDEX idx__menu__item_restaurant_id ON menu_item (restaurant_id);
 CREATE INDEX idx__menu__item_category_id ON menu_item (menu_item_category_id);

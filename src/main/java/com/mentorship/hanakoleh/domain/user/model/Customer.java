@@ -1,7 +1,5 @@
-package com.mentorship.hanakoleh.domain.cart.model;
+package com.mentorship.hanakoleh.domain.user.model;
 
-import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
-import com.mentorship.hanakoleh.domain.user.model.Customer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,12 +7,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,48 +17,38 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "cart")
+@Table(name = "customer")
 @Getter
 @Setter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Cart {
+public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_id")
+    @Column(name = "customer_id")
     private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "restaurant_id", nullable = false)
-    private Restaurant restaurant;
-
-    @Column(name = "cart_created_at", nullable = false)
+    @Builder.Default
+    @Column(name = "customer_notification_status", nullable = false)
     @NotNull
-    private OffsetDateTime createdAt;
-
-    @PrePersist
-    private void prePersist() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
-    }
+    private Boolean notificationStatus = true;
 
     @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof Cart)) {
+        if (!(other instanceof Customer)) {
             return false;
         }
-        Cart cart = (Cart) other;
-        return id != null && id.equals(cart.id);
+        Customer customer = (Customer) other;
+        return id != null && id.equals(customer.id);
     }
 
     @Override
