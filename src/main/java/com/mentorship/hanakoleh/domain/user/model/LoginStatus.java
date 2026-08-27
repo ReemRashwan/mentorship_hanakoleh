@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.domain.user;
+package com.mentorship.hanakoleh.domain.user.model;
 
 public enum LoginStatus {
     SUCCESS,

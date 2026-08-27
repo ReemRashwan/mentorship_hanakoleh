@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.domain.restaurant;
+package com.mentorship.hanakoleh.domain.restaurant.model;
 
 public enum MenuItemOnDemandStatus {
     AVAILABLE,

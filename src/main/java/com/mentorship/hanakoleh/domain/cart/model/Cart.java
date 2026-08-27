@@ -1,6 +1,7 @@
-package com.mentorship.hanakoleh.domain.cart;
+package com.mentorship.hanakoleh.domain.cart.model;
 
-import com.mentorship.hanakoleh.domain.restaurant.MenuItem;
+import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
+import com.mentorship.hanakoleh.domain.user.model.Customer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,11 +10,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,51 +22,48 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "cart_item")
+@Table(name = "cart")
 @Getter
 @Setter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class CartItem {
+public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_item_id")
+    @Column(name = "cart_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "menu_item_id", nullable = false)
-    private MenuItem menuItem;
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
 
-    @Column(name = "cart_item_price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "cart_created_at", nullable = false)
     @NotNull
-    @DecimalMin(value = "0.00")
-    private BigDecimal price;
+    private OffsetDateTime createdAt;
 
-    @Builder.Default
-    @Column(name = "cart_item_quantity", nullable = false)
-    @NotNull
-    @Min(1)
-    private Integer quantity = 1;
-
-    @Column(name = "cart_item_note")
-    private String note;
+    @PrePersist
+    private void prePersist() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
 
     @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof CartItem)) {
+        if (!(other instanceof Cart)) {
             return false;
         }
-        CartItem cartItem = (CartItem) other;
-        return id != null && id.equals(cartItem.id);
+        Cart cart = (Cart) other;
+        return id != null && id.equals(cart.id);
     }
 
     @Override

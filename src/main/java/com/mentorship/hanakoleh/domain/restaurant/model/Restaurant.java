@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.domain.restaurant;
+package com.mentorship.hanakoleh.domain.restaurant.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
