@@ -13,4 +13,6 @@ import lombok.NoArgsConstructor;
 
 public class CartDTO {
     private Integer cartId;
+    private Integer customerId;
+    private Integer restaurantId;
 }

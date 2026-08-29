@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.service;
 
+import com.mentorship.hanakoleh.controller.DTO.CartDTO;
 import com.mentorship.hanakoleh.controller.DTO.CartItemDTO;
 import com.mentorship.hanakoleh.domain.cart.Cart;
 import com.mentorship.hanakoleh.domain.cart.CartItem;
@@ -44,12 +45,12 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public Cart findCartByCustomerId(Integer customerId) {
-        return cartRepository.findByCustomerId(customerId).orElseThrow(()->new CartNotFoundException("Cart not found"));
+        return cartRepository.findByCustomerId(customerId).orElseThrow(() -> new CartNotFoundException("Cart not found"));
 
     }
 
     @Transactional(readOnly = true)
-    public Cart checkOrAssignCart(Integer customerId,Integer restaurantId) {
+    public Cart checkOrAssignCart(Integer customerId, Integer restaurantId) {
         return cartRepository.findByCustomerId(customerId).orElse(createCartForCustomer(customerId, restaurantId));
 
     }
@@ -65,10 +66,11 @@ public class CartService {
     }
 
     @Transactional
-    public void clearCart(Integer userId) {
+    public CartDTO clearCart(Integer userId) {
         Integer customerId = customerService.retrieveCustomerIdByUserId(userId);
         Cart customerCart = findCartByCustomerId(customerId);
         cartItemRepository.deleteByCartId(customerCart.getId());
+        return mapToCartDTO(customerCart);
     }
 
     @Transactional
@@ -76,7 +78,7 @@ public class CartService {
         Integer customerId = customerService.retrieveCustomerIdByUserId(userId);
         MenuItem selectedMenuItem = menuService.findMenuItemById(cartItemDTO.getSelectedMenuItemId());
         //ensure customer has a cart and if not assign one
-        Cart customerCart = checkOrAssignCart(customerId,selectedMenuItem.getMenu().getRestaurant().getId());
+        Cart customerCart = checkOrAssignCart(customerId, selectedMenuItem.getMenu().getRestaurant().getId());
 
         // Ensure the item belongs to the restaurant associated with the active cart
         if (!selectedMenuItem.getMenu().getRestaurant().getId().equals(customerCart.getRestaurant().getId())) {
@@ -110,6 +112,16 @@ public class CartService {
                 .price(cartItem.getPrice())
                 .quantity(cartItem.getQuantity())
                 .note(cartItem.getNote())
+                .build();
+    }
+
+    private CartDTO mapToCartDTO(Cart cart) {
+
+
+        return CartDTO.builder()
+                .cartId(cart.getId())
+                .customerId(cart.getCustomer().getId())
+                .restaurantId(cart.getRestaurant() != null ? cart.getRestaurant().getId() : null)
                 .build();
     }
 }
