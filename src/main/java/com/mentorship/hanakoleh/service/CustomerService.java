@@ -1,11 +1,8 @@
 package com.mentorship.hanakoleh.service;
 
-import com.mentorship.hanakoleh.domain.restaurant.Restaurant;
 import com.mentorship.hanakoleh.domain.user.Customer;
-import com.mentorship.hanakoleh.exceptions.CustomerNotFoundException;
-import com.mentorship.hanakoleh.exceptions.RestaurantNotFoundException;
+import com.mentorship.hanakoleh.exception.CustomerNotFoundException;
 import com.mentorship.hanakoleh.repository.CustomerRepository;
-import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

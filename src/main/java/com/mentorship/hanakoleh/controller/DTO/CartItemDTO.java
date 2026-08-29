@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 
@@ -18,7 +19,4 @@ public class CartItemDTO {
     private Integer quantity;
     private String  note;
 
-    public CartItemDTO( ) {
-
-    }
 }

@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.exceptions;
+package com.mentorship.hanakoleh.exception;
 
 public class ItemUnavailableException extends RuntimeException {
     public ItemUnavailableException(String message) {

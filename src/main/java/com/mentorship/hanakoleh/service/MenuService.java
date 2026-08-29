@@ -1,21 +1,19 @@
 package com.mentorship.hanakoleh.service;
 
-import com.mentorship.hanakoleh.domain.restaurant.Menu;
 import com.mentorship.hanakoleh.domain.restaurant.MenuItem;
 import com.mentorship.hanakoleh.repository.MenuItemRepository;
 import com.mentorship.hanakoleh.repository.MenuRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
 public class MenuService {
     private final MenuRepository menuRepository;
     private final MenuItemRepository menuItemRepository;
 
-    public MenuService(MenuRepository menuRepository,MenuItemRepository menuItemRepository){
-        this.menuItemRepository=menuItemRepository;
+    public MenuService(MenuRepository menuRepository, MenuItemRepository menuItemRepository){
         this.menuRepository=menuRepository;
+        this.menuItemRepository=menuItemRepository;
     }
 
     MenuItem findMenuItemById(Integer menuItemId){

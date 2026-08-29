@@ -2,12 +2,7 @@ package com.mentorship.hanakoleh.controller;
 
 
 import com.mentorship.hanakoleh.controller.DTO.CartItemDTO;
-import com.mentorship.hanakoleh.domain.cart.Cart;
-import com.mentorship.hanakoleh.domain.cart.CartItem;
-import com.mentorship.hanakoleh.domain.restaurant.MenuItem;
-import com.mentorship.hanakoleh.domain.user.GuestUser;
 import com.mentorship.hanakoleh.service.CartService;
-import com.mentorship.hanakoleh.exceptions.UserTokenNotFoundException;
 import com.mentorship.hanakoleh.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +12,6 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/carts")

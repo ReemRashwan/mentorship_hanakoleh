@@ -1,14 +1,9 @@
 package com.mentorship.hanakoleh.service;
 
-import com.mentorship.hanakoleh.controller.DTO.GuestUserDTO;
-import com.mentorship.hanakoleh.controller.DTO.UserDTO;
 import com.mentorship.hanakoleh.domain.user.GuestUser;
-import com.mentorship.hanakoleh.domain.user.User;
-import com.mentorship.hanakoleh.exceptions.CustomerNotFoundException;
+import com.mentorship.hanakoleh.exception.CustomerNotFoundException;
 import com.mentorship.hanakoleh.repository.UserGuestRepository;
 import com.mentorship.hanakoleh.repository.UserRepository;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
