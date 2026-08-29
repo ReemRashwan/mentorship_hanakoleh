@@ -4,6 +4,7 @@ import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
 import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
+import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
@@ -50,6 +51,11 @@ public class CartService {
     public Cart removeCartItem(Integer cartId, Integer itemId) {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found: " + cartId));
+
+        if (!CartStatus.ACTIVE.equals(cart.getStatus())) {
+            throw new OperationNotAllowedException(String.format("Remove item is not allowed while cart is not active." +
+                    " Current cart status: %s", cart.getStatus()));
+        }
 
         CartItem cartItem = cart.getItems().stream()
                 .filter(item -> Objects.equals(item.getId(), itemId))
