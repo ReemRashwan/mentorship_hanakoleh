@@ -1,15 +1,15 @@
 //package com.mentorship.hanakoleh.service;
 //
-//import com.mentorship.hanakoleh.controller.DTO.CartItemDTO;
-//import com.mentorship.hanakoleh.domain.cart.Cart;
-//import com.mentorship.hanakoleh.domain.cart.CartItem;
-//import com.mentorship.hanakoleh.domain.restaurant.MenuItem;
-//import com.mentorship.hanakoleh.domain.restaurant.Restaurant;
+//import com.mentorship.hanakoleh.domain.cart.dto.CartItemDTO;
+//import com.mentorship.hanakoleh.domain.cart.model.Cart;
+//import com.mentorship.hanakoleh.domain.cart.model.CartItem;
+//import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
+//import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
 //import com.mentorship.hanakoleh.domain.user.Customer;
-//import com.mentorship.hanakoleh.exception.CartNotFoundException;
-//import com.mentorship.hanakoleh.exception.CustomerNotFoundException;
-//import com.mentorship.hanakoleh.repository.CartItemRepository;
-//import com.mentorship.hanakoleh.repository.CartRepository;
+//import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
+//import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
+//import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
+//import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Nested;
