@@ -1,7 +1,7 @@
-package com.mentorship.hanakoleh.domain.cart.model;
+package com.mentorship.hanakoleh.domain.cart;
 
-import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
-import com.mentorship.hanakoleh.domain.user.model.Customer;
+import com.mentorship.hanakoleh.domain.restaurant.Restaurant;
+import com.mentorship.hanakoleh.domain.user.Customer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

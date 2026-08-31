@@ -1,9 +1,7 @@
-package com.mentorship.hanakoleh.domain.restaurant.model;
+package com.mentorship.hanakoleh.domain.restaurant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,12 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,67 +20,53 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "menu_item")
+@Table(name = "menu")
 @Getter
 @Setter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class MenuItem {
+public class Menu {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "menu_item_id")
+    @Column(name = "menu_id")
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "menu_id", nullable = false)
-    private Menu menu;
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menu_item_category_id")
-    private ItemCategory category;
-
-    @Column(name = "menu_item_name", nullable = false, length = 150)
+    @Column(name = "menu_name", nullable = false, length = 150)
     @NotBlank
     @Size(max = 150)
     private String name;
 
-    @Column(name = "menu_item_image", length = 255)
+    @Column(name = "menu_icon", length = 255)
     @Size(max = 255)
-    private String image;
-
-    @Column(name = "menu_item_price", nullable = false, precision = 10, scale = 2)
-    @NotNull
-    @DecimalMin(value = "0.00")
-    private BigDecimal price;
-
-    @Column(name = "menu_item_available_quantity")
-    @Min(0)
-    private Integer availableQuantity;
+    private String icon;
 
     @Builder.Default
-    @Column(name = "menu_item_ui_order", nullable = false)
+    @Column(name = "menu_ui_order", nullable = false)
     @NotNull
     @Min(0)
     private Integer uiOrder = 0;
 
     @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(name = "menu_item_on_demand_status", nullable = false, length = 50)
+    @Column(name = "menu_is_visible", nullable = false)
     @NotNull
-    private MenuItemOnDemandStatus onDemandStatus = MenuItemOnDemandStatus.AVAILABLE;
+    private Boolean visible = true;
 
     @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof MenuItem)) {
+        if (!(other instanceof Menu)) {
             return false;
         }
-        MenuItem menuItem = (MenuItem) other;
-        return id != null && id.equals(menuItem.id);
+        Menu menu = (Menu) other;
+        return id != null && id.equals(menu.id);
     }
 
     @Override
