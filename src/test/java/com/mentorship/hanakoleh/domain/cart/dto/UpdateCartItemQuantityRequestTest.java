@@ -3,6 +3,7 @@ package com.mentorship.hanakoleh.domain.cart.dto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.mentorship.hanakoleh.exception.ErrorCode;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -41,6 +42,7 @@ class UpdateCartItemQuantityRequestTest {
 
         assertEquals(1, violations.size());
         assertEquals("quantity", violations.iterator().next().getPropertyPath().toString());
+        assertEquals(ErrorCode.QUANTITY_MUST_BE_POSITIVE_MESSAGE, violations.iterator().next().getMessage());
     }
 
     @Test
@@ -48,6 +50,7 @@ class UpdateCartItemQuantityRequestTest {
         Set<ConstraintViolation<UpdateCartItemQuantityRequest>> violations = validate(-3);
 
         assertEquals(1, violations.size());
+        assertEquals(ErrorCode.QUANTITY_MUST_BE_POSITIVE_MESSAGE, violations.iterator().next().getMessage());
     }
 
     @Test
@@ -56,6 +59,7 @@ class UpdateCartItemQuantityRequestTest {
 
         assertEquals(1, violations.size());
         assertEquals("quantity", violations.iterator().next().getPropertyPath().toString());
+        assertEquals(ErrorCode.QUANTITY_REQUIRED_MESSAGE, violations.iterator().next().getMessage());
     }
 
     private Set<ConstraintViolation<UpdateCartItemQuantityRequest>> validate(Integer quantity) {

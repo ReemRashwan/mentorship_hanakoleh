@@ -7,6 +7,7 @@ import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableExcept
 import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItemOnDemandStatus;
+import com.mentorship.hanakoleh.exception.ErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +22,11 @@ public class CartService {
 
     @Transactional
     public UpdateCartItemQuantityResponse updateItemQuantity(Integer cartItemId, Integer quantity) {
-        if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than 0, or delete the item from the cart.");
+        if (quantity == null) {
+            throw new IllegalArgumentException(ErrorCode.QUANTITY_REQUIRED.getMessage());
+        }
+        if (quantity < 1) {
+            throw new IllegalArgumentException(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage());
         }
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)
@@ -42,13 +46,13 @@ public class CartService {
         MenuItemOnDemandStatus status = menuItem.getOnDemandStatus();
         if (status == MenuItemOnDemandStatus.UNAVAILABLE || status == MenuItemOnDemandStatus.OUT_OF_STOCK) {
             throw new MenuItemNotOrderableException(
-                    "Menu item " + menuItem.getId() + " is currently " + status + ".");
+                    ErrorCode.MENU_ITEM_NOT_ORDERABLE.format(menuItem.getId(), status));
         }
 
         Integer availableQuantity = menuItem.getAvailableQuantity();
         if (availableQuantity != null && quantity > availableQuantity) {
             throw new MenuItemNotOrderableException(
-                    "Only " + availableQuantity + " units of menu item " + menuItem.getId() + " are available.");
+                    ErrorCode.MENU_ITEM_INSUFFICIENT_STOCK.format(availableQuantity, menuItem.getId()));
         }
     }
 

@@ -15,6 +15,7 @@ import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItemOnDemandStatus;
+import com.mentorship.hanakoleh.exception.ErrorCode;
 import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -63,16 +64,19 @@ class CartServiceTest {
 
     @Test
     void shouldRejectQuantityBelowOneWithoutTouchingTheDatabase() {
-        assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> cartService.updateItemQuantity(CART_ITEM_ID, 0));
 
+        assertEquals(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage(), exception.getMessage());
         verifyNoInteractions(cartItemRepository);
     }
 
     @Test
     void shouldRejectNullQuantity() {
-        assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> cartService.updateItemQuantity(CART_ITEM_ID, null));
+
+        assertEquals(ErrorCode.QUANTITY_REQUIRED.getMessage(), exception.getMessage());
 
         verifyNoInteractions(cartItemRepository);
     }

@@ -18,24 +18,24 @@ class GlobalExceptionHandlerTest {
                 globalExceptionHandler.handleCartItemNotFound(new CartItemNotFoundException(42));
 
         assertEquals(HttpStatus.NOT_FOUND.value(), problemDetail.getStatus());
-        assertEquals("Cart item 42 was not found.", problemDetail.getDetail());
+        assertEquals(ErrorCode.CART_ITEM_NOT_FOUND.format(42), problemDetail.getDetail());
     }
 
     @Test
     void shouldReportUnorderableMenuItemAsConflict() {
         ProblemDetail problemDetail = globalExceptionHandler.handleMenuItemNotOrderable(
-                new MenuItemNotOrderableException("Only 10 units of menu item 7 are available."));
+                new MenuItemNotOrderableException(ErrorCode.MENU_ITEM_INSUFFICIENT_STOCK.format(10, 7)));
 
         assertEquals(HttpStatus.CONFLICT.value(), problemDetail.getStatus());
-        assertEquals("Only 10 units of menu item 7 are available.", problemDetail.getDetail());
+        assertEquals(ErrorCode.MENU_ITEM_INSUFFICIENT_STOCK.format(10, 7), problemDetail.getDetail());
     }
 
     @Test
     void shouldReportInvalidQuantityAsBadRequest() {
         ProblemDetail problemDetail = globalExceptionHandler.handleIllegalArgument(
-                new IllegalArgumentException("Quantity must be greater than 0."));
+                new IllegalArgumentException(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage()));
 
         assertEquals(HttpStatus.BAD_REQUEST.value(), problemDetail.getStatus());
-        assertEquals("Quantity must be greater than 0.", problemDetail.getDetail());
+        assertEquals(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage(), problemDetail.getDetail());
     }
 }
