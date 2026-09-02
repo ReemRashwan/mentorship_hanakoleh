@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
 import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
@@ -39,14 +38,14 @@ class CartServiceTest {
     @Test
     void shouldUpdateQuantityWhenMenuItemCanSupplyIt() {
         CartItem cartItem = cartItemWithQuantity(2, menuItem(10, MenuItemOnDemandStatus.AVAILABLE));
-        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
         when(cartItemRepository.save(cartItem)).thenReturn(cartItem);
 
-        UpdateCartItemQuantityResponse response = cartService.updateItemQuantity(CART_ITEM_ID, 3);
+        CartItem updatedCartItem = cartService.updateItemQuantity(CART_ITEM_ID, 3);
 
-        assertEquals(3, response.quantity().intValue());
-        assertEquals(CART_ITEM_ID, response.cartItemId());
-        assertEquals(MENU_ITEM_ID, response.menuItemId());
+        assertEquals(3, updatedCartItem.getQuantity().intValue());
+        assertEquals(CART_ITEM_ID, updatedCartItem.getId());
+        assertEquals(MENU_ITEM_ID, updatedCartItem.getMenuItem().getId());
         assertEquals(3, cartItem.getQuantity().intValue());
         verify(cartItemRepository).save(cartItem);
     }
@@ -54,12 +53,12 @@ class CartServiceTest {
     @Test
     void shouldAllowDecreaseEvenWhenMenuItemIsOutOfStock() {
         CartItem cartItem = cartItemWithQuantity(5, menuItem(0, MenuItemOnDemandStatus.OUT_OF_STOCK));
-        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
         when(cartItemRepository.save(cartItem)).thenReturn(cartItem);
 
-        UpdateCartItemQuantityResponse response = cartService.updateItemQuantity(CART_ITEM_ID, 2);
+        CartItem updatedCartItem = cartService.updateItemQuantity(CART_ITEM_ID, 2);
 
-        assertEquals(2, response.quantity().intValue());
+        assertEquals(2, updatedCartItem.getQuantity().intValue());
     }
 
     @Test
@@ -83,7 +82,7 @@ class CartServiceTest {
 
     @Test
     void shouldFailWhenCartItemDoesNotExist() {
-        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.empty());
+        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.empty());
 
         assertThrows(CartItemNotFoundException.class,
                 () -> cartService.updateItemQuantity(CART_ITEM_ID, 3));
@@ -94,7 +93,7 @@ class CartServiceTest {
     @Test
     void shouldFailWhenIncreaseExceedsAvailableQuantity() {
         CartItem cartItem = cartItemWithQuantity(2, menuItem(10, MenuItemOnDemandStatus.AVAILABLE));
-        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
 
         assertThrows(MenuItemNotOrderableException.class,
                 () -> cartService.updateItemQuantity(CART_ITEM_ID, 20));
@@ -105,7 +104,7 @@ class CartServiceTest {
     @Test
     void shouldFailWhenIncreasingAnUnavailableMenuItem() {
         CartItem cartItem = cartItemWithQuantity(2, menuItem(50, MenuItemOnDemandStatus.UNAVAILABLE));
-        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
 
         assertThrows(MenuItemNotOrderableException.class,
                 () -> cartService.updateItemQuantity(CART_ITEM_ID, 3));

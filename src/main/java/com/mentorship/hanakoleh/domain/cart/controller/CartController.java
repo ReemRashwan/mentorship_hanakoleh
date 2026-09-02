@@ -2,6 +2,8 @@ package com.mentorship.hanakoleh.domain.cart.controller;
 
 import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityRequest;
 import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
+import com.mentorship.hanakoleh.domain.cart.mapper.CartItemMapper;
+import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.service.CartService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,15 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class CartController {
 
     private final CartService cartService;
+    private final CartItemMapper cartItemMapper;
 
-    public CartController(CartService cartService) {
+    public CartController(CartService cartService, CartItemMapper cartItemMapper) {
         this.cartService = cartService;
+        this.cartItemMapper = cartItemMapper;
     }
 
     @PatchMapping("/items/{cartItemId}")
     public UpdateCartItemQuantityResponse updateItemQuantity(
             @PathVariable Integer cartItemId,
             @Valid @RequestBody UpdateCartItemQuantityRequest request) {
-        return cartService.updateItemQuantity(cartItemId, request.getQuantity());
+        CartItem cartItem = cartService.updateItemQuantity(cartItemId, request.getQuantity());
+        return cartItemMapper.toUpdateQuantityResponse(cartItem);
     }
 }

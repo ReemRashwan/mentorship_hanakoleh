@@ -1,7 +1,6 @@
 package com.mentorship.hanakoleh.domain.cart.service;
 
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
-import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
 import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
@@ -21,7 +20,7 @@ public class CartService {
     }
 
     @Transactional
-    public UpdateCartItemQuantityResponse updateItemQuantity(Integer cartItemId, Integer quantity) {
+    public CartItem updateItemQuantity(Integer cartItemId, Integer quantity) {
         if (quantity == null) {
             throw new IllegalArgumentException(ErrorCode.QUANTITY_REQUIRED.getMessage());
         }
@@ -29,7 +28,7 @@ public class CartService {
             throw new IllegalArgumentException(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage());
         }
 
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
+        CartItem cartItem = cartItemRepository.findWithMenuItemById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
 
         if (quantity > cartItem.getQuantity()) {
@@ -37,9 +36,7 @@ public class CartService {
         }
 
         cartItem.setQuantity(quantity);
-        CartItem updatedCartItem = cartItemRepository.save(cartItem);
-
-        return toResponse(updatedCartItem);
+        return cartItemRepository.save(cartItem);
     }
 
     private void validateMenuItemCanSupply(MenuItem menuItem, Integer quantity) {
@@ -54,14 +51,5 @@ public class CartService {
             throw new MenuItemNotOrderableException(
                     ErrorCode.MENU_ITEM_INSUFFICIENT_STOCK.format(availableQuantity, menuItem.getId()));
         }
-    }
-
-    private UpdateCartItemQuantityResponse toResponse(CartItem cartItem) {
-        return new UpdateCartItemQuantityResponse(
-                cartItem.getId(),
-                cartItem.getMenuItem().getId(),
-                cartItem.getQuantity(),
-                cartItem.getPrice(),
-                cartItem.getNote());
     }
 }
