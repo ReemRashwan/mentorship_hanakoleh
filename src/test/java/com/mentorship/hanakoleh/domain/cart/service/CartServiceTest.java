@@ -38,7 +38,7 @@ class CartServiceTest {
     @Test
     void shouldUpdateQuantityWhenMenuItemCanSupplyIt() {
         CartItem cartItem = cartItemWithQuantity(2, menuItem(10, MenuItemOnDemandStatus.AVAILABLE));
-        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
         when(cartItemRepository.save(cartItem)).thenReturn(cartItem);
 
         CartItem updatedCartItem = cartService.updateItemQuantity(CART_ITEM_ID, 3);
@@ -53,7 +53,7 @@ class CartServiceTest {
     @Test
     void shouldAllowDecreaseEvenWhenMenuItemIsOutOfStock() {
         CartItem cartItem = cartItemWithQuantity(5, menuItem(0, MenuItemOnDemandStatus.OUT_OF_STOCK));
-        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
         when(cartItemRepository.save(cartItem)).thenReturn(cartItem);
 
         CartItem updatedCartItem = cartService.updateItemQuantity(CART_ITEM_ID, 2);
@@ -82,7 +82,7 @@ class CartServiceTest {
 
     @Test
     void shouldFailWhenCartItemDoesNotExist() {
-        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.empty());
+        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.empty());
 
         assertThrows(CartItemNotFoundException.class,
                 () -> cartService.updateItemQuantity(CART_ITEM_ID, 3));
@@ -93,7 +93,7 @@ class CartServiceTest {
     @Test
     void shouldFailWhenIncreaseExceedsAvailableQuantity() {
         CartItem cartItem = cartItemWithQuantity(2, menuItem(10, MenuItemOnDemandStatus.AVAILABLE));
-        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
 
         assertThrows(MenuItemNotOrderableException.class,
                 () -> cartService.updateItemQuantity(CART_ITEM_ID, 20));
@@ -104,7 +104,7 @@ class CartServiceTest {
     @Test
     void shouldFailWhenIncreasingAnUnavailableMenuItem() {
         CartItem cartItem = cartItemWithQuantity(2, menuItem(50, MenuItemOnDemandStatus.UNAVAILABLE));
-        when(cartItemRepository.findWithMenuItemById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
+        when(cartItemRepository.findById(CART_ITEM_ID)).thenReturn(Optional.of(cartItem));
 
         assertThrows(MenuItemNotOrderableException.class,
                 () -> cartService.updateItemQuantity(CART_ITEM_ID, 3));

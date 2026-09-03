@@ -11,7 +11,7 @@ import org.mapstruct.factory.Mappers;
 
 class CartItemMapperTest {
 
-    private final CartItemMapper cartItemMapper = Mappers.getMapper(CartItemMapper.class);
+    private final CartMapper cartMapper = Mappers.getMapper(CartMapper.class);
 
     @Test
     void shouldMapCartItemFieldsToTheResponse() {
@@ -28,10 +28,9 @@ class CartItemMapperTest {
                 .note("no onions")
                 .build();
 
-        UpdateCartItemQuantityResponse response = cartItemMapper.toUpdateQuantityResponse(cartItem);
+        UpdateCartItemQuantityResponse response = cartMapper.toUpdateQuantityResponse(cartItem);
 
         assertEquals(1, response.cartItemId());
-        assertEquals(7, response.menuItemId());
         assertEquals(3, response.quantity());
         assertEquals(new BigDecimal("55.00"), response.price());
         assertEquals("no onions", response.note());

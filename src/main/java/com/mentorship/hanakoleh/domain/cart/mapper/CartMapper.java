@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface CartItemMapper {
+public interface CartMapper {
 
     @Mapping(source = "id", target = "cartItemId")
     @Mapping(source = "menuItem.id", target = "menuItemId")
