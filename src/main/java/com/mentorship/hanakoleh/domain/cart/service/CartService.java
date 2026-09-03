@@ -28,7 +28,7 @@ public class CartService {
             throw new IllegalArgumentException(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage());
         }
 
-        CartItem cartItem = cartItemRepository.findWithMenuItemById(cartItemId)
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
 
         if (quantity > cartItem.getQuantity()) {
