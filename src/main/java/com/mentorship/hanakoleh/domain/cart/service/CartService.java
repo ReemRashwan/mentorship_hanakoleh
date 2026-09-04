@@ -7,7 +7,6 @@ import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItemOnDemandStatus;
 import com.mentorship.hanakoleh.exception.ErrorCode;
-import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
@@ -21,9 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CartService {
 
     private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
 
-    public CartService(CartItemRepository cartItemRepository) {
+    public CartService(CartItemRepository cartItemRepository, CartRepository cartRepository) {
         this.cartItemRepository = cartItemRepository;
+        this.cartRepository = cartRepository;
     }
 
     @Transactional

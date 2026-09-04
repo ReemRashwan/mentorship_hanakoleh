@@ -13,7 +13,6 @@ public interface CartMapper {
 
      // Update cart item quantity
     @Mapping(source = "id", target = "cartItemId")
-    @Mapping(source = "menuItem.id", target = "menuItemId")
     UpdateCartItemQuantityResponse toUpdateQuantityResponse(CartItem cartItem);
     // Remove cart item
     @Mapping(target = "cartId", source = "cart.id")

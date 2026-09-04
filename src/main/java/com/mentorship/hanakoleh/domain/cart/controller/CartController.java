@@ -42,7 +42,7 @@ public class CartController {
 }
 
 
-    @DeleteMapping("/v1/carts/{cartId}/items/{itemId}")
+    @DeleteMapping("/{cartId}/items/{itemId}")
     @Operation(summary = "Remove item from cart", description = "Removes an item from the cart. If it's the last item, the cart status changes to EMPTY and restaurant is cleared")
     public ResponseEntity<RemoveCartItemResponse> removeCartItem(
             @PathVariable Integer cartId,
