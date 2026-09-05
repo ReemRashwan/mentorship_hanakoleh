@@ -1,128 +1,99 @@
 package com.mentorship.hanakoleh.domain.cart.service;
 
-import com.mentorship.hanakoleh.domain.cart.dto.CartDTO;
-import com.mentorship.hanakoleh.domain.cart.dto.CartItemDTO;
+import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
+import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
+import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
+import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
+import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
 import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
 import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
-import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
-import com.mentorship.hanakoleh.domain.restaurant.service.RestaurantService;
-import com.mentorship.hanakoleh.domain.user.Customer;
-import com.mentorship.hanakoleh.domain.user.service.CustomerService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.mentorship.hanakoleh.domain.restaurant.model.MenuItemOnDemandStatus;
+
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
-import java.util.Optional;
-
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class CartService {
 
-    private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
-    private final MenuService menuService;
-    private final CustomerService customerService;
-    private final RestaurantService restaurantService;
+    private final CartRepository cartRepository;
+
+    public CartService(CartItemRepository cartItemRepository, CartRepository cartRepository) {
+        this.cartItemRepository = cartItemRepository;
+        this.cartRepository = cartRepository;
+    }
 
     @Transactional
-    public Cart createCartForCustomer(Integer customerId, Integer restaurantId) {
-        Customer customer = customerService.getCustomerReferenceById(customerId);
-        Restaurant restaurant = restaurantService.getRestaurantReferenceById(restaurantId);
+    public UpdateCartItemQuantityResponse updateItemQuantity(Integer cartItemId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0, or delete the item from the cart.");
+        }
 
-        Cart cart = Cart.builder()
-                .createdAt(OffsetDateTime.now())
-                .restaurant(restaurant)
-                .customer(customer)
-                .build();
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
+
+        if (quantity > cartItem.getQuantity()) {
+            validateMenuItemCanSupply(cartItem.getMenuItem(), quantity);
+        }
+
+        cartItem.setQuantity(quantity);
+        CartItem updatedCartItem = cartItemRepository.save(cartItem);
+
+        return toResponse(updatedCartItem);
+    }
+
+    @Transactional
+    public Cart removeCartItem(Integer cartId, Integer itemId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found: " + cartId));
+
+        if (!CartStatus.ACTIVE.equals(cart.getStatus())) {
+            throw new OperationNotAllowedException(String.format("Remove item is not allowed while cart is not active." +
+                    " Current cart status: %s", cart.getStatus()));
+        }
+
+        CartItem cartItem = cart.getItems().stream()
+                .filter(item -> Objects.equals(item.getId(), itemId))
+                .findFirst()
+                .orElseThrow(() -> new CartItemNotFoundException(itemId));
+
+        cart.getItems().remove(cartItem);
+
+        if (cart.getItems().isEmpty()) {
+            cart.setStatus(CartStatus.EMPTY);
+            cart.setRestaurant(null);
+        } else {
+            cart.setStatus(CartStatus.ACTIVE);
+        }
 
         return cartRepository.save(cart);
     }
 
-    @Transactional(readOnly = true)
-    public Cart findCartByCustomerId(Integer customerId) {
-        return cartRepository.findByCustomerId(customerId).orElseThrow(() -> new CartNotFoundException("Cart not found"));
-
-    }
-
-    @Transactional(readOnly = true)
-    public Cart checkOrAssignCart(Integer customerId, Integer restaurantId) {
-        return cartRepository.findByCustomerId(customerId).orElse(createCartForCustomer(customerId, restaurantId));
-
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<Cart> findById(Integer id) {
-        return cartRepository.findById(id);
-    }
-
-    @Transactional
-    public void removeCart(Integer cartId) {
-        cartRepository.deleteById(cartId);
-    }
-
-    @Transactional
-    public CartDTO clearCart(Integer userId) {
-        Integer customerId = customerService.retrieveCustomerIdByUserId(userId);
-        Cart customerCart = findCartByCustomerId(customerId);
-        cartItemRepository.deleteByCartId(customerCart.getId());
-        return mapToCartDTO(customerCart);
-    }
-
-    @Transactional
-    public CartItemDTO addItemToCart(CartItemDTO cartItemDTO, Integer userId) {
-        Integer customerId = customerService.retrieveCustomerIdByUserId(userId);
-        MenuItem selectedMenuItem = menuService.findMenuItemById(cartItemDTO.getSelectedMenuItemId());
-        //ensure customer has a cart and if not assign one
-        Cart customerCart = checkOrAssignCart(customerId, selectedMenuItem.getMenu().getRestaurant().getId());
-
-        // Ensure the item belongs to the restaurant associated with the active cart
-        if (!selectedMenuItem.getMenu().getRestaurant().getId().equals(customerCart.getRestaurant().getId())) {
-            throw new IllegalArgumentException("Cannot add items from a different restaurant to this cart");
+    private void validateMenuItemCanSupply(MenuItem menuItem, Integer quantity) {
+        MenuItemOnDemandStatus status = menuItem.getOnDemandStatus();
+        if (status == MenuItemOnDemandStatus.UNAVAILABLE || status == MenuItemOnDemandStatus.OUT_OF_STOCK) {
+            throw new MenuItemNotOrderableException(
+                    "Menu item " + menuItem.getId() + " is currently " + status + ".");
         }
 
-        CartItem cartItem = cartItemRepository
-                .findByCartIdAndMenuItemId(customerCart.getId(), selectedMenuItem.getId())
-                .map(existingItem -> {
-                    existingItem.setQuantity(existingItem.getQuantity() + cartItemDTO.getQuantity());
-                    if (cartItemDTO.getNote() != null) {
-                        existingItem.setNote(cartItemDTO.getNote());
-                    }
-                    return existingItem;
-                })
-                .orElseGet(() -> CartItem.builder()
-                        .menuItem(selectedMenuItem)
-                        .cart(customerCart)
-                        .price(selectedMenuItem.getPrice())
-                        .quantity(cartItemDTO.getQuantity())
-                        .note(cartItemDTO.getNote())
-                        .build());
-
-        return mapToCartItemDTO(cartItemRepository.save(cartItem));
+        Integer availableQuantity = menuItem.getAvailableQuantity();
+        if (availableQuantity != null && quantity > availableQuantity) {
+            throw new MenuItemNotOrderableException(
+                    "Only " + availableQuantity + " units of menu item " + menuItem.getId() + " are available.");
+        }
     }
 
-    private CartItemDTO mapToCartItemDTO(CartItem cartItem) {
-        return CartItemDTO.builder()
-                .selectedMenuItemId(cartItem.getMenuItem().getId())
-                .price(cartItem.getPrice())
-                .quantity(cartItem.getQuantity())
-                .note(cartItem.getNote())
-                .build();
-    }
-
-    private CartDTO mapToCartDTO(Cart cart) {
-
-
-        return CartDTO.builder()
-                .cartId(cart.getId())
-                .customerId(cart.getCustomer().getId())
-                .restaurantId(cart.getRestaurant() != null ? cart.getRestaurant().getId() : null)
-                .build();
+    private UpdateCartItemQuantityResponse toResponse(CartItem cartItem) {
+        return new UpdateCartItemQuantityResponse(
+                cartItem.getId() == null ? null : Math.toIntExact(cartItem.getId()),
+                cartItem.getMenuItem().getId(),
+                cartItem.getQuantity(),
+                cartItem.getPrice(),
+                cartItem.getNote());
     }
 }
