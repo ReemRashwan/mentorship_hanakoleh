@@ -38,7 +38,7 @@ services:
       HIBERNATE_BIND_LOG_LEVEL: ${HIBERNATE_BIND_LOG_LEVEL}
     volumes:
       # Mounts local ./logs to the container log path
-      - ${LOG_FILE_PATH}:${LOG_FILE_PATH}
+      - ./logs:${LOG_FILE_PATH}
     depends_on:
       postgres:
         condition: service_healthy
