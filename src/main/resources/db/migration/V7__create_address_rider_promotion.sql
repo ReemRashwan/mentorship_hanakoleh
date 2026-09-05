@@ -39,9 +39,7 @@ CREATE UNIQUE INDEX ux__address__one_default_per_customer
 -- ============================================================
 CREATE TABLE IF NOT EXISTS rider (
     rider_id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-    rider_full_name            VARCHAR(150) NOT NULL,
-    rider_phone_number         VARCHAR(20) NOT NULL UNIQUE,
+    user_id                    INTEGER NOT NULL UNIQUE,
     rider_national_id          VARCHAR(20) NULL UNIQUE,
     rider_vehicle_type         VARCHAR(20) NOT NULL DEFAULT 'MOTORCYCLE',
     rider_status                VARCHAR(20) NOT NULL DEFAULT 'OFFLINE',
@@ -55,6 +53,7 @@ CREATE TABLE IF NOT EXISTS rider (
     rider_created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     rider_updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
+    CONSTRAINT fk__rider__user_id FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT,
     CONSTRAINT chk__rider_vehicle_type CHECK (rider_vehicle_type IN ('MOTORCYCLE', 'BICYCLE', 'CAR', 'TUKTUK')),
     CONSTRAINT chk__rider_status CHECK (rider_status IN ('OFFLINE', 'AVAILABLE', 'ON_DELIVERY', 'SUSPENDED')),
     CONSTRAINT chk__rider_lat_range CHECK (rider_current_latitude IS NULL OR (rider_current_latitude BETWEEN -90 AND 90)),
