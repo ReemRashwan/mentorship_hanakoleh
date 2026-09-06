@@ -23,7 +23,7 @@ public class CartController {
     }
 
     @PostMapping("/v1/carts/items")
-    @Operation(operationId = "AddItem", description = "Add a new menu item ot the cart, or increase the quantity of an existing item.")
+    @Operation(summary = "Add Item to cart", description = "Add a new menu item to the cart, or increase the quantity of an existing item.")
     public ResponseEntity<AddCartItemResponse> requestAddMenuItemToCart(@Valid @RequestBody AddCartItemRequest addCartItemRequestDto,
                                                                         Integer userId) {// throws InterruptedException {
         AddCartItemResponse finalCartState =
