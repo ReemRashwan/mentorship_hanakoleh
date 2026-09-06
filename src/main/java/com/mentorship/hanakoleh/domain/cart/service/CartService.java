@@ -5,7 +5,6 @@ import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemResponse;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
-import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
 import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
 import com.mentorship.hanakoleh.domain.restaurant.exception.CrossRestaurantConflictException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemOutOfStock;
@@ -29,7 +28,6 @@ import java.util.Optional;
 @Slf4j
 public class CartService {
 
-    private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
     private final CustomerService customerService;
     private final RestaurantService restaurantService;

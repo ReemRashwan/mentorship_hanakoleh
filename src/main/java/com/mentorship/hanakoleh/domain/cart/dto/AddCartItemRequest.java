@@ -6,7 +6,6 @@ import lombok.Builder;
 
 import java.math.BigDecimal;
 
-
 @Builder
 public record AddCartItemRequest(@NotEmpty
                                  Integer selectedMenuItemId,
