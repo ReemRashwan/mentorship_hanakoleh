@@ -16,7 +16,7 @@ public class CartController {
     }
 
     @DeleteMapping("/v1/carts/items")
-    @Operation(summary = "Clear Cart", description = "To delete all items currently existing in the csutomer cart.")
+    @Operation(summary = "Clear Cart", description = "To delete all items currently existing in the customer cart.")
 
     public ResponseEntity<ClearCartResponse> clearCart(Integer userId) {
 
