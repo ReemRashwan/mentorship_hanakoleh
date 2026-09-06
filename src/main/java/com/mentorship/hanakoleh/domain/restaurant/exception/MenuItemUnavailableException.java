@@ -1,7 +1,7 @@
-package com.mentorship.hanakoleh.domain.cart.exception;
+package com.mentorship.hanakoleh.domain.restaurant.exception;
 
-public class ItemUnavailableException extends RuntimeException {
-    public ItemUnavailableException(String message) {
+public class MenuItemUnavailableException extends RuntimeException {
+    public MenuItemUnavailableException(String message) {
         super(message);
     }
 }

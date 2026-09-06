@@ -1,6 +1,6 @@
 package com.mentorship.hanakoleh.domain.user.repository;
 
-import com.mentorship.hanakoleh.domain.user.Customer;
+import com.mentorship.hanakoleh.domain.user.model.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

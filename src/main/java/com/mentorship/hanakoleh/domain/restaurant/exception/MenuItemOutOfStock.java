@@ -1,4 +1,7 @@
-package com.mentorship.hanakoleh.domain.cart.exception;
+package com.mentorship.hanakoleh.domain.restaurant.exception;
 
-public class MenuItemOutOfStock {
+public class MenuItemOutOfStock extends RuntimeException {
+    public MenuItemOutOfStock(String message) {
+        super(message);
+    }
 }

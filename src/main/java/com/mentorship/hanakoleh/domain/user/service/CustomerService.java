@@ -1,7 +1,7 @@
 package com.mentorship.hanakoleh.domain.user.service;
 
-import com.mentorship.hanakoleh.domain.user.Customer;
 import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
+import com.mentorship.hanakoleh.domain.user.model.Customer;
 import com.mentorship.hanakoleh.domain.user.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +12,12 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     public CustomerService(CustomerRepository customerRepository) {
+
         this.customerRepository = customerRepository;
     }
 
     public Customer getCustomerById(Integer customerId) {
-        return customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
+        return customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
     }
 
 
