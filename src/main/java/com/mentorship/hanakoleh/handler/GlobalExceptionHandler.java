@@ -1,7 +1,7 @@
 package com.mentorship.hanakoleh.handler;
 
+import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
-import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
@@ -52,9 +52,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(restaurantNotFoundMessage, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ItemUnavailableException.class)
-    public ResponseEntity<?> handleItemUnavailableException() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(LocalDateTime.now() + " : Sorry Item is unavailable in stock");
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ResponseEntity<?> handleCartItemNotFoundException() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(LocalDateTime.now() + " : Sorry Cart Item is unavailable");
     }
 
     @ExceptionHandler(InvalidRestaurantIdException.class)

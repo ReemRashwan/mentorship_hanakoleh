@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -36,12 +37,13 @@ public class CartService {
     public AddCartItemResponse addItemToCart(@NonNull AddCartItemRequest addCartItemRequestDto, @NonNull Integer userId) {
         // 1. Retrieve customer ID from user ID
         Integer customerId = customerService.retrieveCustomerIdByUserId(userId);
-        // 2. Fetch existing or create new active cart for the restaurant
-        Cart customerCart = getOrCreateActiveCart(customerId, addCartItemRequestDto.restaurantId());
-        // 3. Retrieve selected menu item
+        // 2. Retrieve selected menu item
         MenuItem selectedMenuItem = restaurantService.getMenuItemByMenuItemId(addCartItemRequestDto.selectedMenuItemId())
                 .orElseThrow(() -> new MenuItemUnavailableException(
                         "Menu Item with ID: " + addCartItemRequestDto.selectedMenuItemId() + " is not available."));
+
+        // 3. Fetch existing or create new active cart for the restaurant
+        Cart customerCart = getOrCreateActiveCart(customerId, addCartItemRequestDto.restaurantId());
         // 4. Search for an existing item in cart
         Optional<CartItem> cartItemOptional = customerCart.getItems().stream()
                 .filter(x -> x.getMenuItem().equals(selectedMenuItem))
@@ -50,18 +52,21 @@ public class CartService {
         if (cartItemOptional.isPresent()) {
             // 5a. first route if cart item already exist; increase quantity of existing item in the cart
             CartItem cartItem = cartItemOptional.get();
-            increaseCartItemQuantity(cartItem, selectedMenuItem, addCartItemRequestDto.quantity());
+            increaseExistingCartItemQuantity(cartItem, selectedMenuItem, addCartItemRequestDto.quantity());
             if (addCartItemRequestDto.note() != null) {
                 cartItem.setNote(addCartItemRequestDto.note());
             }
+
         } else {
-            // 5b. seconde route if cart item doesn't exist; create new CartItem and retrieve MenuItem entity to get the verified price
+            // 5b. second route if cart item doesn't exist; create new CartItem and retrieve MenuItem entity to get the verified price
             createAndPersistNewCartItem(customerCart, selectedMenuItem, addCartItemRequestDto);
         }
+        customerCart.setUpdatedAt(OffsetDateTime.now().toInstant());
 
         return AddCartItemResponse.builder()
                 .restaurantId(addCartItemRequestDto.restaurantId())
-                .status(CartStatus.ACTIVE)
+                .status(customerCart.getStatus())
+                .processedCartItems(customerCart.getItems())
                 .build();
     }
 
@@ -78,7 +83,7 @@ public class CartService {
 
         if (!existingRestaurantId.equals(restaurantId)) {
             throw new CrossRestaurantConflictException(
-                    String.format("Active cart exists for restaurant ID %d, but requested restaurant ID was %d",
+                    String.format("Active cart exists for restaurant ID %d, but requested item belong to restaurant ID %d",
                             existingRestaurantId, restaurantId)
             );
         }
@@ -95,6 +100,7 @@ public class CartService {
                 .status(CartStatus.ACTIVE)
                 .restaurant(restaurant)
                 .customer(customer)
+                .items(new ArrayList<>())
                 .build();
 
         return cartRepository.save(cart);
@@ -114,7 +120,7 @@ public class CartService {
         customerCart.getItems().add(addedCartItem);
     }
 
-    private void increaseCartItemQuantity(CartItem cartItem, MenuItem selectedMenuItem, int requestedQuantity) {
+    private void increaseExistingCartItemQuantity(CartItem cartItem, MenuItem selectedMenuItem, int requestedQuantity) {
         // 1# check restaurant inventory and update accordingly (validating cumulative quantity)
         int newTotalQuantity = cartItem.getQuantity() + requestedQuantity;
         validateRestaurantInventory(selectedMenuItem, newTotalQuantity);
@@ -125,7 +131,7 @@ public class CartService {
     private void validateRestaurantInventory(MenuItem selectedMenuItem, int requestedQuantity) {
         int availableInventory = restaurantService.getMenuItemInventory(selectedMenuItem.getId());
         if (availableInventory < requestedQuantity)
-            throw new MenuItemOutOfStock("Menu Item with ID: " + selectedMenuItem.getId() + "is out of Stock.");
+            throw new MenuItemOutOfStock("Menu Item with ID: " + selectedMenuItem.getId() + " is out of Stock.");
     }
 
 }
