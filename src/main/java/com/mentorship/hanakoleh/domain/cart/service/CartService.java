@@ -1,18 +1,17 @@
 package com.mentorship.hanakoleh.domain.cart.service;
 
-import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
-import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
-import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
-import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
-import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
-import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
-import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
+import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
+import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
-import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItemOnDemandStatus;
-
+import com.mentorship.hanakoleh.exception.ErrorCode;
+import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
+import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
+import com.mentorship.hanakoleh.domain.cart.model.Cart;
+import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
+import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +28,12 @@ public class CartService {
     }
 
     @Transactional
-    public UpdateCartItemQuantityResponse updateItemQuantity(Integer cartItemId, Integer quantity) {
-        if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than 0, or delete the item from the cart.");
+    public CartItem updateItemQuantity(Integer cartItemId, Integer quantity) {
+        if (quantity == null) {
+            throw new IllegalArgumentException(ErrorCode.QUANTITY_REQUIRED.getMessage());
+        }
+        if (quantity < 1) {
+            throw new IllegalArgumentException(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage());
         }
 
         CartItem cartItem = cartItemRepository.findById(cartItemId)
@@ -42,9 +44,8 @@ public class CartService {
         }
 
         cartItem.setQuantity(quantity);
-        CartItem updatedCartItem = cartItemRepository.save(cartItem);
-
-        return toResponse(updatedCartItem);
+        return cartItemRepository.save(cartItem);
+       
     }
 
     @Transactional
@@ -78,22 +79,13 @@ public class CartService {
         MenuItemOnDemandStatus status = menuItem.getOnDemandStatus();
         if (status == MenuItemOnDemandStatus.UNAVAILABLE || status == MenuItemOnDemandStatus.OUT_OF_STOCK) {
             throw new MenuItemNotOrderableException(
-                    "Menu item " + menuItem.getId() + " is currently " + status + ".");
+                    ErrorCode.MENU_ITEM_NOT_ORDERABLE.format(menuItem.getId(), status));
         }
 
         Integer availableQuantity = menuItem.getAvailableQuantity();
         if (availableQuantity != null && quantity > availableQuantity) {
             throw new MenuItemNotOrderableException(
-                    "Only " + availableQuantity + " units of menu item " + menuItem.getId() + " are available.");
+                    ErrorCode.MENU_ITEM_INSUFFICIENT_STOCK.format(availableQuantity, menuItem.getId()));
         }
-    }
-
-    private UpdateCartItemQuantityResponse toResponse(CartItem cartItem) {
-        return new UpdateCartItemQuantityResponse(
-                cartItem.getId() == null ? null : Math.toIntExact(cartItem.getId()),
-                cartItem.getMenuItem().getId(),
-                cartItem.getQuantity(),
-                cartItem.getPrice(),
-                cartItem.getNote());
     }
 }
