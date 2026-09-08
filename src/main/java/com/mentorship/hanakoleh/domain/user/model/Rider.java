@@ -1,6 +1,5 @@
 package com.mentorship.hanakoleh.domain.user.model;
 
-import com.mentorship.hanakoleh.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -100,10 +99,9 @@ public class Rider {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof Rider)) {
+        if (!(other instanceof Rider rider)) {
             return false;
         }
-        Rider rider = (Rider) other;
         return id != null && id.equals(rider.id);
     }
 
