@@ -13,7 +13,7 @@
 
 ---
 
-## 2. State Transition Matrix
+## 2. State Transition Matrix Table
 
 | Previous State | Event / Action | Next State | Triggered By | Guard / Business Rules |
 | :--- | :--- | :--- | :--- | :--- |
