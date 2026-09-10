@@ -2,6 +2,12 @@ package com.mentorship.hanakoleh.domain.cart.controller;
 
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemRequest;
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemResponse;
+import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityRequest;
+import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
+import com.mentorship.hanakoleh.domain.cart.mapper.CartMapper;
+import com.mentorship.hanakoleh.domain.cart.model.CartItem;
+import com.mentorship.hanakoleh.domain.cart.dto.response.RemoveCartItemResponse;
+import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -13,7 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1/carts")
+@Tag(name = "Cart", description = "Cart management API")
 public class CartController {
 
     private final CartService cartService;
@@ -31,5 +38,24 @@ public class CartController {
         return new ResponseEntity<>(finalCartState,
                 HttpStatus.CREATED);
 
+    @PatchMapping("/items/{cartItemId}")
+    @Operation(summary = "Update cart item quantity", description = "Updates the quantity of an item in the cart")
+    public ResponseEntity<UpdateCartItemQuantityResponse> updateItemQuantity(
+            @PathVariable Integer cartItemId,
+            @Valid @RequestBody UpdateCartItemQuantityRequest request) {
+        CartItem cartItem = cartService.updateItemQuantity(cartItemId, request.getQuantity());
+        UpdateCartItemQuantityResponse response = cartMapper.toUpdateQuantityResponse(cartItem);
+        return ResponseEntity.ok(response);
+}
+
+
+    @DeleteMapping("/{cartId}/items/{itemId}")
+    @Operation(summary = "Remove item from cart", description = "Removes an item from the cart. If it's the last item, the cart status changes to EMPTY and restaurant is cleared")
+    public ResponseEntity<RemoveCartItemResponse> removeCartItem(
+            @PathVariable Integer cartId,
+            @PathVariable Integer itemId) {
+        Cart cart = cartService.removeCartItem(cartId, itemId);
+        RemoveCartItemResponse response = cartMapper.toResponse(cart, itemId.longValue());
+        return ResponseEntity.ok(response);
     }
 }
