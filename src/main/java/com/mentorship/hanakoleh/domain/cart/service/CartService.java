@@ -41,6 +41,8 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CustomerService customerService;
     private final RestaurantService restaurantService;
+    private final CartItemRepository cartItemRepository;
+
 
     @Transactional
     public AddCartItemResponse addItemToCart(@NonNull AddCartItemRequest addCartItemRequestDto, @NonNull Integer userId) {
@@ -65,13 +67,7 @@ public class CartService {
             if (addCartItemRequestDto.note() != null) {
                 cartItem.setNote(addCartItemRequestDto.note());
             }
-    public CartItem updateItemQuantity(Integer cartItemId, Integer quantity) {
-        if (quantity == null) {
-            throw new IllegalArgumentException(ErrorCode.QUANTITY_REQUIRED.getMessage());
-        }
-        if (quantity < 1) {
-            throw new IllegalArgumentException(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage());
-        }
+
 
         } else {
             // 5b. second route if cart item doesn't exist; create new CartItem and retrieve MenuItem entity to get the verified price
@@ -84,9 +80,54 @@ public class CartService {
                 .status(customerCart.getStatus())
                 .processedCartItems(customerCart.getItems())
                 .build();
+    }
+
+    @Transactional
+    public CartItem updateItemQuantity(Integer cartItemId, Integer quantity) {
+        if (quantity == null) {
+            throw new IllegalArgumentException(ErrorCode.QUANTITY_REQUIRED.getMessage());
+        }
+        if (quantity < 1) {
+            throw new IllegalArgumentException(ErrorCode.QUANTITY_MUST_BE_POSITIVE.getMessage());
+        }
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
+
+        if (quantity > cartItem.getQuantity()) {
+            validateMenuItemCanSupply(cartItem.getMenuItem(), quantity);
+        }
+
         cartItem.setQuantity(quantity);
         return cartItemRepository.save(cartItem);
-       
+
+    }
+
+    @Transactional
+    public Cart removeCartItem(Integer cartId, Integer itemId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found: " + cartId));
+
+        if (!CartStatus.ACTIVE.equals(cart.getStatus())) {
+            throw new OperationNotAllowedException(String.format("Remove item is not allowed while cart is not active." +
+                    " Current cart status: %s", cart.getStatus()));
+        }
+
+        CartItem cartItem = cart.getItems().stream()
+                .filter(item -> Objects.equals(item.getId(), itemId))
+                .findFirst()
+                .orElseThrow(() -> new CartItemNotFoundException(itemId));
+
+        cart.getItems().remove(cartItem);
+
+        if (cart.getItems().isEmpty()) {
+            cart.setStatus(CartStatus.EMPTY);
+            cart.setRestaurant(null);
+        } else {
+            cart.setStatus(CartStatus.ACTIVE);
+        }
+
+        return cartRepository.save(cart);
     }
 
     @Transactional
@@ -109,6 +150,7 @@ public class CartService {
 
         return activeCart;
     }
+
 
     private Cart createAndPersistNewCartForCustomer(Integer customerId, Integer restaurantId) {
         Customer customer = customerService.getCustomerReferenceById(customerId);
