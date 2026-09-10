@@ -12,7 +12,6 @@ public interface CartRepository extends JpaRepository<Cart, Integer> {
             select c from Cart c
             left join fetch c.items i
             left join fetch i.menuItem
-            left join fetch c.restaurant
             where c.customer.id = :customerId
             """)
     Optional<Cart> findByCustomerIdForCheckout(@Param("customerId") Integer customerId);

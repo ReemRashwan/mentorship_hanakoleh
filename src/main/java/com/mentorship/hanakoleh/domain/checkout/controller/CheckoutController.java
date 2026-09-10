@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.checkout.controller;
 
+import com.mentorship.hanakoleh.domain.cart.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.checkout.dto.CartValidationResponse;
 import com.mentorship.hanakoleh.domain.checkout.mapper.CheckoutCartMapper;
@@ -32,5 +33,14 @@ public class CheckoutController {
             @RequestHeader("X-Customer-Id") Integer customerId) {
         Cart cart = checkoutService.loadAndValidateCart(customerId);
         return ResponseEntity.ok(checkoutCartMapper.toValidationResponse(cart));
+    }
+
+    @GetMapping("/cart-pricing")
+    @Operation(summary = "Re-price cart for checkout",
+            description = "Validates the cart, recomputes each line from live menu prices, and returns the subtotal.")
+    public ResponseEntity<CartPricingResponse> repriceCart(
+            @RequestHeader("X-Customer-Id") Integer customerId) {
+        var repriceCartResponse = checkoutService.repriceCart(customerId);
+        return ResponseEntity.ok(repriceCartResponse);
     }
 }
