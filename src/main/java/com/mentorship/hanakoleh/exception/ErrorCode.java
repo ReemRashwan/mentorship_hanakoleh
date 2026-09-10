@@ -6,7 +6,10 @@ public enum ErrorCode {
             "CART_002", "Quantity must be greater than 0, or delete the item from the cart."),
     CART_ITEM_NOT_FOUND("CART_003", "Cart item %s was not found."),
     MENU_ITEM_NOT_ORDERABLE("CART_004", "Menu item %s is currently %s."),
-    MENU_ITEM_INSUFFICIENT_STOCK("CART_005", "Only %s units of menu item %s are available.");
+    MENU_ITEM_INSUFFICIENT_STOCK("CART_005", "Only %s units of menu item %s are available."),
+    CART_EMPTY("CART_006", "Cart is empty. Add items before checkout."),
+    CART_NOT_ACTIVE("CART_007", "Checkout is not allowed while the cart is %s."),
+    NO_ACTIVE_CART("CART_008", "No cart was found for the current customer.");
 
     public static final String QUANTITY_REQUIRED_MESSAGE = "Quantity is required.";
     public static final String QUANTITY_MUST_BE_POSITIVE_MESSAGE =

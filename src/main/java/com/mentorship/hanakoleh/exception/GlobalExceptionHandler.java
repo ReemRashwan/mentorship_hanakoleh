@@ -2,8 +2,10 @@ package com.mentorship.hanakoleh.exception;
 
 import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
-import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
+import com.mentorship.hanakoleh.domain.checkout.exception.CartNotActiveException;
+import com.mentorship.hanakoleh.domain.checkout.exception.EmptyCartException;
+import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +31,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MenuItemNotOrderableException.class)
     public ProblemDetail handleMenuItemNotOrderable(MenuItemNotOrderableException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(EmptyCartException.class)
+    public ProblemDetail handleEmptyCart(EmptyCartException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+    }
+
+    @ExceptionHandler(CartNotActiveException.class)
+    public ProblemDetail handleCartNotActive(CartNotActiveException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 

@@ -2,10 +2,10 @@ package com.mentorship.hanakoleh.domain.cart.service;
 
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
-import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItemOnDemandStatus;
+import com.mentorship.hanakoleh.domain.restaurant.validation.MenuItemOrderabilityValidator;
 import com.mentorship.hanakoleh.exception.ErrorCode;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
@@ -21,10 +21,15 @@ public class CartService {
 
     private final CartItemRepository cartItemRepository;
     private final CartRepository cartRepository;
+    private final MenuItemOrderabilityValidator menuItemOrderabilityValidator;
 
-    public CartService(CartItemRepository cartItemRepository, CartRepository cartRepository) {
+    public CartService(
+            CartItemRepository cartItemRepository, 
+            CartRepository cartRepository, 
+            MenuItemOrderabilityValidator menuItemOrderabilityValidator) {
         this.cartItemRepository = cartItemRepository;
         this.cartRepository = cartRepository;
+        this.menuItemOrderabilityValidator = menuItemOrderabilityValidator;
     }
 
     @Transactional
@@ -40,7 +45,7 @@ public class CartService {
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
 
         if (quantity > cartItem.getQuantity()) {
-            validateMenuItemCanSupply(cartItem.getMenuItem(), quantity);
+            menuItemOrderabilityValidator.validateOrderable(cartItem.getMenuItem(), quantity);
         }
 
         cartItem.setQuantity(quantity);
@@ -74,18 +79,5 @@ public class CartService {
 
         return cartRepository.save(cart);
     }
-
-    private void validateMenuItemCanSupply(MenuItem menuItem, Integer quantity) {
-        MenuItemOnDemandStatus status = menuItem.getOnDemandStatus();
-        if (status == MenuItemOnDemandStatus.UNAVAILABLE || status == MenuItemOnDemandStatus.OUT_OF_STOCK) {
-            throw new MenuItemNotOrderableException(
-                    ErrorCode.MENU_ITEM_NOT_ORDERABLE.format(menuItem.getId(), status));
-        }
-
-        Integer availableQuantity = menuItem.getAvailableQuantity();
-        if (availableQuantity != null && quantity > availableQuantity) {
-            throw new MenuItemNotOrderableException(
-                    ErrorCode.MENU_ITEM_INSUFFICIENT_STOCK.format(availableQuantity, menuItem.getId()));
-        }
-    }
+    
 }
