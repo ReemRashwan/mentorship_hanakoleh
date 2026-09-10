@@ -32,6 +32,8 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final CustomerService customerService;
+    private final CartItemRepository cartItemRepository;
+
 
     @Transactional
     public ClearCartResponse clearCart(Integer userId) {
@@ -45,12 +47,9 @@ public class CartService {
                 .restaurantId(customerCart.getRestaurant() != null ? customerCart.getRestaurant().getId() : null)
                 .build();
     }
-}
 
-    public CartService(CartItemRepository cartItemRepository, CartRepository cartRepository) {
-        this.cartItemRepository = cartItemRepository;
-        this.cartRepository = cartRepository;
-    }
+
+
 
     @Transactional
     public CartItem updateItemQuantity(Integer cartItemId, Integer quantity) {
