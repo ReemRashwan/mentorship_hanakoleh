@@ -7,6 +7,8 @@ import com.mentorship.hanakoleh.domain.checkout.service.CheckoutService;
 import com.mentorship.hanakoleh.domain.order.model.OrderDeliveryOption;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -85,5 +87,15 @@ public class CheckoutController {
             @RequestParam(value = "riderTip", required = false) BigDecimal riderTip) {
         var total = checkoutService.computeTotals(customerId, option, addressId, promoCode, riderTip);
         return ResponseEntity.ok(total);
+    }
+
+    @PostMapping("/orders")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Place order",
+            description = "Persists the order and its lines atomically in CREATED/PENDING state.")
+    public OrderResponse placeOrder(
+            @RequestHeader("X-Customer-Id") Integer customerId,
+            @Valid @RequestBody PlaceOrderRequest request) {
+        return checkoutService.placeOrder(customerId, request);
     }
 }
