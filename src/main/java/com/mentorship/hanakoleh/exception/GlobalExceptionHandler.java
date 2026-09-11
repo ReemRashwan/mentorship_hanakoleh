@@ -14,6 +14,8 @@ import com.mentorship.hanakoleh.domain.checkout.exception.AddressNotFoundExcepti
 import com.mentorship.hanakoleh.domain.checkout.exception.InvalidDeliveryAddressException;
 import com.mentorship.hanakoleh.domain.checkout.exception.DeliveryOptionNotAvailableException;
 import com.mentorship.hanakoleh.domain.checkout.exception.OutOfDeliveryZoneException;
+import com.mentorship.hanakoleh.domain.checkout.exception.PromotionNotApplicableException;
+import com.mentorship.hanakoleh.domain.checkout.exception.PromotionNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -71,5 +73,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OutOfDeliveryZoneException.class)
     public ProblemDetail handleOutOfDeliveryZone(OutOfDeliveryZoneException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(PromotionNotFoundException.class)
+    public ProblemDetail handlePromotionNotFound(PromotionNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(PromotionNotApplicableException.class)
+    public ProblemDetail handlePromotionNotApplicable(PromotionNotApplicableException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
     }
 }
