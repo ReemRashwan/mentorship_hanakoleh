@@ -1,6 +1,5 @@
 package com.mentorship.hanakoleh.domain.user.model;
 
-import com.mentorship.hanakoleh.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

@@ -1,7 +1,7 @@
 package com.mentorship.hanakoleh.domain.user.service;
 
-import com.mentorship.hanakoleh.domain.user.Customer;
 import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
+import com.mentorship.hanakoleh.domain.user.model.Customer;
 import com.mentorship.hanakoleh.domain.user.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
