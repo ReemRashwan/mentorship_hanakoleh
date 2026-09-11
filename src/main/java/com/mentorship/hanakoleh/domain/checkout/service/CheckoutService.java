@@ -6,12 +6,10 @@ import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
 import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
 import com.mentorship.hanakoleh.domain.checkout.delivery.GeoDistanceCalculator;
-import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryAddressResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryOptionResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.PromotionResponse;
+import com.mentorship.hanakoleh.domain.checkout.dto.*;
 import com.mentorship.hanakoleh.domain.checkout.exception.*;
 import com.mentorship.hanakoleh.domain.checkout.pricing.CartPricingCalculator;
+import com.mentorship.hanakoleh.domain.checkout.pricing.OrderTotalsCalculator;
 import com.mentorship.hanakoleh.domain.checkout.promotion.PromotionDiscountCalculator;
 import com.mentorship.hanakoleh.domain.order.model.OrderDeliveryOption;
 import com.mentorship.hanakoleh.domain.order.model.Promotion;
@@ -36,6 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class CheckoutService {
 
     private static final int MONEY_SCALE = 2;
+    private static final BigDecimal SERVICE_FEE = BigDecimal.ZERO.setScale(MONEY_SCALE);
+    private static final BigDecimal TAX_AMOUNT = BigDecimal.ZERO.setScale(MONEY_SCALE);
+    private static final String CURRENCY = "EGP";
 
     private final CartRepository cartRepository;
     private final MenuItemOrderabilityValidator menuItemOrderabilityValidator;
@@ -45,6 +46,7 @@ public class CheckoutService {
     private final GeoDistanceCalculator geoDistanceCalculator;
     private final PromotionRepository promotionRepository;
     private final PromotionDiscountCalculator promotionDiscountCalculator;
+    private final OrderTotalsCalculator orderTotalsCalculator;
 
     public CheckoutService(CartRepository cartRepository,
                            MenuItemOrderabilityValidator menuItemOrderabilityValidator,
@@ -53,7 +55,8 @@ public class CheckoutService {
                            RestaurantDeliveryOptionRepository deliveryOptionRepository,
                            GeoDistanceCalculator geoDistanceCalculator,
                            PromotionRepository promotionRepository,
-                           PromotionDiscountCalculator promotionDiscountCalculator) {
+                           PromotionDiscountCalculator promotionDiscountCalculator,
+                           OrderTotalsCalculator orderTotalsCalculator) {
         this.cartRepository = cartRepository;
         this.menuItemOrderabilityValidator = menuItemOrderabilityValidator;
         this.cartPricingCalculator = cartPricingCalculator;
@@ -62,6 +65,7 @@ public class CheckoutService {
         this.geoDistanceCalculator = geoDistanceCalculator;
         this.promotionRepository = promotionRepository;
         this.promotionDiscountCalculator = promotionDiscountCalculator;
+        this.orderTotalsCalculator = orderTotalsCalculator;
     }
 
     // --- Issue #1: load & validate ------------------------------------------------
@@ -163,6 +167,55 @@ public class CheckoutService {
                 .orElseThrow(() -> new PromotionNotFoundException(
                         ErrorCode.PROMOTION_NOT_FOUND.format(code)));
 
+        BigDecimal discount = discountForCode(subtotal, code);
+        return new PromotionResponse(
+                promotion.getCode(), promotion.getDiscountType(), promotion.getDiscountValue(),
+                subtotal, discount, subtotal.subtract(discount));
+    }
+
+    // --- Issue #6: totals & ETA ---------------------------------------------------
+
+    @Transactional(readOnly = true)
+    public OrderTotalsResponse computeTotals(Integer customerId,
+                                             OrderDeliveryOption option,
+                                             Long addressId,
+                                             String promoCode,
+                                             BigDecimal riderTip) {
+        BigDecimal tip = (riderTip == null) ? BigDecimal.ZERO : riderTip;
+        if (tip.signum() < 0) {
+            throw new IllegalArgumentException(ErrorCode.RIDER_TIP_NEGATIVE.getMessage());
+        }
+        tip = tip.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+
+        Cart cart = loadAndValidateCart(customerId);
+        BigDecimal subtotal = cartPricingCalculator.reprice(cart).subtotal();
+
+        DeliveryOptionResponse delivery = resolveDeliveryOption(customerId, option, addressId);
+        BigDecimal deliveryFee = delivery.deliveryFee();
+
+        BigDecimal discount = BigDecimal.ZERO.setScale(MONEY_SCALE);
+        if (promoCode != null && !promoCode.isBlank()) {
+            discount = applyPromotion(customerId, promoCode).discountAmount();
+        }
+
+        BigDecimal total = orderTotalsCalculator.total(
+                subtotal, deliveryFee, SERVICE_FEE, tip, TAX_AMOUNT, discount);
+
+        int estimatedMinutes = delivery.estimatedMinutes();
+        OffsetDateTime eta = OffsetDateTime.now().plusMinutes(estimatedMinutes);
+
+        return new OrderTotalsResponse(
+                option, CURRENCY, subtotal, deliveryFee, SERVICE_FEE, tip,
+                TAX_AMOUNT, discount, total, estimatedMinutes, eta);
+    }
+
+    // --- helpers ------------------------------------------------------------------
+
+    private BigDecimal discountForCode(BigDecimal subtotal, String code) {
+        Promotion promotion = promotionRepository.findByCodeIgnoreCase(code)
+                .orElseThrow(() -> new PromotionNotFoundException(
+                        ErrorCode.PROMOTION_NOT_FOUND.format(code)));
+
         OffsetDateTime now = OffsetDateTime.now();
         boolean active = Boolean.TRUE.equals(promotion.getIsActive())
                 && !now.isBefore(promotion.getStartsAt())
@@ -170,27 +223,21 @@ public class CheckoutService {
         if (!active) {
             throw new PromotionNotApplicableException(ErrorCode.PROMOTION_NOT_ACTIVE.format(code));
         }
-
         if (subtotal.compareTo(promotion.getMinOrderAmount()) < 0) {
             throw new PromotionNotApplicableException(
                     ErrorCode.PROMOTION_BELOW_MIN_ORDER.format(code, promotion.getMinOrderAmount()));
         }
-
         if (promotion.getUsageLimitTotal() != null
                 && promotion.getUsageCountTotal() >= promotion.getUsageLimitTotal()) {
             throw new PromotionNotApplicableException(ErrorCode.PROMOTION_USAGE_EXHAUSTED.format(code));
         }
-
-        BigDecimal discount = promotionDiscountCalculator.discountFor(promotion, subtotal);
-        return new PromotionResponse(
-                promotion.getCode(), promotion.getDiscountType(), promotion.getDiscountValue(),
-                subtotal, discount, subtotal.subtract(discount));
+        return promotionDiscountCalculator.discountFor(promotion, subtotal);
     }
-    // --- helpers ------------------------------------------------------------------
 
     private String formatAddress(Address a) {
         return Stream.of(a.getStreet(), a.getDistrict(), a.getCity(), a.getGovernorate())
                 .filter(part -> part != null && !part.isBlank())
                 .collect(Collectors.joining(", "));
     }
+
 }

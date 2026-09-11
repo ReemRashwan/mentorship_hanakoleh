@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/api/v1/checkout")
 @Tag(name = "Checkout", description = "Checkout flow API")
@@ -70,5 +72,18 @@ public class CheckoutController {
             @RequestParam("code") String code) {
         var promotionResponse = checkoutService.applyPromotion(customerId, code);
         return ResponseEntity.ok(promotionResponse);
+    }
+
+    @GetMapping("/totals")
+    @Operation(summary = "Compute checkout totals",
+            description = "Composes subtotal, delivery fee, tip, tax and promotion discount into the final total and ETA.")
+    public ResponseEntity<OrderTotalsResponse> computeTotals(
+            @RequestHeader("X-Customer-Id") Integer customerId,
+            @RequestParam("option") OrderDeliveryOption option,
+            @RequestParam(value = "addressId", required = false) Long addressId,
+            @RequestParam(value = "promoCode", required = false) String promoCode,
+            @RequestParam(value = "riderTip", required = false) BigDecimal riderTip) {
+        var total = checkoutService.computeTotals(customerId, option, addressId, promoCode, riderTip);
+        return ResponseEntity.ok(total);
     }
 }
