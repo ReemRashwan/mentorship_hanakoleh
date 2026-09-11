@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.mentorship.hanakoleh.domain.checkout.exception.AddressNotFoundException;
+import com.mentorship.hanakoleh.domain.checkout.exception.InvalidDeliveryAddressException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -47,5 +49,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ProblemDetail handleAddressNotFound(AddressNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidDeliveryAddressException.class)
+    public ProblemDetail handleInvalidDeliveryAddress(InvalidDeliveryAddressException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
     }
 }

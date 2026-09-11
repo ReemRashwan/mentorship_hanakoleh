@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.domain.cart.dto;
+package com.mentorship.hanakoleh.domain.checkout.dto;
 
 import java.math.BigDecimal;
 import java.util.List;

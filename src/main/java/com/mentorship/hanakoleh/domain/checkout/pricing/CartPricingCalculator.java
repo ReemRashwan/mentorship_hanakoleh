@@ -1,6 +1,6 @@
 package com.mentorship.hanakoleh.domain.checkout.pricing;
 
-import com.mentorship.hanakoleh.domain.cart.dto.CartPricingResponse;
+import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
