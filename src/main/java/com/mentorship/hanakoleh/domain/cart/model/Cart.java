@@ -56,7 +56,7 @@ public class Cart {
     private Restaurant restaurant;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "cart_status", nullable = false, length = 50)
     @Builder.Default
     private CartStatus status = CartStatus.ACTIVE;
 
@@ -89,10 +89,9 @@ public class Cart {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof Cart)) {
+        if (!(other instanceof Cart cart)) {
             return false;
         }
-        Cart cart = (Cart) other;
         return id != null && id.equals(cart.id);
     }
 
