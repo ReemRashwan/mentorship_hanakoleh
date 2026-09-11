@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.mentorship.hanakoleh.domain.checkout.exception.AddressNotFoundException;
 import com.mentorship.hanakoleh.domain.checkout.exception.InvalidDeliveryAddressException;
+import com.mentorship.hanakoleh.domain.checkout.exception.DeliveryOptionNotAvailableException;
+import com.mentorship.hanakoleh.domain.checkout.exception.OutOfDeliveryZoneException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -59,5 +61,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidDeliveryAddressException.class)
     public ProblemDetail handleInvalidDeliveryAddress(InvalidDeliveryAddressException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+    }
+
+    @ExceptionHandler(DeliveryOptionNotAvailableException.class)
+    public ProblemDetail handleDeliveryOptionNotAvailable(DeliveryOptionNotAvailableException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(OutOfDeliveryZoneException.class)
+    public ProblemDetail handleOutOfDeliveryZone(OutOfDeliveryZoneException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 }

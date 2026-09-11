@@ -12,7 +12,9 @@ public enum ErrorCode {
     NO_ACTIVE_CART("CART_008", "No cart was found for the current customer."),
     ADDRESS_NOT_FOUND("ADDR_001", "Address %s was not found for the current customer."),
     NO_DEFAULT_ADDRESS("ADDR_002", "No default delivery address is set for the current customer."),
-    ADDRESS_MISSING_LOCATION("ADDR_003", "The selected delivery address has no map location; please pin it on the map.");
+    ADDRESS_MISSING_LOCATION("ADDR_003", "The selected delivery address has no map location; please pin it on the map."),
+    DELIVERY_OPTION_NOT_AVAILABLE("DLV_001", "Delivery option %s is not available for this restaurant."),
+    OUT_OF_DELIVERY_ZONE("DLV_002", "Your address is %s km away, outside the restaurant's %s km delivery zone.");
     public static final String QUANTITY_REQUIRED_MESSAGE = "Quantity is required.";
     public static final String QUANTITY_MUST_BE_POSITIVE_MESSAGE =
             "Quantity must be greater than 0, or delete the item from the cart.";
