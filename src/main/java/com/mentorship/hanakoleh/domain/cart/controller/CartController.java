@@ -29,10 +29,10 @@ public class CartController {
         this.cartMapper = cartMapper;
     }
 
-    @PostMapping("/v1/carts/items")
+    @PostMapping("/items")
     @Operation(summary = "Add Item to cart", description = "Add a new menu item to the cart, or increase the quantity of an existing item.")
     public ResponseEntity<AddCartItemResponse> requestAddMenuItemToCart(@Valid @RequestBody AddCartItemRequest addCartItemRequestDto,
-                                                                        Integer userId) {// throws InterruptedException {
+                                                                        Integer userId) {
         AddCartItemResponse finalCartState =
                 cartService.addItemToCart(addCartItemRequestDto, userId);
         return new ResponseEntity<>(finalCartState,

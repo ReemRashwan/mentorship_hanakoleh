@@ -2,6 +2,7 @@ package com.mentorship.hanakoleh.domain.cart.service;
 
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemRequest;
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemResponse;
+import com.mentorship.hanakoleh.domain.cart.dto.CartItemDTO;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
@@ -25,6 +26,9 @@ import com.mentorship.hanakoleh.domain.user.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,10 +80,23 @@ public class CartService {
         customerCart.setUpdatedAt(OffsetDateTime.now().toInstant());
 
         return AddCartItemResponse.builder()
+                .cartId(customerCart.getId())
                 .restaurantId(addCartItemRequestDto.restaurantId())
                 .status(customerCart.getStatus())
-                .processedCartItems(customerCart.getItems())
-                .build();
+                .totalItemCount(customerCart.getItems().stream()
+                        .mapToInt(CartItem::getQuantity)
+                        .sum())
+                .totalPrice(customerCart.getItems().stream()
+                        .map(item -> item.getMenuItem().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add))
+                .processedCartItems(customerCart.getItems().stream()
+                        .map(item -> CartItemDTO.builder()
+                                .menuItemId(item.getMenuItem().getId())
+                                .quantity(item.getQuantity())
+                                .note(item.getNote())
+                                .subTotal(item.getMenuItem().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                                .build())
+                        .toList()) .build();
     }
 
     @Transactional
