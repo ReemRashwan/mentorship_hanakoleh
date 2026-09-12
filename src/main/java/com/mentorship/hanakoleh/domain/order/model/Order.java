@@ -1,8 +1,8 @@
 package com.mentorship.hanakoleh.domain.order.model;
 
 import com.mentorship.hanakoleh.domain.user.model.Address;
-import com.mentorship.hanakoleh.domain.user.model.Rider;
 import com.mentorship.hanakoleh.domain.user.model.Customer;
+import com.mentorship.hanakoleh.domain.user.model.Rider;
 import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

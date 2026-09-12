@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.cart.controller;
 
+import com.mentorship.hanakoleh.domain.cart.dto.ClearCartResponse;
 import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityRequest;
 import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
 import com.mentorship.hanakoleh.domain.cart.mapper.CartMapper;
@@ -11,12 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/carts")
@@ -29,6 +25,15 @@ public class CartController {
     public CartController(CartService cartService, CartMapper cartMapper) {
         this.cartService = cartService;
         this.cartMapper = cartMapper;
+    }
+
+    @DeleteMapping("/v1/carts/items")
+    @Operation(summary = "Clear Cart", description = "To delete all items currently existing in the customer cart.")
+
+    public ResponseEntity<ClearCartResponse> clearCart(Integer userId) {
+
+        ClearCartResponse clearedCart = cartService.clearCart(userId);
+        return ResponseEntity.ok(clearedCart);
     }
 
     @PatchMapping("/items/{cartItemId}")
@@ -51,4 +56,5 @@ public class CartController {
         RemoveCartItemResponse response = cartMapper.toResponse(cart, itemId.longValue());
         return ResponseEntity.ok(response);
     }
+
 }
