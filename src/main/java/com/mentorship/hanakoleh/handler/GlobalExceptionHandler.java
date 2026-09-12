@@ -39,15 +39,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(customerNotFoundMessage, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(CartNotFoundException.class)
-    public ResponseEntity<?> handleCartNotFoundException() {
-        ResponseMessage cartNotFoundMessage = new ResponseMessage(
-                "Cart Not Found",
-                "Cart does not exist",
-                LocalDateTime.now());
-        return new ResponseEntity<>(cartNotFoundMessage, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(RestaurantNotFoundException.class)
     public ResponseEntity<?> handleRestaurantNotFoundException() {
         ResponseMessage restaurantNotFoundMessage = new ResponseMessage(
@@ -79,11 +70,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CartNotFoundException.class)
     public ProblemDetail handleCartNotFound(CartNotFoundException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
-    }
-
-    @ExceptionHandler(CartItemNotFoundException.class)
-    public ProblemDetail handleCartItemNotFound(CartItemNotFoundException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
