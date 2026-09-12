@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.checkout.controller;
 
+import com.mentorship.hanakoleh.domain.checkout.dto.*;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.checkout.dto.CartValidationResponse;
@@ -63,5 +64,15 @@ public class CheckoutController {
             @RequestParam(value = "addressId", required = false) Long addressId) {
         var deliveryOptionResponse = checkoutService.resolveDeliveryOption(customerId, option, addressId);
         return ResponseEntity.ok(deliveryOptionResponse);
+    }
+
+        @GetMapping("/promotion")
+    @Operation(summary = "Apply promotion code",
+            description = "Validates a promotion code against the cart and returns the discount and resulting total.")
+    public ResponseEntity<PromotionResponse> applyPromotion(
+            @RequestHeader("X-Customer-Id") Integer customerId,
+            @RequestParam("code") String code) {
+        var promotionResponse = checkoutService.applyPromotion(customerId, code);
+        return ResponseEntity.ok(promotionResponse);
     }
 }

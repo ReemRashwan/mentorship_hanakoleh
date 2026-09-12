@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.checkout.service;
 
+import com.mentorship.hanakoleh.config.AppConstants;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
@@ -9,9 +10,13 @@ import com.mentorship.hanakoleh.domain.checkout.delivery.GeoDistanceCalculator;
 import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryAddressResponse;
 import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryOptionResponse;
+import com.mentorship.hanakoleh.domain.checkout.dto.PromotionResponse;
 import com.mentorship.hanakoleh.domain.checkout.exception.*;
 import com.mentorship.hanakoleh.domain.checkout.pricing.CartPricingCalculator;
+import com.mentorship.hanakoleh.domain.checkout.promotion.PromotionDiscountCalculator;
 import com.mentorship.hanakoleh.domain.order.model.OrderDeliveryOption;
+import com.mentorship.hanakoleh.domain.order.model.Promotion;
+import com.mentorship.hanakoleh.domain.order.repository.PromotionRepository;
 import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
 import com.mentorship.hanakoleh.domain.restaurant.model.RestaurantDeliveryOption;
 import com.mentorship.hanakoleh.domain.restaurant.repository.RestaurantDeliveryOptionRepository;
@@ -25,10 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.mentorship.hanakoleh.config.AppConstants;
 
 
 @RequiredArgsConstructor
@@ -41,6 +45,8 @@ public class CheckoutService {
     private final AddressRepository addressRepository;
     private final RestaurantDeliveryOptionRepository deliveryOptionRepository;
     private final GeoDistanceCalculator geoDistanceCalculator;
+    private final PromotionRepository promotionRepository;
+    private final PromotionDiscountCalculator promotionDiscountCalculator;
 
     // --- Issue #1: load & validate ------------------------------------------------
     @Transactional(readOnly = true)
@@ -130,6 +136,40 @@ public class CheckoutService {
         return new DeliveryOptionResponse(config.getId(), option, false, fee, estimatedMinutes, distance);
     }
 
+    // --- Issue #5: promotions -----------------------------------------------------
+
+    @Transactional(readOnly = true)
+    public PromotionResponse applyPromotion(Integer customerId, String code) {
+        Cart cart = loadAndValidateCart(customerId);
+        BigDecimal subtotal = cartPricingCalculator.reprice(cart).subtotal();
+
+        Promotion promotion = promotionRepository.findByCodeIgnoreCase(code)
+                .orElseThrow(() -> new PromotionNotFoundException(
+                        ErrorCode.PROMOTION_NOT_FOUND.format(code)));
+
+        OffsetDateTime now = OffsetDateTime.now();
+        boolean active = Boolean.TRUE.equals(promotion.getIsActive())
+                && !now.isBefore(promotion.getStartsAt())
+                && !now.isAfter(promotion.getEndsAt());
+        if (!active) {
+            throw new PromotionNotApplicableException(ErrorCode.PROMOTION_NOT_ACTIVE.format(code));
+        }
+
+        if (subtotal.compareTo(promotion.getMinOrderAmount()) < 0) {
+            throw new PromotionNotApplicableException(
+                    ErrorCode.PROMOTION_BELOW_MIN_ORDER.format(code, promotion.getMinOrderAmount()));
+        }
+
+        if (promotion.getUsageLimitTotal() != null
+                && promotion.getUsageCountTotal() >= promotion.getUsageLimitTotal()) {
+            throw new PromotionNotApplicableException(ErrorCode.PROMOTION_USAGE_EXHAUSTED.format(code));
+        }
+
+        BigDecimal discount = promotionDiscountCalculator.discountFor(promotion, subtotal);
+        return new PromotionResponse(
+                promotion.getCode(), promotion.getDiscountType(), promotion.getDiscountValue(),
+                subtotal, discount, subtotal.subtract(discount));
+    }
     // --- helpers ------------------------------------------------------------------
 
     private String formatAddress(Address a) {
