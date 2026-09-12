@@ -63,11 +63,11 @@ public class OrderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDetailsResponse> getOrder(
-            @PathVariable Long id,
+            @PathVariable Long orderId,
             @RequestHeader("Authorization") String authorizationHeader) {
         Integer customerId = AuthenticationFunction.extractID(authorizationHeader);
         OrderDetailsResponse response = orderMapper.toOrderDetailsResponse(
-                orderService.getOrder(id, customerId));
+                orderService.getOrder(orderId, customerId));
         return ResponseEntity.ok(response);
     }
 }
