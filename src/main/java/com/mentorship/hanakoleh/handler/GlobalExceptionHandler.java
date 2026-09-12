@@ -1,12 +1,12 @@
 package com.mentorship.hanakoleh.handler;
 
-import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
-import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
+import com.mentorship.hanakoleh.domain.cart.exception.*;
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.UserTokenNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,6 +60,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRestaurantIdException.class)
     public ResponseEntity<?> handleInvalidRestaurantIdException() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(LocalDateTime.now() + " :Authentication token missing");
+    }
+
+    @ExceptionHandler(OperationNotAllowedException.class)
+    public ProblemDetail handleOperationNotAllowed(OperationNotAllowedException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(CartNotFoundException.class)
+    public ProblemDetail handleCartNotFound(CartNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ProblemDetail handleCartItemNotFound(CartItemNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(MenuItemNotOrderableException.class)
+    public ProblemDetail handleMenuItemNotOrderable(MenuItemNotOrderableException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
 }
