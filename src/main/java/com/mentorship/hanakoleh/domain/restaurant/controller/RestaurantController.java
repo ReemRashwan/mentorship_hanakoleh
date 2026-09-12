@@ -18,7 +18,7 @@ public class RestaurantController {
     @PatchMapping("{restaurantId}/orders/{orderId}/accept")
     ResponseEntity<String> acceptOrder(
             @PathVariable Integer restaurantId,
-            @PathVariable Integer orderId,
+            @PathVariable Long orderId,
             @RequestBody String notes) {
         restaurantService.acceptOrderByRestaurant(restaurantId,orderId,notes);
         return ResponseEntity.ok("Order has been accepted");

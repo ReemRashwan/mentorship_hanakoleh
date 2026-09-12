@@ -34,6 +34,7 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderStatusUpdateService orderStatusUpdateService;
     private final OrderMapper orderMapper;
+    private final MockOrderService mockOrderService;
 
     @PatchMapping("/{orderId}/status")
     @Operation(summary = "Update order status")
@@ -48,7 +49,7 @@ public class OrderController {
             @PathVariable Integer customerId,
             @RequestBody @Valid PlaceOrderRequest request
     ) {
-        PlaceOrderResponse response = orderService.placeOrder(customerId);
+        PlaceOrderResponse response = mockOrderService.placeOrder(customerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

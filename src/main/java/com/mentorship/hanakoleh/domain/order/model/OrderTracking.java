@@ -25,6 +25,16 @@ public class OrderTracking {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+    @Column(name = "order_tracking_current_status", nullable = false, length = 30)
+    @NotNull
+    @Size(max = 30)
+    private OrderFinalStatus currentStatus;
+
+    @Column(name = "order_tracking_previous_status", nullable = false, length = 30)
+    @NotNull
+    @Size(max = 30)
+    private OrderFinalStatus previousStatus;
+
     @Column(name = "order_tracking_notes")
     @Size(max = 1000)
     private String notes;

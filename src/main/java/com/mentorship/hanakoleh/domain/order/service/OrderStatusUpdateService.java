@@ -51,7 +51,7 @@ public class OrderStatusUpdateService {
     }
 
     @Transactional
-    public boolean acceptOrder( Integer authenticatedRestaurantId, Integer activeOrderId,String notes) {
+    public boolean acceptOrder( Integer authenticatedRestaurantId, Long activeOrderId,String notes) {
         Order activeOrder = orderRepository.findById(activeOrderId).orElseThrow(
                 () ->   new OrderNotFoundException(String.format("Order with id %d not found", activeOrderId)));
 

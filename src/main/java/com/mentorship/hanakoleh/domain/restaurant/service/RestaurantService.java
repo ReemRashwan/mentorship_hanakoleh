@@ -51,11 +51,11 @@ public class RestaurantService {
     }
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
-    public void handleIncomingOrders(OrderConfirmedEvent orderConfirmedEvent) {
-        //ord
-    }
+    public void handleIncomingConfirmedOrders(OrderConfirmedEvent orderConfirmedEvent) {
+        log.info("Incoming Order{}that is {}is received. \n1-matching the order to correct restaurant. 2-checking restaurant status and ability to process.\n3-pushing notification to restaurant.", orderConfirmedEvent.getOrderId(), orderConfirmedEvent.getOrderFinalStatus());
+    };
 
-    public void acceptOrderByRestaurant(Integer authenticatedRestaurantId, Integer orderId, String notes) {
+    public void acceptOrderByRestaurant(Integer authenticatedRestaurantId, Long orderId, String notes) {
         orderStatusUpdateService.acceptOrder(authenticatedRestaurantId, orderId, notes);
     }
 }

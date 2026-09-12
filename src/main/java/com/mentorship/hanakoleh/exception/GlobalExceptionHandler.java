@@ -2,7 +2,7 @@ package com.mentorship.hanakoleh.exception;
 
 import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
-import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
+import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.order.exception.InvalidOrderTransitionException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
