@@ -59,9 +59,11 @@ public class MenuItem {
     @DecimalMin(value = "0.00")
     private BigDecimal price;
 
-    @Column(name = "menu_item_available_quantity")
+    @Builder.Default
+    @Column(name = "menu_item_available_quantity", nullable = false)
     @Min(0)
-    private Integer availableQuantity;
+    @NotNull
+    private Integer availableQuantity = 0;
 
     @Builder.Default
     @Column(name = "menu_item_ui_order", nullable = false)

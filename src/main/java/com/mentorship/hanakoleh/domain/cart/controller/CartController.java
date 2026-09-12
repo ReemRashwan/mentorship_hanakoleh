@@ -1,13 +1,10 @@
 package com.mentorship.hanakoleh.domain.cart.controller;
 
-import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemRequest;
-import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemResponse;
-import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityRequest;
-import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
-import com.mentorship.hanakoleh.domain.cart.mapper.CartMapper;
-import com.mentorship.hanakoleh.domain.cart.model.CartItem;
+import com.mentorship.hanakoleh.domain.cart.dto.*;
 import com.mentorship.hanakoleh.domain.cart.dto.response.RemoveCartItemResponse;
+import com.mentorship.hanakoleh.domain.cart.mapper.CartMapper;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
+import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,6 +36,15 @@ public class CartController {
                 HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/items")
+    @Operation(summary = "Clear Cart", description = "To delete all items currently existing in the customer cart.")
+
+    public ResponseEntity<ClearCartResponse> clearCart(Integer userId) {
+
+        ClearCartResponse clearedCart = cartService.clearCart(userId);
+        return ResponseEntity.ok(clearedCart);
+    }
+
     @PatchMapping("/items/{cartItemId}")
     @Operation(summary = "Update cart item quantity", description = "Updates the quantity of an item in the cart")
     public ResponseEntity<UpdateCartItemQuantityResponse> updateItemQuantity(
@@ -47,7 +53,7 @@ public class CartController {
         CartItem cartItem = cartService.updateItemQuantity(cartItemId, request.getQuantity());
         UpdateCartItemQuantityResponse response = cartMapper.toUpdateQuantityResponse(cartItem);
         return ResponseEntity.ok(response);
-}
+    }
 
 
     @DeleteMapping("/{cartId}/items/{itemId}")

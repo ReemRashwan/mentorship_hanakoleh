@@ -2,6 +2,8 @@ package com.mentorship.hanakoleh.service;
 
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemRequest;
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemResponse;
+import com.mentorship.hanakoleh.domain.cart.dto.ClearCartResponse;
+import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
@@ -27,46 +29,53 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CartServiceTests {
+class CartServiceTest {
 
     @Mock
     private CartRepository cartRepository;
+
     @Mock
     private CustomerService customerService;
+
     @Mock
     private RestaurantService restaurantService;
 
     @InjectMocks
     private CartService cartService;
 
-    private Integer userId;
-    private Integer restaurantId;
-    private Integer customerId;
-    private Integer cartId;
-    private Integer cartItemId;
-    private Integer menuId;
-    private Integer menuItemId;
-
-    private User mockUser;
-    private Customer mockCustomer;
-    private Restaurant mockRestaurant;
-    private ItemCategory mockItemCategory;
-    private Cart mockCart;
-    private CartItem mockCartItem;
-    private Menu mockMenu;
-    private MenuItem mockMenuItem;
-    private AddCartItemRequest addCartItemRequest;
-
     @Nested
-    @DisplayName("Tests for Add Item to cart.")
+    @DisplayName("Tests for Add Item to cart")
     class AddItemToCartTests {
+
+        private Integer userId;
+        private Integer restaurantId;
+        private Integer customerId;
+        private Integer cartId;
+        private Integer cartItemId;
+        private Integer menuId;
+        private Integer menuItemId;
+
+        private User mockUser;
+        private Customer mockCustomer;
+        private Restaurant mockRestaurant;
+        private ItemCategory mockItemCategory;
+        private Cart mockCart;
+        private CartItem mockCartItem;
+        private Menu mockMenu;
+        private MenuItem mockMenuItem;
+        private AddCartItemRequest addCartItemRequest;
 
         @BeforeEach
         void setUp() {
@@ -104,10 +113,8 @@ class CartServiceTests {
         @Test
         @DisplayName("Should successfully add new item to cart when item doesn't exist in cart")
         void shouldSuccessfullyAddNewItemToCart_WhenCartIsAvailableAndItemDoesNotExistInCart() {
-            // Given
-            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, BigDecimal.valueOf(18), 2, "No onions");
+            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, 2, "No onions");
 
-            // When
             when(customerService.retrieveCustomerIdByUserId(anyInt())).thenReturn(customerId);
             when(cartRepository.findByCustomerIdAndStatus(anyInt(), eq(CartStatus.ACTIVE)))
                     .thenReturn(Optional.of(mockCart));
@@ -115,10 +122,8 @@ class CartServiceTests {
                     .thenReturn(Optional.of(mockMenuItem));
             when(restaurantService.getMenuItemInventory(menuItemId)).thenReturn(10);
 
-            // Act
             AddCartItemResponse response = cartService.addItemToCart(addCartItemRequest, userId);
 
-            // Assert
             assertNotNull(response);
             assertEquals(CartStatus.ACTIVE, response.status());
             assertEquals(restaurantId, response.restaurantId());
@@ -134,12 +139,10 @@ class CartServiceTests {
         @Test
         @DisplayName("Should successfully add new item to cart when item already exists in cart")
         void shouldSuccessfullyAddNewItemToCart_WhenCartIsAvailableAndItemExistsInCart() {
-            // Given
-            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, BigDecimal.valueOf(15.99), 2, "No onions");
+            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, 2, "No onions");
             mockCartItem = CartItem.builder().id(cartItemId).cart(mockCart).menuItem(mockMenuItem).price(BigDecimal.valueOf(15.99)).quantity(2).note("Not spicy").build();
             mockCart.getItems().add(mockCartItem);
 
-            // When
             when(customerService.retrieveCustomerIdByUserId(anyInt())).thenReturn(customerId);
             when(cartRepository.findByCustomerIdAndStatus(anyInt(), eq(CartStatus.ACTIVE)))
                     .thenReturn(Optional.of(mockCart));
@@ -147,10 +150,8 @@ class CartServiceTests {
                     .thenReturn(Optional.of(mockMenuItem));
             when(restaurantService.getMenuItemInventory(menuItemId)).thenReturn(5);
 
-            // Act
             AddCartItemResponse response = cartService.addItemToCart(addCartItemRequest, userId);
 
-            // Assert
             assertNotNull(response);
             assertEquals(CartStatus.ACTIVE, response.status());
             assertEquals(restaurantId, response.restaurantId());
@@ -166,8 +167,7 @@ class CartServiceTests {
         @Test
         @DisplayName("Should successfully add new item to cart when a different item already exists in cart")
         void shouldSuccessfullyAddNewItemToCart_WhenCartIsAvailableAndDifferentItemExistsInCart() {
-            // Given
-            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, BigDecimal.valueOf(15.99), 2, "No onions");
+            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, 2, "No onions");
             MenuItem differentMenuItem = MenuItem.builder().id(99).build();
 
             CartItem existingCartItem = CartItem.builder()
@@ -181,7 +181,6 @@ class CartServiceTests {
 
             mockCart.getItems().add(existingCartItem);
 
-            // When
             when(customerService.retrieveCustomerIdByUserId(anyInt())).thenReturn(customerId);
             when(cartRepository.findByCustomerIdAndStatus(anyInt(), eq(CartStatus.ACTIVE)))
                     .thenReturn(Optional.of(mockCart));
@@ -189,10 +188,8 @@ class CartServiceTests {
                     .thenReturn(Optional.of(mockMenuItem));
             when(restaurantService.getMenuItemInventory(menuItemId)).thenReturn(5);
 
-            // Act
             AddCartItemResponse response = cartService.addItemToCart(addCartItemRequest, userId);
 
-            // Assert
             assertNotNull(response);
             assertEquals(CartStatus.ACTIVE, response.status());
             assertEquals(restaurantId, response.restaurantId());
@@ -213,12 +210,10 @@ class CartServiceTests {
         }
 
         @Test
-        @DisplayName("Should successfully create an active cart and add the new item when customer has no active cart ")
+        @DisplayName("Should successfully create an active cart and add the new item when customer has no active cart")
         void shouldSuccessfullyAddNewItem_WhenCustomerHasNoActiveCart() {
-            // Given
-            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, BigDecimal.valueOf(15.99), 4, "No onions");
+            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, 4, "No onions");
 
-            // When
             when(customerService.retrieveCustomerIdByUserId(anyInt())).thenReturn(customerId);
             when(customerService.getCustomerReferenceById(anyInt())).thenReturn(mockCustomer);
             when(restaurantService.getRestaurantReferenceById(restaurantId)).thenReturn(mockRestaurant);
@@ -229,10 +224,8 @@ class CartServiceTests {
             when(restaurantService.getMenuItemInventory(menuItemId)).thenReturn(5);
             when(cartRepository.save(any(Cart.class))).thenReturn(mockCart);
 
-            // Act
             AddCartItemResponse response = cartService.addItemToCart(addCartItemRequest, userId);
 
-            // Assert
             assertNotNull(response);
             assertEquals(CartStatus.ACTIVE, response.status());
             assertEquals(restaurantId, response.restaurantId());
@@ -244,7 +237,6 @@ class CartServiceTests {
             assertNotNull(capturedCart);
             assertEquals(0, capturedCart.getItems().size());
 
-            // Switched to evaluating mockCart items for consistency with other tests
             CartItem addedItem = mockCart.getItems().get(0);
             assertEquals(menuItemId, addedItem.getMenuItem().getId());
             assertEquals(4, addedItem.getQuantity());
@@ -255,19 +247,16 @@ class CartServiceTests {
         @Test
         @DisplayName("Should throw exception if the item requested to be added is from a different restaurant")
         void shouldThrowCrossRestaurantConflictException_WhenItemIsFromDifferentRestaurant() {
-            // Given
             CartItem cartItemFromDifferentRestaurant = CartItem.builder().id(999).menuItem(MenuItem.builder().id(999).build()).build();
             mockCart.getItems().add(cartItemFromDifferentRestaurant);
-            addCartItemRequest = new AddCartItemRequest(menuItemId, 20, BigDecimal.valueOf(18), 2, "No onions");
+            addCartItemRequest = new AddCartItemRequest(menuItemId, 20, 2, "No onions");
 
-            // When
             when(customerService.retrieveCustomerIdByUserId(anyInt())).thenReturn(customerId);
             when(restaurantService.getMenuItemByMenuItemId(menuItemId))
                     .thenReturn(Optional.of(mockMenuItem));
             when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE))
                     .thenReturn(Optional.of(mockCart));
 
-            // Act & Assert
             final CrossRestaurantConflictException exception = assertThrows(
                     CrossRestaurantConflictException.class,
                     () -> cartService.addItemToCart(addCartItemRequest, userId)
@@ -280,14 +269,12 @@ class CartServiceTests {
         @Test
         @DisplayName("Should throw exception when selected menu item does not exist")
         void shouldThrowMenuItemUnavailableExceptionException_WhenMenuItemDoesNotExist() {
-            // Given
-            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, BigDecimal.valueOf(15.99), 2, "No onions");
+            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, 2, "No onions");
 
             when(customerService.retrieveCustomerIdByUserId(anyInt())).thenReturn(customerId);
             when(restaurantService.getMenuItemByMenuItemId(menuItemId))
                     .thenReturn(Optional.empty());
 
-            // Act & Assert
             MenuItemUnavailableException exception = assertThrows(
                     MenuItemUnavailableException.class,
                     () -> cartService.addItemToCart(addCartItemRequest, userId)
@@ -300,8 +287,7 @@ class CartServiceTests {
         @Test
         @DisplayName("Should throw exception when menu item inventory is insufficient")
         void shouldThrowMenuItemOutOfStock_WhenMenuItemIsOutOfStock() {
-            // Given
-            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, BigDecimal.valueOf(15.99), 5, "No onions");
+            addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, 5, "No onions");
 
             when(customerService.retrieveCustomerIdByUserId(anyInt())).thenReturn(customerId);
             when(restaurantService.getMenuItemByMenuItemId(menuItemId))
@@ -310,7 +296,6 @@ class CartServiceTests {
             when(cartRepository.findByCustomerIdAndStatus(anyInt(), eq(CartStatus.ACTIVE)))
                     .thenReturn(Optional.of(mockCart));
 
-            // Act & Assert
             MenuItemOutOfStock exception = assertThrows(
                     MenuItemOutOfStock.class,
                     () -> cartService.addItemToCart(addCartItemRequest, userId)
@@ -318,6 +303,114 @@ class CartServiceTests {
 
             assertEquals("Menu Item with ID: " + menuItemId + " is out of Stock.", exception.getMessage());
             verify(cartRepository, never()).save(any(Cart.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("Tests for Clear Cart")
+    class ClearCartTests {
+
+        private final Integer userId = 100;
+        private final Integer customerId = 50;
+        private final Integer cartId = 10;
+        private final Integer restaurantId = 5;
+        private final Integer menuId = 1;
+        private final Integer menuItemId = 10;
+        private final Integer cartItemId1 = 10;
+        private final Integer cartItemId2 = 10;
+
+        private Customer customer;
+        private Restaurant restaurant;
+        private Menu mockMenu;
+        private ItemCategory mockItemCategory;
+        private Cart activeCart;
+        private CartItem mockCartItem1;
+        private CartItem mockCartItem2;
+        private MenuItem mockMenuItem;
+
+        @BeforeEach
+        void setUp() {
+            customer = Customer.builder()
+                    .id(customerId)
+                    .build();
+
+            restaurant = Restaurant.builder()
+                    .id(restaurantId)
+                    .build();
+
+            mockMenu = Menu.builder().id(menuId).restaurant(restaurant).name("Meat Burgers").uiOrder(1).visible(true).build();
+            mockItemCategory = ItemCategory.builder().id(menuItemId).name("Burgers").build();
+            mockMenuItem = MenuItem.builder().id(menuItemId).menu(mockMenu).category(mockItemCategory)
+                    .name("Juicy Lucy Double Cheese Burger")
+                    .price(BigDecimal.valueOf(15.99))
+                    .availableQuantity(5)
+                    .uiOrder(1)
+                    .onDemandStatus(MenuItemOnDemandStatus.AVAILABLE)
+                    .build();
+            mockCartItem1 = CartItem.builder().id(cartItemId1).cart(activeCart).menuItem(mockMenuItem).price(BigDecimal.valueOf(15.99)).quantity(2).note("Not spicy").build();
+            mockCartItem2 = CartItem.builder().id(cartItemId2).cart(activeCart).menuItem(mockMenuItem).price(BigDecimal.valueOf(15.99)).quantity(2).note("No Onion").build();
+            List<CartItem> items = new ArrayList<>();
+            items.add(mockCartItem1);
+            items.add(mockCartItem2);
+            activeCart = Cart.builder()
+                    .id(cartId)
+                    .customer(customer)
+                    .restaurant(restaurant)
+                    .status(CartStatus.ACTIVE)
+                    .items(items)
+                    .build();
+        }
+
+        @Test
+        @DisplayName("Should clear cart items successfully when active cart exists with restaurant")
+        void clearCart_Success_WithRestaurant() {
+            when(customerService.retrieveCustomerIdByUserId(userId)).thenReturn(customerId);
+            when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE))
+                    .thenReturn(Optional.of(activeCart));
+
+            ClearCartResponse response = cartService.clearCart(userId);
+
+            assertThat(response).isNotNull();
+            assertThat(response.getCartId()).isEqualTo(cartId);
+            assertThat(response.getCustomerId()).isEqualTo(customerId);
+            assertThat(response.getRestaurantId()).isEqualTo(restaurantId);
+            assertThat(activeCart.getItems()).isEmpty();
+
+            verify(customerService).retrieveCustomerIdByUserId(userId);
+            verify(cartRepository).findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE);
+        }
+
+        @Test
+        @DisplayName("Should clear cart items successfully when active cart has no restaurant attached")
+        void clearCart_Success_NullRestaurant() {
+            activeCart.setRestaurant(null);
+
+            when(customerService.retrieveCustomerIdByUserId(userId)).thenReturn(customerId);
+            when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE))
+                    .thenReturn(Optional.of(activeCart));
+
+            ClearCartResponse response = cartService.clearCart(userId);
+
+            assertThat(response).isNotNull();
+            assertThat(response.getCartId()).isEqualTo(cartId);
+            assertThat(response.getCustomerId()).isEqualTo(customerId);
+            assertThat(response.getRestaurantId()).isNull();
+            assertThat(activeCart.getItems()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Should throw CartNotFoundException when no active cart exists for customer")
+        void clearCart_ThrowsException_WhenNoActiveCartFound() {
+            when(customerService.retrieveCustomerIdByUserId(userId)).thenReturn(customerId);
+            when(cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE))
+                    .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> cartService.clearCart(userId))
+                    .isInstanceOf(CartNotFoundException.class)
+                    .hasMessage("No Active Cart found for Customer Id " + customerId);
+
+            verify(customerService).retrieveCustomerIdByUserId(userId);
+            verify(cartRepository).findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE);
         }
     }
 }

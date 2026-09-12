@@ -3,17 +3,14 @@ package com.mentorship.hanakoleh.domain.cart.service;
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemRequest;
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemResponse;
 import com.mentorship.hanakoleh.domain.cart.dto.CartItemDTO;
-import com.mentorship.hanakoleh.domain.cart.model.CartItem;
+import com.mentorship.hanakoleh.domain.cart.dto.ClearCartResponse;
 import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
-import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
-import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
-import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
-import com.mentorship.hanakoleh.domain.restaurant.model.MenuItemOnDemandStatus;
-import com.mentorship.hanakoleh.exception.ErrorCode;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
+import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
+import com.mentorship.hanakoleh.domain.cart.repository.CartItemRepository;
 import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
 import com.mentorship.hanakoleh.domain.restaurant.exception.CrossRestaurantConflictException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemOutOfStock;
@@ -21,20 +18,20 @@ import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemUnavailableE
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
 import com.mentorship.hanakoleh.domain.restaurant.service.RestaurantService;
+import com.mentorship.hanakoleh.domain.restaurant.validation.MenuItemOrderabilityValidator;
 import com.mentorship.hanakoleh.domain.user.model.Customer;
 import com.mentorship.hanakoleh.domain.user.service.CustomerService;
+import com.mentorship.hanakoleh.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -43,10 +40,10 @@ import java.util.Optional;
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final CustomerService customerService;
-    private final RestaurantService restaurantService;
     private final CartItemRepository cartItemRepository;
-
+    private final RestaurantService restaurantService;
+    private final CustomerService customerService;
+    private final MenuItemOrderabilityValidator menuItemOrderabilityValidator;
 
     @Transactional
     public AddCartItemResponse addItemToCart(@NonNull AddCartItemRequest addCartItemRequestDto, @NonNull Integer userId) {
@@ -91,13 +88,27 @@ public class CartService {
                         .reduce(BigDecimal.ZERO, BigDecimal::add))
                 .processedCartItems(customerCart.getItems().stream()
                         .map(item -> CartItemDTO.builder()
-                                .menuItemId(item.getMenuItem().getId())
+                                .selectedMenuItemId(item.getMenuItem().getId())
                                 .quantity(item.getQuantity())
                                 .note(item.getNote())
-                                .subTotal(item.getMenuItem().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                                .price(item.getMenuItem().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                                 .build())
-                        .toList()) .build();
+                        .toList()).build();
     }
+
+    @Transactional
+    public ClearCartResponse clearCart(Integer userId) {
+        Integer customerId = customerService.retrieveCustomerIdByUserId(userId);
+        Cart customerCart = cartRepository.findByCustomerIdAndStatus(customerId, CartStatus.ACTIVE)
+                .orElseThrow(() -> new CartNotFoundException("No Active Cart found for Customer Id " + customerId));
+        customerCart.getItems().clear();
+        return ClearCartResponse.builder()
+                .cartId(customerCart.getId())
+                .customerId(customerCart.getCustomer().getId())
+                .restaurantId(customerCart.getRestaurant() != null ? customerCart.getRestaurant().getId() : null)
+                .build();
+    }
+
 
     @Transactional
     public CartItem updateItemQuantity(Integer cartItemId, Integer quantity) {
@@ -112,7 +123,7 @@ public class CartService {
                 .orElseThrow(() -> new CartItemNotFoundException(cartItemId));
 
         if (quantity > cartItem.getQuantity()) {
-            validateMenuItemCanSupply(cartItem.getMenuItem(), quantity);
+            menuItemOrderabilityValidator.validateOrderable(cartItem.getMenuItem(), quantity);
         }
 
         cartItem.setQuantity(quantity);
@@ -210,19 +221,5 @@ public class CartService {
         int availableInventory = restaurantService.getMenuItemInventory(selectedMenuItem.getId());
         if (availableInventory < requestedQuantity)
             throw new MenuItemOutOfStock("Menu Item with ID: " + selectedMenuItem.getId() + " is out of Stock.");
-    }
-
-    private void validateMenuItemCanSupply(MenuItem menuItem, Integer quantity) {
-        MenuItemOnDemandStatus status = menuItem.getOnDemandStatus();
-        if (status == MenuItemOnDemandStatus.UNAVAILABLE || status == MenuItemOnDemandStatus.OUT_OF_STOCK) {
-            throw new MenuItemNotOrderableException(
-                    ErrorCode.MENU_ITEM_NOT_ORDERABLE.format(menuItem.getId(), status));
-        }
-
-        Integer availableQuantity = menuItem.getAvailableQuantity();
-        if (availableQuantity != null && quantity > availableQuantity) {
-            throw new MenuItemNotOrderableException(
-                    ErrorCode.MENU_ITEM_INSUFFICIENT_STOCK.format(availableQuantity, menuItem.getId()));
-        }
     }
 }

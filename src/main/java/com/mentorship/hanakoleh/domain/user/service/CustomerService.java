@@ -12,12 +12,12 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     public CustomerService(CustomerRepository customerRepository) {
-
         this.customerRepository = customerRepository;
     }
 
     public Customer getCustomerById(Integer customerId) {
-        return customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
+        return customerRepository.findById(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
     }
 
 
