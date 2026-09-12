@@ -9,7 +9,6 @@ import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRestaurantException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
