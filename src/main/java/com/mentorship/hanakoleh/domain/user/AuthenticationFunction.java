@@ -10,7 +10,7 @@ import java.util.Base64;
 @Component
 @RequiredArgsConstructor
 public class AuthenticationFunction {
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static Integer extractID(String authorizationHeader) {
         String tokenPrefix = "Bearer ";
@@ -23,6 +23,6 @@ public class AuthenticationFunction {
         String[] chunks = token.split("\\.");
         Base64.Decoder decoder = Base64.getUrlDecoder();
         String payload = new String(decoder.decode(chunks[1]));
-        return (mapper.readTree(payload)).get("customerID").asInt();
+        return (MAPPER.readTree(payload)).get("customerID").asInt();
     }
 }
