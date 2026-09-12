@@ -64,14 +64,23 @@ public class OrderMapper {
                 orderItem.getSpecialInstructions());
     }
 
-@Mapper(componentModel = "spring")
-public interface OrderMapper {
-    @Mapping(source = "order.id", target = "orderId")
-    @Mapping(source = "order.restaurant.name", target = "restaurantName")
-    @Mapping(source = "order.finalStatus", target = "status")
-    @Mapping(source = "order.totalAmount", target = "totalAmount")
-    @Mapping(source = "order.currencyCode", target = "currencyCode")
-    @Mapping(source = "itemLineCount", target = "itemLineCount")
-    @Mapping(source = "order.createdAt", target = "createdAt")
-    OrderHistoryResponse toOrderHistoryResponse(Order order, long itemLineCount);
+    public OrderHistoryResponse toOrderHistoryResponse(Order order, long itemLineCount) {
+        if (order == null) {
+            return null;
+        }
+        String restaurantName = null;
+        if (order.getRestaurant() != null) {
+            restaurantName = order.getRestaurant().getName();
+        }
+        return new OrderHistoryResponse(
+                order.getId(),
+                restaurantName,
+                order.getFinalStatus(),
+                order.getTotalAmount(),
+                order.getCurrencyCode(),
+                itemLineCount,
+                order.getCreatedAt()
+        );
+    }
+
 }
