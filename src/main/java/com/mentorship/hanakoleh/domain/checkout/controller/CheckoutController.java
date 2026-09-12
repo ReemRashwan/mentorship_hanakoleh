@@ -1,6 +1,5 @@
 package com.mentorship.hanakoleh.domain.checkout.controller;
 
-import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.checkout.dto.CartValidationResponse;
 import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryAddressResponse;
@@ -9,10 +8,6 @@ import com.mentorship.hanakoleh.domain.checkout.service.CheckoutService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

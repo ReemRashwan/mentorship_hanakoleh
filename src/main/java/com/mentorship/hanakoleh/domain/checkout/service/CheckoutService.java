@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 @RequiredArgsConstructor
 @Service
 public class CheckoutService {
@@ -63,7 +64,7 @@ public class CheckoutService {
     @Transactional(readOnly = true)
     public CartPricingResponse repriceCart(Integer customerId) {
         Cart cart = loadAndValidateCart(customerId);
-        return cartPricingCalculator.reprice(cart);
+        return this.cartPricingCalculator.reprice(cart);
     }
 
     /**
