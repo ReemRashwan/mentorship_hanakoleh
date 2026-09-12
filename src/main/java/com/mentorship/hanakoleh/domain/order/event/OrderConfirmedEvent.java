@@ -10,7 +10,7 @@ import lombok.Data;
 @Builder
 public class OrderConfirmedEvent   {
     private Long orderId;
+    private OrderFinalStatus orderFinalStatus;
     private OrderPaymentMethod orderPaymentMethod;
     private OrderPaymentStatus orderPaymentStatus;
-    private OrderFinalStatus orderFinalStatus;
 }

@@ -92,7 +92,7 @@ public class MockOrderService {
                 .estimatedDeliveryAt(OffsetDateTime.now().plusMinutes(30))
                 .createdAt(OffsetDateTime.now())
                 .build();
-        orderStatusUpdateService.confirmOrder(activeOrder, "Order placed successfully");
+        orderStatusUpdateService.confirmOrder(activeOrder.getId(), "Order placed successfully");
         log.info("Order placed successfully");
         return new PlaceOrderResponse(activeOrder.getId(),activeOrder.getFinalStatus());
     }

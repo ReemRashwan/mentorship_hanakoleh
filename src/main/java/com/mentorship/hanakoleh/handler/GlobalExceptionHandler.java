@@ -123,5 +123,9 @@ public class GlobalExceptionHandler {
     public ProblemDetail handlePromotionNotApplicable(PromotionNotApplicableException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
     }
+    @ExceptionHandler(PaymentNotSatisfiedException.class)
+    ProblemDetail handlePaymentNotSatisfied(PaymentNotSatisfiedException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.PAYMENT_REQUIRED, exception.getMessage());
+    }
 }
 
