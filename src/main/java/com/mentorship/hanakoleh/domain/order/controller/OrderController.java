@@ -38,13 +38,6 @@ public class OrderController {
             @RequestBody UpdateOrderStatusRequest updateOrderStatusRequest) {
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    @GetMapping("/current")
-    public ResponseEntity<List<CurrentOrderResponse>> getCurrentOrders(@RequestHeader("Authorization") String authorizationHeader) {
-        Integer customerId = AuthenticationFunction.extractID(authorizationHeader);
-        List<CurrentOrderResponse> orders = orderService.getCurrentOrders(customerId).stream()
-                .map(orderMapper::toCurrentOrderResponse)
-                .toList();
-        return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/history")
@@ -56,6 +49,18 @@ public class OrderController {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<OrderHistoryResponse> response = orderService.getHistoricalOrders(customerId, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<List<CurrentOrderResponse>> getCurrentOrders(@RequestHeader("Authorization") String authorizationHeader) {
+        Integer customerId = AuthenticationFunction.extractID(authorizationHeader);
+        List<CurrentOrderResponse> orders = orderService.getCurrentOrders(customerId).stream()
+                .map(orderMapper::toCurrentOrderResponse)
+                .toList();
+        return ResponseEntity.ok(orders);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<OrderDetailsResponse> getOrder(
             @PathVariable Long id,

@@ -23,5 +23,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     """)
     List<OrderItemLineCountProjection> findLineCountByOrderIds(
         @Param("orderIds") Collection<Long> orderIds);
+
     List<OrderItem> findByOrderIdOrderByIdAsc(Long orderId);
 }

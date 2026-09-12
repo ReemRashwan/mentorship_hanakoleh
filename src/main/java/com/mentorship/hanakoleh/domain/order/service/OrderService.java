@@ -35,7 +35,6 @@ public class OrderService {
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository,
             OrderMapper orderMapper) {
-    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.orderMapper = orderMapper;
@@ -52,33 +51,38 @@ public class OrderService {
         }
 
         List<Long> orderIds = orders.getContent().stream()
-        .map(Order::getId)
-        .toList();
+                .map(Order::getId)
+                .toList();
 
         List<OrderItemLineCountProjection> lineCounts =
-        orderItemRepository.findLineCountByOrderIds(orderIds);
+                orderItemRepository.findLineCountByOrderIds(orderIds);
 
         Map<Long, Long> lineCountByOrderId = lineCounts.stream()
-        .collect(Collectors.toMap(
-                OrderItemLineCountProjection::getOrderId,
-                OrderItemLineCountProjection::getLineCount));
+                .collect(Collectors.toMap(
+                        OrderItemLineCountProjection::getOrderId,
+                        OrderItemLineCountProjection::getLineCount));
 
         return orders.map(order -> {
-    long lineCount = lineCountByOrderId.getOrDefault(order.getId(), 0L);
+            long lineCount = lineCountByOrderId.getOrDefault(order.getId(), 0L);
 
-    return orderMapper.toOrderHistoryResponse(order, lineCount);
-});
+            return orderMapper.toOrderHistoryResponse(order, lineCount);
+        });
 
-    public List<Order> getCurrentOrders(Integer customerId) {
-        return orderRepository.findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
-                customerId,
-                NON_CURRENT_STATUSES);
     }
 
     // Helper methods
     // Helper method to get the start date for the historical orders
     private OffsetDateTime getHistoricalOrderStartDate() {
         return OffsetDateTime.now().minusMonths(OrderConstants.NUMBER_OF_MONTHS_FOR_HISTORICAL_ORDERS);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Order> getCurrentOrders(Integer customerId) {
+        return orderRepository.findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
+                customerId,
+                NON_CURRENT_STATUSES);
+    }
+
     @Transactional(readOnly = true)
     public OrderDetails getOrder(Long orderId, Integer customerId) {
         Order order = orderRepository.findByIdAndCustomer_Id(orderId, customerId)

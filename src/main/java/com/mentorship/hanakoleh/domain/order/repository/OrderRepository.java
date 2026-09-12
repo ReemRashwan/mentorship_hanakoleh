@@ -13,12 +13,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @EntityGraph(attributePaths = "restaurant")
+
     Page<Order> findByCustomerIdAndCreatedAtGreaterThanEqual(
-    List<Order> findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
             Integer customerId,
             OffsetDateTime createdFrom,
             Pageable pageable);
+
+    @EntityGraph(attributePaths = "restaurant")
+    List<Order> findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
+            Integer customerId,
             Collection<OrderFinalStatus> statuses);
 
     @EntityGraph(attributePaths = "restaurant")
