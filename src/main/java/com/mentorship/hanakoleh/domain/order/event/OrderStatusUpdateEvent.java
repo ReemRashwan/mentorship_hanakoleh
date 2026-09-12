@@ -5,4 +5,7 @@ import org.springframework.context.ApplicationEvent;
 
 @Data
 public class OrderStatusUpdateEvent extends ApplicationEvent {
+    public OrderStatusUpdateEvent(Object source) {
+        super(source);
+    }
 }
