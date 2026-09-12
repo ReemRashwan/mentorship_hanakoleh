@@ -23,7 +23,6 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-@RequiredArgsConstructor
 @Service
 @Slf4j
 public class OrderStatusUpdateService {
