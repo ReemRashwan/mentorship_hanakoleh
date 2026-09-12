@@ -1,5 +1,7 @@
 package com.mentorship.hanakoleh.domain.restaurant.service;
 
+import com.mentorship.hanakoleh.domain.order.event.OrderConfirmedEvent;
+import com.mentorship.hanakoleh.domain.order.service.OrderStatusUpdateService;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
@@ -7,6 +9,7 @@ import com.mentorship.hanakoleh.domain.restaurant.repository.MenuItemRepository;
 import com.mentorship.hanakoleh.domain.restaurant.repository.RestaurantRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -45,5 +48,14 @@ public class RestaurantService {
     public Integer getMenuItemInventory(Integer menuItemId) {
         Optional<Integer> availableQuantity = menuItemRepository.findAvailableQuantityById(menuItemId);
         return availableQuantity.orElseThrow(() -> new EntityNotFoundException("Quantity for Menu Item with ID " + menuItemId + " not found."));
+    }
+
+    @TransactionalEventListener(phase = AFTER_COMMIT)
+    public void handleIncomingOrders(OrderConfirmedEvent orderConfirmedEvent) {
+        //ord
+    }
+
+    public void acceptOrderByRestaurant(Integer authenticatedRestaurantId, Integer orderId, String notes) {
+        orderStatusUpdateService.acceptOrder(authenticatedRestaurantId, orderId, notes);
     }
 }
