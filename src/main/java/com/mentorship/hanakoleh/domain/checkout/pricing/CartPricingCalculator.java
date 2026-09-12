@@ -5,6 +5,7 @@ import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import org.springframework.stereotype.Component;
+import com.mentorship.hanakoleh.config.AppConstants;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,7 +19,6 @@ import java.util.List;
 @Component
 public class CartPricingCalculator {
 
-    private static final int MONEY_SCALE = 2;
 
     public CartPricingResponse reprice(Cart cart) {
         List<CartPricingResponse.PricedItem> items = new ArrayList<>();
@@ -55,6 +55,6 @@ public class CartPricingCalculator {
     }
 
     private BigDecimal scaled(BigDecimal value) {
-        return value.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        return value.setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
     }
 }

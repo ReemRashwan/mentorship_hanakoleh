@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.checkout.service;
 
+import com.mentorship.hanakoleh.config.AppConstants;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
@@ -21,22 +22,19 @@ import com.mentorship.hanakoleh.domain.restaurant.validation.MenuItemOrderabilit
 import com.mentorship.hanakoleh.domain.user.model.Address;
 import com.mentorship.hanakoleh.domain.user.repository.AddressRepository;
 import com.mentorship.hanakoleh.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+@RequiredArgsConstructor
 @Service
 public class CheckoutService {
-
-    private static final int MONEY_SCALE = 2;
-    private static final BigDecimal SERVICE_FEE = BigDecimal.ZERO.setScale(MONEY_SCALE);
-    private static final BigDecimal TAX_AMOUNT = BigDecimal.ZERO.setScale(MONEY_SCALE);
-    private static final String CURRENCY = "EGP";
 
     private final CartRepository cartRepository;
     private final MenuItemOrderabilityValidator menuItemOrderabilityValidator;
@@ -47,26 +45,6 @@ public class CheckoutService {
     private final PromotionRepository promotionRepository;
     private final PromotionDiscountCalculator promotionDiscountCalculator;
     private final OrderTotalsCalculator orderTotalsCalculator;
-
-    public CheckoutService(CartRepository cartRepository,
-                           MenuItemOrderabilityValidator menuItemOrderabilityValidator,
-                           CartPricingCalculator cartPricingCalculator,
-                           AddressRepository addressRepository,
-                           RestaurantDeliveryOptionRepository deliveryOptionRepository,
-                           GeoDistanceCalculator geoDistanceCalculator,
-                           PromotionRepository promotionRepository,
-                           PromotionDiscountCalculator promotionDiscountCalculator,
-                           OrderTotalsCalculator orderTotalsCalculator) {
-        this.cartRepository = cartRepository;
-        this.menuItemOrderabilityValidator = menuItemOrderabilityValidator;
-        this.cartPricingCalculator = cartPricingCalculator;
-        this.addressRepository = addressRepository;
-        this.deliveryOptionRepository = deliveryOptionRepository;
-        this.geoDistanceCalculator = geoDistanceCalculator;
-        this.promotionRepository = promotionRepository;
-        this.promotionDiscountCalculator = promotionDiscountCalculator;
-        this.orderTotalsCalculator = orderTotalsCalculator;
-    }
 
     // --- Issue #1: load & validate ------------------------------------------------
     @Transactional(readOnly = true)
@@ -103,11 +81,11 @@ public class CheckoutService {
     public DeliveryAddressResponse resolveDeliveryAddress(Integer customerId, Long addressId) {
         Address address = (addressId != null)
                 ? addressRepository.findByIdAndCustomerId(addressId, customerId)
-                .orElseThrow(() -> new AddressNotFoundException(
-                        ErrorCode.ADDRESS_NOT_FOUND.format(addressId)))
+                  .orElseThrow(() -> new AddressNotFoundException(
+                          ErrorCode.ADDRESS_NOT_FOUND.format(addressId)))
                 : addressRepository.findDefaultByCustomerId(customerId)
-                .orElseThrow(() -> new InvalidDeliveryAddressException(
-                        ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
+                  .orElseThrow(() -> new InvalidDeliveryAddressException(
+                          ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
 
         if (address.getLatitude() == null || address.getLongitude() == null) {
             throw new InvalidDeliveryAddressException(ErrorCode.ADDRESS_MISSING_LOCATION.getMessage());
@@ -135,7 +113,7 @@ public class CheckoutService {
 
         Restaurant restaurant = config.getRestaurant();
         int estimatedMinutes = restaurant.getAvgPreparationTimeInMins() + config.getTimeModifierMins();
-        BigDecimal fee = config.getAdditionalFee().setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal fee = config.getAdditionalFee().setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
 
         // Only DELIVERY is delivered; TAKEAWAY / IN_RESTAURANT are collected in person.
         if (option != OrderDeliveryOption.DELIVERY) {
@@ -147,7 +125,7 @@ public class CheckoutService {
                 address.latitude(), address.longitude(),
                 restaurant.getLatitude(), restaurant.getLongitude());
 
-        BigDecimal distance = BigDecimal.valueOf(distanceKm).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal distance = BigDecimal.valueOf(distanceKm).setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
         if (distance.compareTo(restaurant.getDeliveryRadiusKm()) > 0) {
             throw new OutOfDeliveryZoneException(
                     ErrorCode.OUT_OF_DELIVERY_ZONE.format(distance, restaurant.getDeliveryRadiusKm()));
@@ -185,7 +163,7 @@ public class CheckoutService {
         if (tip.signum() < 0) {
             throw new IllegalArgumentException(ErrorCode.RIDER_TIP_NEGATIVE.getMessage());
         }
-        tip = tip.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        tip = tip.setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
 
         Cart cart = loadAndValidateCart(customerId);
         BigDecimal subtotal = cartPricingCalculator.reprice(cart).subtotal();
@@ -193,20 +171,20 @@ public class CheckoutService {
         DeliveryOptionResponse delivery = resolveDeliveryOption(customerId, option, addressId);
         BigDecimal deliveryFee = delivery.deliveryFee();
 
-        BigDecimal discount = BigDecimal.ZERO.setScale(MONEY_SCALE);
+        BigDecimal discount = BigDecimal.ZERO.setScale(AppConstants.MONEY_SCALE);
         if (promoCode != null && !promoCode.isBlank()) {
             discount = applyPromotion(customerId, promoCode).discountAmount();
         }
 
         BigDecimal total = orderTotalsCalculator.total(
-                subtotal, deliveryFee, SERVICE_FEE, tip, TAX_AMOUNT, discount);
+                subtotal, deliveryFee, AppConstants.SERVICE_FEE, tip, AppConstants.TAX_AMOUNT, discount);
 
         int estimatedMinutes = delivery.estimatedMinutes();
         OffsetDateTime eta = OffsetDateTime.now().plusMinutes(estimatedMinutes);
 
         return new OrderTotalsResponse(
-                option, CURRENCY, subtotal, deliveryFee, SERVICE_FEE, tip,
-                TAX_AMOUNT, discount, total, estimatedMinutes, eta);
+                option, AppConstants.CURRENCY, subtotal, deliveryFee, AppConstants.SERVICE_FEE, tip,
+                AppConstants.TAX_AMOUNT, discount, total, estimatedMinutes, eta);
     }
 
     // --- helpers ------------------------------------------------------------------
@@ -223,10 +201,12 @@ public class CheckoutService {
         if (!active) {
             throw new PromotionNotApplicableException(ErrorCode.PROMOTION_NOT_ACTIVE.format(code));
         }
+
         if (subtotal.compareTo(promotion.getMinOrderAmount()) < 0) {
             throw new PromotionNotApplicableException(
                     ErrorCode.PROMOTION_BELOW_MIN_ORDER.format(code, promotion.getMinOrderAmount()));
         }
+
         if (promotion.getUsageLimitTotal() != null
                 && promotion.getUsageCountTotal() >= promotion.getUsageLimitTotal()) {
             throw new PromotionNotApplicableException(ErrorCode.PROMOTION_USAGE_EXHAUSTED.format(code));
@@ -239,5 +219,4 @@ public class CheckoutService {
                 .filter(part -> part != null && !part.isBlank())
                 .collect(Collectors.joining(", "));
     }
-
 }
