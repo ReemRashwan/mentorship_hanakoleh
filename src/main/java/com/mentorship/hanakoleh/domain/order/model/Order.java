@@ -195,10 +195,9 @@ public class Order {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof Order)) {
+        if (!(other instanceof Order order)) {
             return false;
         }
-        Order order = (Order) other;
         return id != null && id.equals(order.id);
     }
 
