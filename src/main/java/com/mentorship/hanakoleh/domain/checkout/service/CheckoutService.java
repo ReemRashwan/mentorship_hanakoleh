@@ -21,6 +21,8 @@ import com.mentorship.hanakoleh.domain.checkout.exception.InvalidDeliveryAddress
 import com.mentorship.hanakoleh.domain.checkout.exception.OutOfDeliveryZoneException;
 import com.mentorship.hanakoleh.domain.checkout.exception.PromotionNotApplicableException;
 import com.mentorship.hanakoleh.domain.checkout.exception.PromotionNotFoundException;
+import com.mentorship.hanakoleh.domain.checkout.dto.*;
+import com.mentorship.hanakoleh.domain.checkout.exception.*;
 import com.mentorship.hanakoleh.domain.checkout.pricing.CartPricingCalculator;
 import com.mentorship.hanakoleh.domain.checkout.pricing.OrderTotalsCalculator;
 import com.mentorship.hanakoleh.domain.checkout.promotion.PromotionDiscountCalculator;
@@ -28,6 +30,8 @@ import com.mentorship.hanakoleh.domain.order.model.Order;
 import com.mentorship.hanakoleh.domain.order.model.OrderDeliveryOption;
 import com.mentorship.hanakoleh.domain.order.model.OrderItem;
 import com.mentorship.hanakoleh.domain.order.model.Promotion;
+import com.mentorship.hanakoleh.domain.order.repository.OrderItemRepository;
+import com.mentorship.hanakoleh.domain.order.repository.OrderRepository;
 import com.mentorship.hanakoleh.domain.order.repository.OrderItemRepository;
 import com.mentorship.hanakoleh.domain.order.repository.OrderRepository;
 import com.mentorship.hanakoleh.domain.order.repository.PromotionRepository;
@@ -39,6 +43,10 @@ import com.mentorship.hanakoleh.domain.restaurant.validation.MenuItemOrderabilit
 import com.mentorship.hanakoleh.domain.user.model.Address;
 import com.mentorship.hanakoleh.domain.user.repository.AddressRepository;
 import com.mentorship.hanakoleh.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
@@ -52,13 +60,9 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@RequiredArgsConstructor
 @Service
 public class CheckoutService {
-
-    private static final int MONEY_SCALE = 2;
-    private static final BigDecimal SERVICE_FEE = BigDecimal.ZERO.setScale(MONEY_SCALE);
-    private static final BigDecimal TAX_AMOUNT = BigDecimal.ZERO.setScale(MONEY_SCALE);
-    private static final String CURRENCY = "EGP";
 
     private final CartRepository cartRepository;
     private final MenuItemOrderabilityValidator menuItemOrderabilityValidator;
@@ -72,45 +76,25 @@ public class CheckoutService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
 
-    public CheckoutService(CartRepository cartRepository,
-                           MenuItemOrderabilityValidator menuItemOrderabilityValidator,
-                           CartPricingCalculator cartPricingCalculator,
-                           AddressRepository addressRepository,
-                           RestaurantDeliveryOptionRepository deliveryOptionRepository,
-                           GeoDistanceCalculator geoDistanceCalculator,
-                           PromotionRepository promotionRepository,
-                           PromotionDiscountCalculator promotionDiscountCalculator,
-                           OrderTotalsCalculator orderTotalsCalculator,
-                           OrderRepository orderRepository,
-                           OrderItemRepository orderItemRepository) {
-        this.cartRepository = cartRepository;
-        this.menuItemOrderabilityValidator = menuItemOrderabilityValidator;
-        this.cartPricingCalculator = cartPricingCalculator;
-        this.addressRepository = addressRepository;
-        this.deliveryOptionRepository = deliveryOptionRepository;
-        this.geoDistanceCalculator = geoDistanceCalculator;
-        this.promotionRepository = promotionRepository;
-        this.promotionDiscountCalculator = promotionDiscountCalculator;
-        this.orderTotalsCalculator = orderTotalsCalculator;
-        this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-    }
-
     // --- Issue #1: load & validate ------------------------------------------------
 
     @Transactional(readOnly = true)
     public Cart loadAndValidateCart(Integer customerId) {
         Cart cart = cartRepository.findByCustomerIdForCheckout(customerId)
                 .orElseThrow(() -> new CartNotFoundException(ErrorCode.NO_ACTIVE_CART.getMessage()));
+
         if (cart.getStatus() != CartStatus.ACTIVE) {
             throw new CartNotActiveException(ErrorCode.CART_NOT_ACTIVE.format(cart.getStatus()));
         }
+
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new EmptyCartException(ErrorCode.CART_EMPTY.getMessage());
         }
+
         for (CartItem item : cart.getItems()) {
             menuItemOrderabilityValidator.validateOrderable(item.getMenuItem(), item.getQuantity());
         }
+
         return cart;
     }
 
@@ -118,7 +102,8 @@ public class CheckoutService {
 
     @Transactional(readOnly = true)
     public CartPricingResponse repriceCart(Integer customerId) {
-        return cartPricingCalculator.reprice(loadAndValidateCart(customerId));
+        Cart cart = loadAndValidateCart(customerId);
+        return cartPricingCalculator.reprice(cart);
     }
 
     // --- Issue #3: delivery address -----------------------------------------------
@@ -134,11 +119,12 @@ public class CheckoutService {
     private Address resolveDeliveryAddressEntity(Integer customerId, Long addressId) {
         Address address = (addressId != null)
                 ? addressRepository.findByIdAndCustomerId(addressId, customerId)
-                .orElseThrow(() -> new AddressNotFoundException(
-                        ErrorCode.ADDRESS_NOT_FOUND.format(addressId)))
+                  .orElseThrow(() -> new AddressNotFoundException(
+                          ErrorCode.ADDRESS_NOT_FOUND.format(addressId)))
                 : addressRepository.findDefaultByCustomerId(customerId)
-                .orElseThrow(() -> new InvalidDeliveryAddressException(
-                        ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
+                  .orElseThrow(() -> new InvalidDeliveryAddressException(
+                          ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
+
         if (address.getLatitude() == null || address.getLongitude() == null) {
             throw new InvalidDeliveryAddressException(ErrorCode.ADDRESS_MISSING_LOCATION.getMessage());
         }
@@ -329,7 +315,6 @@ public class CheckoutService {
 
     private Promotion requireValidPromotion(String code, BigDecimal subtotal) {
         Promotion promotion = promotionRepository.findByCodeIgnoreCase(code)
-                .orElseThrow(() -> new PromotionNotFoundException(ErrorCode.PROMOTION_NOT_FOUND.format(code)));
 
         OffsetDateTime now = OffsetDateTime.now();
         boolean active = Boolean.TRUE.equals(promotion.getIsActive())
@@ -354,7 +339,7 @@ public class CheckoutService {
         if (tip.signum() < 0) {
             throw new IllegalArgumentException(ErrorCode.RIDER_TIP_NEGATIVE.getMessage());
         }
-        return tip.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        return tip.setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
     }
 
     private BigDecimal distanceKm(Address address, Restaurant restaurant) {
