@@ -18,7 +18,9 @@ public enum ErrorCode {
     PROMOTION_NOT_FOUND("PROMO_001", "Promotion code %s was not found."),
     PROMOTION_NOT_ACTIVE("PROMO_002", "Promotion %s is not currently active."),
     PROMOTION_BELOW_MIN_ORDER("PROMO_003", "Promotion %s requires a minimum order of %s."),
-    PROMOTION_USAGE_EXHAUSTED("PROMO_004", "Promotion %s has reached its usage limit.");
+    PROMOTION_USAGE_EXHAUSTED("PROMO_004", "Promotion %s has reached its usage limit."),
+    RIDER_TIP_NEGATIVE("TOTAL_001", "Rider tip cannot be negative.");
+
     public static final String QUANTITY_REQUIRED_MESSAGE = "Quantity is required.";
     public static final String QUANTITY_MUST_BE_POSITIVE_MESSAGE =
             "Quantity must be greater than 0, or delete the item from the cart.";

@@ -2,10 +2,6 @@ package com.mentorship.hanakoleh.domain.checkout.controller;
 
 import com.mentorship.hanakoleh.domain.checkout.dto.*;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
-import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.CartValidationResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryAddressResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryOptionResponse;
 import com.mentorship.hanakoleh.domain.checkout.mapper.CheckoutCartMapper;
 import com.mentorship.hanakoleh.domain.checkout.service.CheckoutService;
 import com.mentorship.hanakoleh.domain.order.model.OrderDeliveryOption;
@@ -13,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/v1/checkout")
@@ -74,5 +72,18 @@ public class CheckoutController {
             @RequestParam("code") String code) {
         var promotionResponse = checkoutService.applyPromotion(customerId, code);
         return ResponseEntity.ok(promotionResponse);
+    }
+
+    @GetMapping("/totals")
+    @Operation(summary = "Compute checkout totals",
+            description = "Composes subtotal, delivery fee, tip, tax and promotion discount into the final total and ETA.")
+    public ResponseEntity<OrderTotalsResponse> computeTotals(
+            @RequestHeader("X-Customer-Id") Integer customerId,
+            @RequestParam("option") OrderDeliveryOption option,
+            @RequestParam(value = "addressId", required = false) Long addressId,
+            @RequestParam(value = "promoCode", required = false) String promoCode,
+            @RequestParam(value = "riderTip", required = false) BigDecimal riderTip) {
+        var total = checkoutService.computeTotals(customerId, option, addressId, promoCode, riderTip);
+        return ResponseEntity.ok(total);
     }
 }
