@@ -19,12 +19,16 @@ import com.mentorship.hanakoleh.domain.restaurant.validation.MenuItemOrderabilit
 import com.mentorship.hanakoleh.domain.user.model.Address;
 import com.mentorship.hanakoleh.domain.user.repository.AddressRepository;
 import com.mentorship.hanakoleh.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.mentorship.hanakoleh.config.AppConstants;
 
 
 @RequiredArgsConstructor
@@ -105,7 +109,7 @@ public class CheckoutService {
 
         Restaurant restaurant = config.getRestaurant();
         int estimatedMinutes = restaurant.getAvgPreparationTimeInMins() + config.getTimeModifierMins();
-        BigDecimal fee = config.getAdditionalFee().setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal fee = config.getAdditionalFee().setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
 
         // Only DELIVERY is delivered; TAKEAWAY / IN_RESTAURANT are collected in person.
         if (option != OrderDeliveryOption.DELIVERY) {
@@ -117,7 +121,7 @@ public class CheckoutService {
                 address.latitude(), address.longitude(),
                 restaurant.getLatitude(), restaurant.getLongitude());
 
-        BigDecimal distance = BigDecimal.valueOf(distanceKm).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal distance = BigDecimal.valueOf(distanceKm).setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
         if (distance.compareTo(restaurant.getDeliveryRadiusKm()) > 0) {
             throw new OutOfDeliveryZoneException(
                     ErrorCode.OUT_OF_DELIVERY_ZONE.format(distance, restaurant.getDeliveryRadiusKm()));
