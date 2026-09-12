@@ -3,7 +3,10 @@ package com.mentorship.hanakoleh.domain.order.service;
 import com.mentorship.hanakoleh.domain.order.constants.OrderConstants;
 import com.mentorship.hanakoleh.domain.order.dto.OrderHistoryResponse;
 import com.mentorship.hanakoleh.domain.order.mapper.OrderMapper;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
+import com.mentorship.hanakoleh.domain.order.dto.OrderDetails;
 import com.mentorship.hanakoleh.domain.order.model.Order;
+import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
 import com.mentorship.hanakoleh.domain.order.repository.OrderItemRepository;
 import com.mentorship.hanakoleh.domain.order.repository.OrderRepository;
 import com.mentorship.hanakoleh.domain.order.projection.OrderItemLineCountProjection;
@@ -18,6 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrderService {
+
+    private static final List<OrderFinalStatus> NON_CURRENT_STATUSES = List.of(
+            OrderFinalStatus.COMPLETED,
+            OrderFinalStatus.CANCELLED,
+            OrderFinalStatus.REFUNDED);
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
@@ -43,29 +51,43 @@ public class OrderService {
         }
 
         List<Long> orderIds = orders.getContent().stream()
-        .map(Order::getId)
-        .toList();
+                .map(Order::getId)
+                .toList();
 
         List<OrderItemLineCountProjection> lineCounts =
-        orderItemRepository.findLineCountByOrderIds(orderIds);
+                orderItemRepository.findLineCountByOrderIds(orderIds);
 
         Map<Long, Long> lineCountByOrderId = lineCounts.stream()
-        .collect(Collectors.toMap(
-                OrderItemLineCountProjection::getOrderId,
-                OrderItemLineCountProjection::getLineCount));
+                .collect(Collectors.toMap(
+                        OrderItemLineCountProjection::getOrderId,
+                        OrderItemLineCountProjection::getLineCount));
 
         return orders.map(order -> {
-    long lineCount = lineCountByOrderId.getOrDefault(order.getId(), 0L);
+            long lineCount = lineCountByOrderId.getOrDefault(order.getId(), 0L);
 
-    return orderMapper.toOrderHistoryResponse(order, lineCount);
-});
-        
+            return orderMapper.toOrderHistoryResponse(order, lineCount);
+        });
+
     }
 
     // Helper methods
     // Helper method to get the start date for the historical orders
     private OffsetDateTime getHistoricalOrderStartDate() {
         return OffsetDateTime.now().minusMonths(OrderConstants.NUMBER_OF_MONTHS_FOR_HISTORICAL_ORDERS);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Order> getCurrentOrders(Integer customerId) {
+        return orderRepository.findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
+                customerId,
+                NON_CURRENT_STATUSES);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderDetails getOrder(Long orderId, Integer customerId) {
+        Order order = orderRepository.findByIdAndCustomer_Id(orderId, customerId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        return new OrderDetails(order, orderItemRepository.findByOrderIdOrderByIdAsc(orderId));
     }
 
 }
