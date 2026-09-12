@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.domain.order.dto;
+package com.mentorship.hanakoleh.domain.order.model.dto;
 
 import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
 

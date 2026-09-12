@@ -1,6 +1,6 @@
 package com.mentorship.hanakoleh.domain.order.service;
 
-import com.mentorship.hanakoleh.domain.order.dto.PlaceOrderResponse;
+import com.mentorship.hanakoleh.domain.order.model.dto.PlaceOrderResponse;
 import com.mentorship.hanakoleh.domain.order.model.*;
 import com.mentorship.hanakoleh.domain.order.repository.OrderRepository;
 import com.mentorship.hanakoleh.domain.restaurant.model.*;

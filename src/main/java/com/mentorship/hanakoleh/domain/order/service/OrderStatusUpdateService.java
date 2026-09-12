@@ -10,8 +10,6 @@ import com.mentorship.hanakoleh.domain.order.model.*;
 import com.mentorship.hanakoleh.domain.order.repository.OrderRepository;
 import com.mentorship.hanakoleh.domain.order.repository.OrderTrackingRepository;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,8 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class OrderStatusUpdateService {
@@ -138,7 +135,7 @@ public class OrderStatusUpdateService {
         } catch (OptimisticLockingFailureException e) {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.IN_DELIVERY);
         }
-        persistOrderTrackingRecord(Math.toIntExact(activeOrder.getRider().getId()),activeOrder, previousStatus, notes);
+        persistOrderTrackingRecord(activeOrder.getRider().getUser().getId(),activeOrder, previousStatus, notes);
         log.info("Order status updated successfully to In_Delivery.");
         publisher.publishEvent(OrderPickedUpEvent.builder().orderId(activeOrder.getId()).build());
         log.info("published Order PICKED UP.");
@@ -167,7 +164,7 @@ public class OrderStatusUpdateService {
         } catch (OptimisticLockingFailureException e) {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.COMPLETED);
         }
-            persistOrderTrackingRecord(Math.toIntExact(activeOrder.getRider().getId()),activeOrder, previousStatus, notes);
+            persistOrderTrackingRecord(activeOrder.getRider().getUser().getId(),activeOrder, previousStatus, notes);
             log.info("Order status updated successfully to COMPLETED.");
             publisher.publishEvent(OrderDeliveredEvent.builder().orderId(activeOrder.getId()).build());
             log.info("published Order DELIVERED");
@@ -175,7 +172,7 @@ public class OrderStatusUpdateService {
     }
 
     @Transactional
-    public void cancelOrder(Integer cancelingActor, Long activeOrderId, String notes) {
+    public void cancelOrder(Integer cancelingActorUserId, Long activeOrderId, String notes) {
         Order activeOrder = orderRepository.findById(activeOrderId).orElseThrow(
                 () -> new OrderNotFoundException(String.format("Order with id %d not found", activeOrderId)));
 
@@ -191,7 +188,7 @@ public class OrderStatusUpdateService {
         } catch (OptimisticLockingFailureException e) {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.CANCELLED);
         }
-            persistOrderTrackingRecord(cancelingActor,activeOrder, previousStatus, notes);
+            persistOrderTrackingRecord(cancelingActorUserId,activeOrder, previousStatus, notes);
             log.info("Order status updated successfully to CANCELLED.");
             publisher.publishEvent(OrderCancelledEvent.builder().orderId(activeOrder.getId()).build());
             log.info("published Order CANCELLED.");
@@ -199,7 +196,7 @@ public class OrderStatusUpdateService {
     }
 
     @Transactional
-    public void refundOrder(Integer refundingActor, Long activeOrderId, String notes) {
+    public void refundOrder(Integer cancelingActorUserId, Long activeOrderId, String notes) {
         Order activeOrder = orderRepository.findById(activeOrderId).orElseThrow(
                 () -> new OrderNotFoundException(String.format("Order with id %d not found", activeOrderId)));
 
@@ -215,7 +212,7 @@ public class OrderStatusUpdateService {
             } catch (OptimisticLockingFailureException e) {
                 throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.REFUNDED);
             }
-            persistOrderTrackingRecord(refundingActor, activeOrder, previousStatus, notes);
+            persistOrderTrackingRecord(cancelingActorUserId, activeOrder, previousStatus, notes);
             log.info("Order status updated successfully to REFUNDED.");
             publisher.publishEvent(OrderRefundProcessedEvent.builder().orderId(activeOrder.getId()).build());
             log.info("published Order REFUND PROCESSED.");
