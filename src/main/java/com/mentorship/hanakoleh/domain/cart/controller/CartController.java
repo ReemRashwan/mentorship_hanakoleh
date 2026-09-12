@@ -1,22 +1,17 @@
 package com.mentorship.hanakoleh.domain.cart.controller;
 
-import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityRequest;
-import com.mentorship.hanakoleh.domain.cart.dto.UpdateCartItemQuantityResponse;
-import com.mentorship.hanakoleh.domain.cart.mapper.CartMapper;
-import com.mentorship.hanakoleh.domain.cart.model.CartItem;
+import com.mentorship.hanakoleh.domain.cart.dto.*;
 import com.mentorship.hanakoleh.domain.cart.dto.response.RemoveCartItemResponse;
+import com.mentorship.hanakoleh.domain.cart.mapper.CartMapper;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
+import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/carts")
@@ -31,6 +26,25 @@ public class CartController {
         this.cartMapper = cartMapper;
     }
 
+    @PostMapping("/items")
+    @Operation(summary = "Add Item to cart", description = "Add a new menu item to the cart, or increase the quantity of an existing item.")
+    public ResponseEntity<AddCartItemResponse> requestAddMenuItemToCart(@Valid @RequestBody AddCartItemRequest addCartItemRequestDto,
+                                                                        Integer userId) {
+        AddCartItemResponse finalCartState =
+                cartService.addItemToCart(addCartItemRequestDto, userId);
+        return new ResponseEntity<>(finalCartState,
+                HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/items")
+    @Operation(summary = "Clear Cart", description = "To delete all items currently existing in the customer cart.")
+
+    public ResponseEntity<ClearCartResponse> clearCart(Integer userId) {
+
+        ClearCartResponse clearedCart = cartService.clearCart(userId);
+        return ResponseEntity.ok(clearedCart);
+    }
+
     @PatchMapping("/items/{cartItemId}")
     @Operation(summary = "Update cart item quantity", description = "Updates the quantity of an item in the cart")
     public ResponseEntity<UpdateCartItemQuantityResponse> updateItemQuantity(
@@ -39,7 +53,7 @@ public class CartController {
         CartItem cartItem = cartService.updateItemQuantity(cartItemId, request.getQuantity());
         UpdateCartItemQuantityResponse response = cartMapper.toUpdateQuantityResponse(cartItem);
         return ResponseEntity.ok(response);
-}
+    }
 
 
     @DeleteMapping("/{cartId}/items/{itemId}")

@@ -13,6 +13,7 @@ public enum ErrorCode {
     ADDRESS_NOT_FOUND("ADDR_001", "Address %s was not found for the current customer."),
     NO_DEFAULT_ADDRESS("ADDR_002", "No default delivery address is set for the current customer."),
     ADDRESS_MISSING_LOCATION("ADDR_003", "The selected delivery address has no map location; please pin it on the map.");
+
     public static final String QUANTITY_REQUIRED_MESSAGE = "Quantity is required.";
     public static final String QUANTITY_MUST_BE_POSITIVE_MESSAGE =
             "Quantity must be greater than 0, or delete the item from the cart.";

@@ -16,11 +16,14 @@ import com.mentorship.hanakoleh.domain.restaurant.validation.MenuItemOrderabilit
 import com.mentorship.hanakoleh.domain.user.model.Address;
 import com.mentorship.hanakoleh.domain.user.repository.AddressRepository;
 import com.mentorship.hanakoleh.exception.ErrorCode;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@RequiredArgsConstructor
 @Service
 public class CheckoutService {
 
@@ -29,16 +32,11 @@ public class CheckoutService {
     private final CartPricingCalculator cartPricingCalculator;
     private final AddressRepository addressRepository;
 
-    public CheckoutService(CartRepository cartRepository,
-                           MenuItemOrderabilityValidator menuItemOrderabilityValidator,
-                           CartPricingCalculator cartPricingCalculator,
-                           AddressRepository addressRepository) {
-        this.cartRepository = cartRepository;
-        this.menuItemOrderabilityValidator = menuItemOrderabilityValidator;
-        this.cartPricingCalculator = cartPricingCalculator;
-        this.addressRepository = addressRepository;
-    }
-
+    /**
+     * <p>First capability. load the customer's cart and validate
+     * it is ready for checkout - the cart exists, is ACTIVE, is not
+     * empty, and every line's menu item is still orderable.
+     */
     @Transactional(readOnly = true)
     public Cart loadAndValidateCart(Integer customerId) {
         Cart cart = cartRepository.findByCustomerIdForCheckout(customerId)
@@ -77,11 +75,11 @@ public class CheckoutService {
     public DeliveryAddressResponse resolveDeliveryAddress(Integer customerId, Long addressId) {
         Address address = (addressId != null)
                 ? addressRepository.findByIdAndCustomerId(addressId, customerId)
-                .orElseThrow(() -> new AddressNotFoundException(
-                        ErrorCode.ADDRESS_NOT_FOUND.format(addressId)))
+                  .orElseThrow(() -> new AddressNotFoundException(
+                          ErrorCode.ADDRESS_NOT_FOUND.format(addressId)))
                 : addressRepository.findDefaultByCustomerId(customerId)
-                .orElseThrow(() -> new InvalidDeliveryAddressException(
-                        ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
+                  .orElseThrow(() -> new InvalidDeliveryAddressException(
+                          ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
 
         if (address.getLatitude() == null || address.getLongitude() == null) {
             throw new InvalidDeliveryAddressException(ErrorCode.ADDRESS_MISSING_LOCATION.getMessage());
