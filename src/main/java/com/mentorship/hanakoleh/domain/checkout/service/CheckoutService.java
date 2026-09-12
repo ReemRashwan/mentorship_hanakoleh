@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.checkout.service;
 
+import com.mentorship.hanakoleh.config.AppConstants;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
@@ -23,19 +24,20 @@ import com.mentorship.hanakoleh.domain.restaurant.validation.MenuItemOrderabilit
 import com.mentorship.hanakoleh.domain.user.model.Address;
 import com.mentorship.hanakoleh.domain.user.repository.AddressRepository;
 import com.mentorship.hanakoleh.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+
+@RequiredArgsConstructor
 @Service
 public class CheckoutService {
-
-    private static final int MONEY_SCALE = 2;
 
     private final CartRepository cartRepository;
     private final MenuItemOrderabilityValidator menuItemOrderabilityValidator;
@@ -45,24 +47,6 @@ public class CheckoutService {
     private final GeoDistanceCalculator geoDistanceCalculator;
     private final PromotionRepository promotionRepository;
     private final PromotionDiscountCalculator promotionDiscountCalculator;
-
-    public CheckoutService(CartRepository cartRepository,
-                           MenuItemOrderabilityValidator menuItemOrderabilityValidator,
-                           CartPricingCalculator cartPricingCalculator,
-                           AddressRepository addressRepository,
-                           RestaurantDeliveryOptionRepository deliveryOptionRepository,
-                           GeoDistanceCalculator geoDistanceCalculator,
-                           PromotionRepository promotionRepository,
-                           PromotionDiscountCalculator promotionDiscountCalculator) {
-        this.cartRepository = cartRepository;
-        this.menuItemOrderabilityValidator = menuItemOrderabilityValidator;
-        this.cartPricingCalculator = cartPricingCalculator;
-        this.addressRepository = addressRepository;
-        this.deliveryOptionRepository = deliveryOptionRepository;
-        this.geoDistanceCalculator = geoDistanceCalculator;
-        this.promotionRepository = promotionRepository;
-        this.promotionDiscountCalculator = promotionDiscountCalculator;
-    }
 
     // --- Issue #1: load & validate ------------------------------------------------
     @Transactional(readOnly = true)
@@ -99,11 +83,11 @@ public class CheckoutService {
     public DeliveryAddressResponse resolveDeliveryAddress(Integer customerId, Long addressId) {
         Address address = (addressId != null)
                 ? addressRepository.findByIdAndCustomerId(addressId, customerId)
-                .orElseThrow(() -> new AddressNotFoundException(
-                        ErrorCode.ADDRESS_NOT_FOUND.format(addressId)))
+                  .orElseThrow(() -> new AddressNotFoundException(
+                          ErrorCode.ADDRESS_NOT_FOUND.format(addressId)))
                 : addressRepository.findDefaultByCustomerId(customerId)
-                .orElseThrow(() -> new InvalidDeliveryAddressException(
-                        ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
+                  .orElseThrow(() -> new InvalidDeliveryAddressException(
+                          ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
 
         if (address.getLatitude() == null || address.getLongitude() == null) {
             throw new InvalidDeliveryAddressException(ErrorCode.ADDRESS_MISSING_LOCATION.getMessage());
@@ -131,7 +115,7 @@ public class CheckoutService {
 
         Restaurant restaurant = config.getRestaurant();
         int estimatedMinutes = restaurant.getAvgPreparationTimeInMins() + config.getTimeModifierMins();
-        BigDecimal fee = config.getAdditionalFee().setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal fee = config.getAdditionalFee().setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
 
         // Only DELIVERY is delivered; TAKEAWAY / IN_RESTAURANT are collected in person.
         if (option != OrderDeliveryOption.DELIVERY) {
@@ -143,7 +127,7 @@ public class CheckoutService {
                 address.latitude(), address.longitude(),
                 restaurant.getLatitude(), restaurant.getLongitude());
 
-        BigDecimal distance = BigDecimal.valueOf(distanceKm).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+        BigDecimal distance = BigDecimal.valueOf(distanceKm).setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
         if (distance.compareTo(restaurant.getDeliveryRadiusKm()) > 0) {
             throw new OutOfDeliveryZoneException(
                     ErrorCode.OUT_OF_DELIVERY_ZONE.format(distance, restaurant.getDeliveryRadiusKm()));
