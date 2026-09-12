@@ -99,10 +99,9 @@ public class Rider {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof Rider)) {
+        if (!(other instanceof Rider rider)) {
             return false;
         }
-        Rider rider = (Rider) other;
         return id != null && id.equals(rider.id);
     }
 
