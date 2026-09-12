@@ -5,6 +5,7 @@ import com.mentorship.hanakoleh.domain.order.projection.OrderItemLineCountProjec
 
 import java.util.Collection;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,5 +23,5 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     """)
     List<OrderItemLineCountProjection> findLineCountByOrderIds(
         @Param("orderIds") Collection<Long> orderIds);
+    List<OrderItem> findByOrderIdOrderByIdAsc(Long orderId);
 }
-
