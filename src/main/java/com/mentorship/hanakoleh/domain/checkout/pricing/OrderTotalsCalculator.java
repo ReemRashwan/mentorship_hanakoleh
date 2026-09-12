@@ -1,13 +1,13 @@
 package com.mentorship.hanakoleh.domain.checkout.pricing;
 
+import com.mentorship.hanakoleh.config.AppConstants;
+import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import org.springframework.stereotype.Component;
 
 @Component
 public class OrderTotalsCalculator {
-
-    private static final int MONEY_SCALE = 2;
 
     public BigDecimal total(BigDecimal subtotal,
                             BigDecimal deliveryFee,
@@ -21,6 +21,6 @@ public class OrderTotalsCalculator {
                 .add(riderTip)
                 .add(tax)
                 .subtract(discount)
-                .setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+                .setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
     }
 }
