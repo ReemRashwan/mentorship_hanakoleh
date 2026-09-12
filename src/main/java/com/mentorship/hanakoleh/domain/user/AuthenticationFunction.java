@@ -1,14 +1,10 @@
 package com.mentorship.hanakoleh.domain.user;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Base64;
 
-@Component
-@RequiredArgsConstructor
 public class AuthenticationFunction {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
