@@ -4,6 +4,7 @@ import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +31,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MenuItemNotOrderableException.class)
     public ProblemDetail handleMenuItemNotOrderable(MenuItemNotOrderableException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ProblemDetail handleOrderNotFound(OrderNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
