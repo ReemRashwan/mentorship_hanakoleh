@@ -9,7 +9,10 @@ public enum ErrorCode {
     MENU_ITEM_INSUFFICIENT_STOCK("CART_005", "Only %s units of menu item %s are available."),
     CART_EMPTY("CART_006", "Cart is empty. Add items before checkout."),
     CART_NOT_ACTIVE("CART_007", "Checkout is not allowed while the cart is %s."),
-    NO_ACTIVE_CART("CART_008", "No cart was found for the current customer.");
+    NO_ACTIVE_CART("CART_008", "No cart was found for the current customer."),
+    ADDRESS_NOT_FOUND("ADDR_001", "Address %s was not found for the current customer."),
+    NO_DEFAULT_ADDRESS("ADDR_002", "No default delivery address is set for the current customer."),
+    ADDRESS_MISSING_LOCATION("ADDR_003", "The selected delivery address has no map location; please pin it on the map.");
 
     public static final String QUANTITY_REQUIRED_MESSAGE = "Quantity is required.";
     public static final String QUANTITY_MUST_BE_POSITIVE_MESSAGE =

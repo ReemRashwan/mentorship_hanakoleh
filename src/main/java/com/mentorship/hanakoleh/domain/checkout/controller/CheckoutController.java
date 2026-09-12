@@ -1,17 +1,15 @@
 package com.mentorship.hanakoleh.domain.checkout.controller;
 
-import com.mentorship.hanakoleh.domain.cart.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
+import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.checkout.dto.CartValidationResponse;
+import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryAddressResponse;
 import com.mentorship.hanakoleh.domain.checkout.mapper.CheckoutCartMapper;
 import com.mentorship.hanakoleh.domain.checkout.service.CheckoutService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/checkout")
@@ -42,5 +40,15 @@ public class CheckoutController {
             @RequestHeader("X-Customer-Id") Integer customerId) {
         var repriceCartResponse = checkoutService.repriceCart(customerId);
         return ResponseEntity.ok(repriceCartResponse);
+    }
+
+    @GetMapping("/delivery-address")
+    @Operation(summary = "Resolve & validate delivery address",
+            description = "Resolves the delivery address (given id, or the customer's default) and validates ownership and location.")
+    public ResponseEntity<DeliveryAddressResponse> resolveDeliveryAddress(
+            @RequestHeader("X-Customer-Id") Integer customerId,
+            @RequestParam(value = "addressId", required = false) Long addressId) {
+        var deliveryAddressResponse = checkoutService.resolveDeliveryAddress(customerId, addressId);
+        return ResponseEntity.ok(deliveryAddressResponse);
     }
 }

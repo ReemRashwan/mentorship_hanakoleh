@@ -4,8 +4,10 @@ import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
+import com.mentorship.hanakoleh.domain.checkout.exception.AddressNotFoundException;
 import com.mentorship.hanakoleh.domain.checkout.exception.CartNotActiveException;
 import com.mentorship.hanakoleh.domain.checkout.exception.EmptyCartException;
+import com.mentorship.hanakoleh.domain.checkout.exception.InvalidDeliveryAddressException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
@@ -106,6 +108,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CartNotActiveException.class)
     public ProblemDetail handleCartNotActive(CartNotActiveException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ProblemDetail handleAddressNotFound(AddressNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidDeliveryAddressException.class)
+    public ProblemDetail handleInvalidDeliveryAddress(InvalidDeliveryAddressException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
     }
 }
 
