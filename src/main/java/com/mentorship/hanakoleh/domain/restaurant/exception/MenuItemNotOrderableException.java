@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.domain.cart.exception;
+package com.mentorship.hanakoleh.domain.restaurant.exception;
 
 public class MenuItemNotOrderableException extends RuntimeException {
 

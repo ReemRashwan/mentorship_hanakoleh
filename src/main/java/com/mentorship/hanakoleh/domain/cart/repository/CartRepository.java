@@ -2,7 +2,10 @@ package com.mentorship.hanakoleh.domain.cart.repository;
 
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -17,4 +20,13 @@ public interface CartRepository extends JpaRepository<Cart, Integer> {
 
     boolean existsByCustomerIdAndRestaurantIdAndStatus(Integer customerId, Integer restaurantId, CartStatus status);
 
+
+    @Query("""
+            select c from Cart c
+            left join fetch c.items i
+            left join fetch i.menuItem
+            left join fetch c.restaurant
+            where c.customer.id = :customerId
+            """)
+    Optional<Cart> findByCustomerIdForCheckout(@Param("customerId") Integer customerId);
 }

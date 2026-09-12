@@ -64,124 +64,124 @@
 			<scope>runtime</scope>
 		</dependency>
 
-        <!-- Developer Tooling -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-docker-compose</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>1.5.5.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.0.4</version>
-        </dependency>
+		<!-- Developer Tooling -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-docker-compose</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.5.5.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.1.0</version>
+		</dependency>
 
-        <!-- Testing Suite -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.tngtech.archunit</groupId>
-            <artifactId>archunit-junit5</artifactId>
-            <version>${archunit.version}</version>
-            <scope>test</scope>
-        </dependency>
+		<!-- Testing Suite -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5</artifactId>
+			<version>${archunit.version}</version>
+			<scope>test</scope>
+		</dependency>
 
-        <!-- API Documentation (Spring REST Docs) -->
-        <dependency>
-            <groupId>org.springframework.restdocs</groupId>
-            <artifactId>spring-restdocs-mockmvc</artifactId>
-            <scope>test</scope>
+		<!-- API Documentation (Spring REST Docs) -->
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-mockmvc</artifactId>
+			<scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
             <version>2.2.54</version>
-        </dependency>
-    </dependencies>
+		</dependency>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <!-- Spring Boot Executable Packaging Plugin -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
+	<build>
+		<plugins>
+			<!-- Spring Boot Executable Packaging Plugin -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
 
-            <!-- Compiler & Annotation Processing -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.springframework.boot</groupId>
-                            <artifactId>spring-boot-configuration-processor</artifactId>
-                        </path>
+			<!-- Compiler & Annotation Processing -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-configuration-processor</artifactId>
+						</path>
 
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>1.5.5.Final</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>1.5.5.Final</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 
-            <!-- Code Style Quality Gate (Checkstyle) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${checkstyle-plugin.version}</version>
-                <configuration>
-                    <configLocation>${project.basedir}/config/checkstyle/checkstyle.xml</configLocation>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>validate-checkstyle</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+			<!-- Code Style Quality Gate (Checkstyle) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${checkstyle-plugin.version}</version>
+				<configuration>
+					<configLocation>${project.basedir}/config/checkstyle/checkstyle.xml</configLocation>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					<consoleOutput>true</consoleOutput>
+					<failsOnError>true</failsOnError>
+				</configuration>
+				<executions>
+					<execution>
+						<id>validate-checkstyle</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

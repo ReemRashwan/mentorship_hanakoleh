@@ -1,7 +1,10 @@
 package com.mentorship.hanakoleh.handler;
 
 import com.mentorship.hanakoleh.domain.cart.exception.*;
+import com.mentorship.hanakoleh.domain.checkout.exception.CartNotActiveException;
+import com.mentorship.hanakoleh.domain.checkout.exception.EmptyCartException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
+import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.UserTokenNotFoundException;
@@ -85,6 +88,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgument(IllegalArgumentException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(EmptyCartException.class)
+    public ProblemDetail handleEmptyCart(EmptyCartException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+    }
+
+    @ExceptionHandler(CartNotActiveException.class)
+    public ProblemDetail handleCartNotActive(CartNotActiveException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 
 }
