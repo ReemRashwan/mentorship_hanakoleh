@@ -1,17 +1,17 @@
 package com.mentorship.hanakoleh.domain.order.controller;
 
-import com.mentorship.hanakoleh.domain.order.dto.OrderHistoryResponse;
-import com.mentorship.hanakoleh.domain.order.dto.CurrentOrderResponse;
-import com.mentorship.hanakoleh.domain.order.dto.OrderDetailsResponse;
+import com.mentorship.hanakoleh.domain.order.dto.*;
 import com.mentorship.hanakoleh.domain.order.mapper.OrderMapper;
 import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
-import com.mentorship.hanakoleh.domain.order.model.dto.UpdateOrderStatusRequest;
+import com.mentorship.hanakoleh.domain.order.model.dto.*;
 import com.mentorship.hanakoleh.domain.order.service.OrderService;
 import java.util.List;
 import com.mentorship.hanakoleh.domain.user.AuthenticationFunction;
 import com.mentorship.hanakoleh.domain.order.service.OrderStatusUpdateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.mentorship.hanakoleh.domain.order.service.MockOrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +30,7 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderStatusUpdateService orderStatusUpdateService;
     private final OrderMapper orderMapper;
+    private final MockOrderService mockOrderService;
 
     @PatchMapping("/{orderId}/status")
     @Operation(summary = "Update order status")
@@ -38,6 +39,24 @@ public class OrderController {
             @RequestBody UpdateOrderStatusRequest updateOrderStatusRequest) {
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+    @PostMapping(path = "/place/{customerId}")
+    ResponseEntity<PlaceOrderResponse> placeOrder(
+            @PathVariable Integer customerId,
+            @RequestBody @Valid PlaceOrderRequest request
+    ) {
+        PlaceOrderResponse response = mockOrderService.placeOrder(customerId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping(path = "{orderId}/cancel/{userId}")
+    ResponseEntity<CancelOrderResponse> cancelOrder(
+            @PathVariable Long orderId,
+            @PathVariable Integer userId,
+            @RequestBody @Valid CancelOrderRequest request
+    ) {
+        CancelOrderResponse response = orderService.cancelOrder(userId,orderId,request.getCancellationTrigger(), request.getReason(), request.getNotes());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 
     @GetMapping("/history")

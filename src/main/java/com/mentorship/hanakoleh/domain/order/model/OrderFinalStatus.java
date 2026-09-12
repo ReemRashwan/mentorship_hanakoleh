@@ -61,3 +61,4 @@ public enum OrderFinalStatus {
 
     public abstract boolean canTransitionTo(OrderFinalStatus nextState);
 }
+
