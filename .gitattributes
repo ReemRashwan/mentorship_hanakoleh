@@ -1,2 +1,9 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+# Keep SQL migrations and Java sources as LF everywhere, so Flyway migration
+# checksums (and diffs) stay stable across Windows/git line-ending conversion.
+# Without this, CRLF<->LF flips change a migration's checksum and Flyway fails
+# validation on the next startup even though the migration content is unchanged.
+*.sql text eol=lf
+*.java text eol=lf
