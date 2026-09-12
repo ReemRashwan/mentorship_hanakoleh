@@ -52,7 +52,7 @@ public class OrderTracking {
     private String notes;
 
     @Column(name = "order_tracking_created_by_user_id")
-    private Integer triggeredByUserId;
+    private Integer triggeredByCustomerId;
 
     @Column(name = "order_tracking_created_at", nullable = false)
     @NotNull
