@@ -1,6 +1,9 @@
 package com.mentorship.hanakoleh.handler;
 
-import com.mentorship.hanakoleh.domain.cart.exception.*;
+import com.mentorship.hanakoleh.domain.cart.exception.CartItemNotFoundException;
+import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
+import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
+import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.checkout.exception.CartNotActiveException;
 import com.mentorship.hanakoleh.domain.checkout.exception.EmptyCartException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
@@ -55,6 +58,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(restaurantNotFoundMessage, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ResponseEntity<?> handleCartItemNotFoundException() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(LocalDateTime.now() + " : Sorry Cart Item is unavailable");
+    }
+
     @ExceptionHandler(ItemUnavailableException.class)
     public ResponseEntity<?> handleItemUnavailableException() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(LocalDateTime.now() + " : Sorry Item is unavailable in stock");
@@ -99,6 +107,5 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleCartNotActive(CartNotActiveException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
-
 }
 
