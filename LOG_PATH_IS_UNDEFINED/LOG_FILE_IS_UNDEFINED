@@ -1,0 +1,71 @@
+2026-09-17 13:10:06.378 INFO  [restartedMain] c.m.hanakoleh.HanakolehApplication - Starting HanakolehApplication using Java 17.0.20.1 with PID 3576 (C:\Users\asus\IdeaProjects\mentorship_hanakoleh\target\classes started by asus in C:\Users\asus\IdeaProjects\mentorship_hanakoleh)
+2026-09-17 13:10:06.381 DEBUG [restartedMain] c.m.hanakoleh.HanakolehApplication - Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-09-17 13:10:06.382 INFO  [restartedMain] c.m.hanakoleh.HanakolehApplication - No active profile set, falling back to 1 default profile: "default"
+2026-09-17 13:10:06.433 INFO  [restartedMain] o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-09-17 13:10:06.434 INFO  [restartedMain] o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-09-17 13:10:06.446 INFO  [restartedMain] o.s.b.d.c.l.DockerComposeLifecycleManager - Using Docker Compose file C:\Users\asus\IdeaProjects\mentorship_hanakoleh\docker-compose.yml
+2026-09-17 13:10:06.828 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 9.1.0.Final
+2026-09-17 13:10:07.273 INFO  [restartedMain] o.s.b.d.c.l.DockerComposeLifecycleManager - There are already Docker Compose services running, skipping startup
+2026-09-17 13:10:07.995 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-17 13:10:08.067 INFO  [restartedMain] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 58 ms. Found 12 JPA repository interfaces.
+2026-09-17 13:10:08.608 INFO  [restartedMain] o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-09-17 13:10:08.616 INFO  [restartedMain] o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-09-17 13:10:08.617 INFO  [restartedMain] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-17 13:10:08.617 INFO  [restartedMain] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.22]
+2026-09-17 13:10:08.654 INFO  [restartedMain] o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 1372 ms
+2026-09-17 13:10:08.985 INFO  [restartedMain] org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://127.0.0.1:5433/hanakoleh_db?ApplicationName=hanakoleh (PostgreSQL 16.15)
+2026-09-17 13:10:09.057 INFO  [restartedMain] o.f.c.i.s.JdbcTableSchemaHistory - Schema history table "public"."flyway_schema_history" does not exist yet
+2026-09-17 13:10:09.061 INFO  [restartedMain] o.f.core.internal.command.DbValidate - Successfully validated 12 migrations (execution time 00:00.031s)
+2026-09-17 13:10:09.074 INFO  [restartedMain] org.flywaydb.core.Flyway - All configured schemas are empty; a baseline marker will not be added to Flyway's schema history table. A baseline or migration script with a lower version than the baseline version may execute if available. Check the Schemas parameter if this is not intended. See https://help.red-gate.com/help/flyway-cli12/help_4.aspx?topic=baseline-on-migrate for more info
+2026-09-17 13:10:09.079 INFO  [restartedMain] o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "public"."flyway_schema_history" ...
+2026-09-17 13:10:09.151 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Current version of schema "public": << Empty Schema >>
+2026-09-17 13:10:09.165 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "1 - create user and auth foundations"
+2026-09-17 13:10:09.284 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "2 - create menu and catalog"
+2026-09-17 13:10:09.337 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "3 - create cart management"
+2026-09-17 13:10:09.383 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "4 - add menu item ui column"
+2026-09-17 13:10:09.398 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "5 - add restaurant business fields"
+2026-09-17 13:10:09.419 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "6 - create order management"
+2026-09-17 13:10:09.537 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "7 - create address rider promotion"
+2026-09-17 13:10:09.604 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "8 - align cart status and nullability"
+2026-09-17 13:10:09.620 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "9 - fix order and promotion column types"
+2026-09-17 13:10:09.693 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "10 - seed test data"
+2026-09-17 13:10:09.740 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "11 - menu item available quantity not null"
+2026-09-17 13:10:09.768 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Migrating schema "public" to version "12 - create restaurant delivery options"
+2026-09-17 13:10:09.801 INFO  [restartedMain] o.f.core.internal.command.DbMigrate - Successfully applied 12 migrations to schema "public", now at version v12 (execution time 00:00.469s)
+2026-09-17 13:10:09.878 INFO  [restartedMain] org.hibernate.orm.jpa - HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-09-17 13:10:09.933 INFO  [restartedMain] org.hibernate.orm.core - HHH000001: Hibernate ORM core version 7.4.1.Final
+2026-09-17 13:10:10.302 INFO  [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-17 13:10:10.329 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-09-17 13:10:10.354 INFO  [restartedMain] com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3772c849
+2026-09-17 13:10:10.355 INFO  [restartedMain] com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-09-17 13:10:10.415 INFO  [restartedMain] o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://127.0.0.1:5433/hanakoleh_db?ApplicationName=hanakoleh]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.15
+	Default catalog/schema: hanakoleh_db/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-17 13:10:11.508 INFO  [restartedMain] org.hibernate.orm.core - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-17 13:10:11.562 INFO  [restartedMain] o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-17 13:10:11.628 INFO  [restartedMain] o.s.d.j.r.q.QueryEnhancerFactories - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-09-17 13:10:12.407 WARN  [restartedMain] o.s.b.s.a.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 72edbf50-959a-4790-934d-453b63c5d98a
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-09-17 13:10:12.415 INFO  [restartedMain] o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-09-17 13:10:13.395 INFO  [restartedMain] o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-09-17 13:10:13.513 INFO  [restartedMain] o.a.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8080"]
+2026-09-17 13:10:13.554 INFO  [restartedMain] o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-09-17 13:10:13.572 INFO  [restartedMain] c.m.hanakoleh.HanakolehApplication - Started HanakolehApplication in 7.831 seconds (process running for 9.285)
+2026-09-17 13:10:13.585 WARN  [restartedMain] o.s.c.events.SpringDocAppInitializer - SpringDoc /api-docs/json endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-09-17 13:10:13.585 WARN  [restartedMain] o.s.c.events.SpringDocAppInitializer - SpringDoc /api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-09-17 13:10:14.091 INFO  [RMI TCP Connection(3)-10.32.35.27] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-17 13:10:14.092 INFO  [RMI TCP Connection(3)-10.32.35.27] o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-17 13:10:14.095 INFO  [RMI TCP Connection(3)-10.32.35.27] o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
