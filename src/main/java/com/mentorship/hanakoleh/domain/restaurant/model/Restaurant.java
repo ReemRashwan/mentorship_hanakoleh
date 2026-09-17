@@ -7,10 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
@@ -62,6 +60,12 @@ public class Restaurant {
     @Column(name = "restaurant_created_at", nullable = false)
     @NotNull
     private OffsetDateTime createdAt;
+
+    @Builder.Default
+    @Column(name = "restaurant_delivery_radius_km", nullable = false, precision = 6, scale = 2)
+    @NotNull
+    @DecimalMin(value = "0.00")
+    private BigDecimal deliveryRadiusKm = BigDecimal.ZERO;
 
     @PrePersist
     private void prePersist() {

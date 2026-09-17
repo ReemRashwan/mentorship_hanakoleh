@@ -1,6 +1,5 @@
 package com.mentorship.hanakoleh.domain.user.model;
 
-import com.mentorship.hanakoleh.domain.user.Customer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -130,10 +129,9 @@ public class Address {
         if (this == other) {
             return true;
         }
-        if (!(other instanceof Address)) {
+        if (!(other instanceof Address address)) {
             return false;
         }
-        Address address = (Address) other;
         return id != null && id.equals(address.id);
     }
 
