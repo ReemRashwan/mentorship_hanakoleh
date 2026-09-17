@@ -3,14 +3,12 @@ package com.mentorship.hanakoleh.domain.order.controller;
 import com.mentorship.hanakoleh.domain.order.dto.*;
 import com.mentorship.hanakoleh.domain.order.mapper.OrderMapper;
 import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
-import com.mentorship.hanakoleh.domain.order.model.dto.*;
 import com.mentorship.hanakoleh.domain.order.service.OrderService;
 import java.util.List;
 import com.mentorship.hanakoleh.domain.user.AuthenticationFunction;
 import com.mentorship.hanakoleh.domain.order.service.OrderStatusUpdateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import com.mentorship.hanakoleh.domain.order.service.MockOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,7 +28,6 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderStatusUpdateService orderStatusUpdateService;
     private final OrderMapper orderMapper;
-    private final MockOrderService mockOrderService;
 
     @PatchMapping("/{orderId}/status")
     @Operation(summary = "Update order status")
@@ -40,12 +37,12 @@ public class OrderController {
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
-    @PostMapping(path = "/place/{customerId}")
-    ResponseEntity<PlaceOrderResponse> placeOrder(
+    @PatchMapping(path = "/updateStatus/{customerId}")
+    ResponseEntity<UpdateOrderStatusResponse> changeOrderStatus(
             @PathVariable Integer customerId,
-            @RequestBody @Valid PlaceOrderRequest request
+            @RequestBody @Valid UpdateOrderStatusRequest request
     ) {
-        PlaceOrderResponse response = mockOrderService.placeOrder(customerId);
+        UpdateOrderStatusResponse response = orderService.changeOrderStatus(customerId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

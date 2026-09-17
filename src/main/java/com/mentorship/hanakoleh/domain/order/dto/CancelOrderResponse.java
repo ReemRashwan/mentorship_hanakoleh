@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.domain.order.model.dto;
+package com.mentorship.hanakoleh.domain.order.dto;
 
 import lombok.Builder;
 import lombok.Data;

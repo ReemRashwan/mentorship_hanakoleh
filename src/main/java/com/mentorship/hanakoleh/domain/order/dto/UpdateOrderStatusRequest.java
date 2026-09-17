@@ -1,9 +1,9 @@
-package com.mentorship.hanakoleh.domain.order.model.dto;
+package com.mentorship.hanakoleh.domain.order.dto;
 
 import com.mentorship.hanakoleh.domain.order.model.OrderPaymentMethod;
 import com.mentorship.hanakoleh.domain.order.model.OrderPaymentStatus;
 
-public record PlaceOrderRequest(
+public record UpdateOrderStatusRequest (
         Integer restaurantId,
         Integer deliveryAddressId,
         OrderPaymentMethod paymentMethod,

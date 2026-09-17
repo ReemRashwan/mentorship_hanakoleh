@@ -22,12 +22,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Pageable pageable);
 
     @EntityGraph(attributePaths = "restaurant")
-    List<Order> findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
+    List<Order> findByCustomerIdAndFinalStatusNotInOrderByCreatedAtDesc(
             Integer customerId,
             Collection<OrderFinalStatus> statuses);
 
     @EntityGraph(attributePaths = "restaurant")
-    Optional<Order> findByIdAndCustomer_Id(Long orderId, Integer userId);
+    Optional<Order> findByIdAndCustomerId(Long orderId, Integer userId);
     boolean existsByIdempotencyKey(UUID idempotencyKey);
 
 }
