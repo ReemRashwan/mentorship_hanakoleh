@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD Suppressions 1.2//EN"
+        "https://checkstyle.org">
+
+<suppressions>
+    <!-- Suppress MethodName checks for any method annotated with @Test -->
+    <suppress-xpath checks="MethodName" query="//METHOD_DEF[./ANNOTATIONS/ANNOTATION/IDENT[@text='Test']]"/>
+</suppressions>
