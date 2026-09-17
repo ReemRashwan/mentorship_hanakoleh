@@ -168,7 +168,13 @@ class CartServiceTest {
         @DisplayName("Should successfully add new item to cart when a different item already exists in cart")
         void shouldSuccessfullyAddNewItemToCart_WhenCartIsAvailableAndDifferentItemExistsInCart() {
             addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, 2, "No onions");
-            MenuItem differentMenuItem = MenuItem.builder().id(99).build();
+            MenuItem differentMenuItem = MenuItem.builder().id(99).menu(mockMenu).category(mockItemCategory)
+                    .name("Chicken Crunchy  Burger")
+                    .price(BigDecimal.valueOf(20))
+                    .availableQuantity(20)
+                    .uiOrder(2)
+                    .onDemandStatus(MenuItemOnDemandStatus.AVAILABLE)
+                    .build();
 
             CartItem existingCartItem = CartItem.builder()
                     .id(120)
