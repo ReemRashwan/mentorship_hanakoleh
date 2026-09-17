@@ -25,12 +25,12 @@ public class OrderTracking {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @Column(name = "order_tracking_current_status", nullable = false, length = 30)
+    @Column(name = "order_current_status", nullable = false, length = 30)
     @NotNull
     @Size(max = 30)
     private OrderFinalStatus currentStatus;
 
-    @Column(name = "order_tracking_previous_status", nullable = false, length = 30)
+    @Column(name = "order_previous_status", nullable = false, length = 30)
     @NotNull
     @Size(max = 30)
     private OrderFinalStatus previousStatus;
