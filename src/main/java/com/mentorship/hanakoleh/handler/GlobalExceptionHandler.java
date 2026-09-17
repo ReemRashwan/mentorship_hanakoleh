@@ -132,12 +132,6 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.PAYMENT_REQUIRED, exception.getMessage());
     }
 
-
-    @ExceptionHandler(CartItemNotFoundException.class)
-    public ProblemDetail handleCartItemNotFound(CartItemNotFoundException exception) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
-    }
-
     @ExceptionHandler(OrderNotFoundException.class)
     ProblemDetail handleNotFound(OrderNotFoundException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());

@@ -28,11 +28,13 @@ public class OrderTracking {
     @Column(name = "order_current_status", nullable = false, length = 30)
     @NotNull
     @Size(max = 30)
+    @Enumerated(EnumType.STRING)
     private OrderFinalStatus currentStatus;
 
     @Column(name = "order_previous_status", nullable = false, length = 30)
     @NotNull
     @Size(max = 30)
+    @Enumerated(EnumType.STRING)
     private OrderFinalStatus previousStatus;
 
     @Column(name = "order_tracking_notes")
