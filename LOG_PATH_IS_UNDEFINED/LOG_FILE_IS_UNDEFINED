@@ -1241,3 +1241,79 @@ org.springframework.boot.docker.compose.lifecycle.ReadinessTimeoutException: Rea
 		at java.base/java.net.Socket.connect(Socket.java:633)
 		at org.springframework.boot.docker.compose.lifecycle.TcpConnectServiceReadinessCheck.check(TcpConnectServiceReadinessCheck.java:57)
 		... 27 common frames omitted
+2026-09-17 12:20:24.786 INFO  [restartedMain] c.m.hanakoleh.HanakolehApplication - Starting HanakolehApplication using Java 17.0.20.1 with PID 27876 (C:\Users\asus\IdeaProjects\mentorship_hanakoleh\target\classes started by asus in C:\Users\asus\IdeaProjects\mentorship_hanakoleh)
+2026-09-17 12:20:24.791 DEBUG [restartedMain] c.m.hanakoleh.HanakolehApplication - Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-09-17 12:20:24.792 INFO  [restartedMain] c.m.hanakoleh.HanakolehApplication - No active profile set, falling back to 1 default profile: "default"
+2026-09-17 12:20:24.858 INFO  [restartedMain] o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-09-17 12:20:24.859 INFO  [restartedMain] o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-09-17 12:20:24.880 INFO  [restartedMain] o.s.b.d.c.l.DockerComposeLifecycleManager - Using Docker Compose file C:\Users\asus\IdeaProjects\mentorship_hanakoleh\docker-compose.yml
+2026-09-17 12:20:25.199 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 9.1.0.Final
+2026-09-17 12:20:31.190 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Starting 
+2026-09-17 12:20:31.453 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Started 
+2026-09-17 12:20:31.454 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Waiting 
+2026-09-17 12:20:36.965 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Healthy 
+2026-09-17 12:20:36.966 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-app Starting 
+2026-09-17 12:20:37.198 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-app Started 
+2026-09-17 12:20:37.199 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-app Waiting 
+2026-09-17 12:20:37.199 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Waiting 
+2026-09-17 12:20:37.706 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Healthy 
+2026-09-17 12:20:37.706 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-app Healthy 
+2026-09-17 12:20:43.681 INFO  [restartedMain] c.m.hanakoleh.HanakolehApplication - Starting HanakolehApplication using Java 17.0.20.1 with PID 26236 (C:\Users\asus\IdeaProjects\mentorship_hanakoleh\target\classes started by asus in C:\Users\asus\IdeaProjects\mentorship_hanakoleh)
+2026-09-17 12:20:43.687 DEBUG [restartedMain] c.m.hanakoleh.HanakolehApplication - Running with Spring Boot v4.1.0, Spring v7.0.8
+2026-09-17 12:20:43.688 INFO  [restartedMain] c.m.hanakoleh.HanakolehApplication - No active profile set, falling back to 1 default profile: "default"
+2026-09-17 12:20:43.743 INFO  [restartedMain] o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-09-17 12:20:43.743 INFO  [restartedMain] o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-09-17 12:20:43.764 INFO  [restartedMain] o.s.b.d.c.l.DockerComposeLifecycleManager - Using Docker Compose file C:\Users\asus\IdeaProjects\mentorship_hanakoleh\docker-compose.yml
+2026-09-17 12:20:44.068 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 9.1.0.Final
+2026-09-17 12:20:44.974 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Starting 
+2026-09-17 12:20:45.170 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Started 
+2026-09-17 12:20:45.171 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Waiting 
+2026-09-17 12:20:50.682 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Healthy 
+2026-09-17 12:20:50.683 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-app Starting 
+2026-09-17 12:20:50.910 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-app Started 
+2026-09-17 12:20:50.911 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Waiting 
+2026-09-17 12:20:50.911 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-app Waiting 
+2026-09-17 12:20:51.419 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-postgres Healthy 
+2026-09-17 12:20:51.420 INFO  [OutputReader-stderr] o.s.b.docker.compose.core.DockerCli -  Container hanakoleh-app Healthy 
+2026-09-17 12:22:52.165 ERROR [restartedMain] o.s.boot.SpringApplication - Application run failed
+org.springframework.boot.docker.compose.lifecycle.ReadinessTimeoutException: Readiness timeout of PT2M reached while waiting for services [hanakoleh-app]
+	at org.springframework.boot.docker.compose.lifecycle.ServiceReadinessChecks.waitUntilReady(ServiceReadinessChecks.java:83)
+	at org.springframework.boot.docker.compose.lifecycle.DockerComposeLifecycleManager.start(DockerComposeLifecycleManager.java:152)
+	at org.springframework.boot.docker.compose.lifecycle.DockerComposeListener.onApplicationEvent(DockerComposeListener.java:53)
+	at org.springframework.boot.docker.compose.lifecycle.DockerComposeListener.onApplicationEvent(DockerComposeListener.java:35)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:180)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:173)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:151)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:133)
+	at org.springframework.boot.context.event.EventPublishingRunListener.multicastInitialEvent(EventPublishingRunListener.java:137)
+	at org.springframework.boot.context.event.EventPublishingRunListener.contextLoaded(EventPublishingRunListener.java:99)
+	at org.springframework.boot.SpringApplicationRunListeners.lambda$contextLoaded$0(SpringApplicationRunListeners.java:74)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:123)
+	at org.springframework.boot.SpringApplicationRunListeners.doWithListeners(SpringApplicationRunListeners.java:117)
+	at org.springframework.boot.SpringApplicationRunListeners.contextLoaded(SpringApplicationRunListeners.java:74)
+	at org.springframework.boot.SpringApplication.prepareContext(SpringApplication.java:418)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:320)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1365)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354)
+	at com.mentorship.hanakoleh.HanakolehApplication.main(HanakolehApplication.java:13)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:52)
+	Suppressed: org.springframework.boot.docker.compose.lifecycle.ServiceNotReadyException: IOException while connecting to port 8080
+		at org.springframework.boot.docker.compose.lifecycle.TcpConnectServiceReadinessCheck.check(TcpConnectServiceReadinessCheck.java:61)
+		at org.springframework.boot.docker.compose.lifecycle.TcpConnectServiceReadinessCheck.check(TcpConnectServiceReadinessCheck.java:48)
+		at org.springframework.boot.docker.compose.lifecycle.ServiceReadinessChecks.check(ServiceReadinessChecks.java:97)
+		at org.springframework.boot.docker.compose.lifecycle.ServiceReadinessChecks.waitUntilReady(ServiceReadinessChecks.java:77)
+		... 24 common frames omitted
+	Caused by: java.net.ConnectException: Connection refused: getsockopt
+		at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+		at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:684)
+		at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:547)
+		at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:602)
+		at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+		at java.base/java.net.Socket.connect(Socket.java:633)
+		at org.springframework.boot.docker.compose.lifecycle.TcpConnectServiceReadinessCheck.check(TcpConnectServiceReadinessCheck.java:57)
+		... 27 common frames omitted

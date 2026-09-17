@@ -5,6 +5,10 @@ import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.checkout.exception.*;
+import com.mentorship.hanakoleh.domain.order.exception.InvalidOrderTransitionException;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRestaurantException;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRiderException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
@@ -126,6 +130,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PaymentNotSatisfiedException.class)
     ProblemDetail handlePaymentNotSatisfied(PaymentNotSatisfiedException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.PAYMENT_REQUIRED, exception.getMessage());
+    }
+
+
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ProblemDetail handleCartItemNotFound(CartItemNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    ProblemDetail handleNotFound(OrderNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotOwnedByRestaurantException.class)
+    ProblemDetail handleOrderNotOwnedByRestaurant(OrderNotOwnedByRestaurantException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,exception.getMessage());
+    }
+    @ExceptionHandler(OrderNotOwnedByRiderException.class)
+    ProblemDetail handleOrderNotOwnedByRider(OrderNotOwnedByRiderException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,exception.getMessage());
+    }
+    @ExceptionHandler(InvalidOrderTransitionException.class)
+    ProblemDetail handleInvalidTransition(InvalidOrderTransitionException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 }
 
