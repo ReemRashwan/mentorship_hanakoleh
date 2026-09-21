@@ -1,27 +1,14 @@
 package com.mentorship.hanakoleh.domain.checkout.service;
 
-import com.mentorship.hanakoleh.config.AppConstants;
+import com.mentorship.hanakoleh.common.AppConstants;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
 import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
 import com.mentorship.hanakoleh.domain.checkout.delivery.GeoDistanceCalculator;
-import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryAddressResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryOptionResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.OrderResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.OrderTotalsResponse;
-import com.mentorship.hanakoleh.domain.checkout.dto.PlaceOrderRequest;
-import com.mentorship.hanakoleh.domain.checkout.dto.PromotionResponse;
-import com.mentorship.hanakoleh.domain.checkout.exception.AddressNotFoundException;
-import com.mentorship.hanakoleh.domain.checkout.exception.CartNotActiveException;
-import com.mentorship.hanakoleh.domain.checkout.exception.DeliveryOptionNotAvailableException;
-import com.mentorship.hanakoleh.domain.checkout.exception.EmptyCartException;
-import com.mentorship.hanakoleh.domain.checkout.exception.InvalidDeliveryAddressException;
-import com.mentorship.hanakoleh.domain.checkout.exception.OutOfDeliveryZoneException;
-import com.mentorship.hanakoleh.domain.checkout.exception.PromotionNotApplicableException;
-import com.mentorship.hanakoleh.domain.checkout.exception.PromotionNotFoundException;
+import com.mentorship.hanakoleh.domain.checkout.dto.*;
+import com.mentorship.hanakoleh.domain.checkout.exception.*;
 import com.mentorship.hanakoleh.domain.checkout.pricing.CartPricingCalculator;
 import com.mentorship.hanakoleh.domain.checkout.pricing.OrderTotalsCalculator;
 import com.mentorship.hanakoleh.domain.checkout.promotion.PromotionDiscountCalculator;
@@ -47,11 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -107,8 +90,9 @@ public class CheckoutService {
     public DeliveryAddressResponse resolveDeliveryAddress(Integer customerId, Long addressId) {
         Address a = resolveDeliveryAddressEntity(customerId, addressId);
         return new DeliveryAddressResponse(
-                a.getId(), customerId, a.getLabel(), formatAddress(a),
-                a.getLatitude(), a.getLongitude(), Boolean.TRUE.equals(a.getIsDefault()));
+                a.getId(), customerId, a.getStreetAddress(), a.getBuildingNumber(),
+                a.getFloor(), a.getApartmentNumber(), a.getLandmark(), a.getDistrictName(),
+                Boolean.TRUE.equals(a.getIsDefault()));
     }
 
     private Address resolveDeliveryAddressEntity(Integer customerId, Long addressId) {
@@ -120,9 +104,6 @@ public class CheckoutService {
                   .orElseThrow(() -> new InvalidDeliveryAddressException(
                           ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
 
-        if (address.getLatitude() == null || address.getLongitude() == null) {
-            throw new InvalidDeliveryAddressException(ErrorCode.ADDRESS_MISSING_LOCATION.getMessage());
-        }
         return address;
     }
 
@@ -147,12 +128,8 @@ public class CheckoutService {
         }
 
         Address address = resolveDeliveryAddressEntity(customerId, addressId);
-        BigDecimal distance = distanceKm(address, restaurant);
-        if (distance.compareTo(restaurant.getDeliveryRadiusKm()) > 0) {
-            throw new OutOfDeliveryZoneException(
-                    ErrorCode.OUT_OF_DELIVERY_ZONE.format(distance, restaurant.getDeliveryRadiusKm()));
-        }
-        return new DeliveryOptionResponse(config.getId(), option, false, fee, estimatedMinutes, distance);
+        // Distance calculation removed - coordinates no longer available
+        return new DeliveryOptionResponse(config.getId(), option, false, fee, estimatedMinutes, null);
     }
 
     // --- Issue #5: promotions -----------------------------------------------------
@@ -264,26 +241,22 @@ public class CheckoutService {
             m.put("fulfillment", option.name());
             return m;
         }
-        m.put("governorate", a.getGovernorate());
-        m.put("city", a.getCity());
-        if (a.getDistrict() != null) {
-            m.put("district", a.getDistrict());
-        }
-        m.put("street", a.getStreet());
+        m.put("street", a.getStreetAddress());
         if (a.getBuildingNumber() != null) {
             m.put("building", a.getBuildingNumber());
         }
         if (a.getFloor() != null) {
             m.put("floor", a.getFloor());
         }
-        if (a.getApartment() != null) {
-            m.put("apartment", a.getApartment());
+        if (a.getApartmentNumber() != null) {
+            m.put("apartment", a.getApartmentNumber());
         }
-        if (a.getLabel() != null) {
-            m.put("label", a.getLabel());
+        if (a.getDistrictName() != null) {
+            m.put("district", a.getDistrictName());
         }
-        m.put("latitude", a.getLatitude());
-        m.put("longitude", a.getLongitude());
+        if (a.getLandmark() != null) {
+            m.put("landmark", a.getLandmark());
+        }
         return m;
     }
 
@@ -339,14 +312,12 @@ public class CheckoutService {
     }
 
     private BigDecimal distanceKm(Address address, Restaurant restaurant) {
-        double d = geoDistanceCalculator.distanceKm(
-                address.getLatitude(), address.getLongitude(),
-                restaurant.getLatitude(), restaurant.getLongitude());
-        return BigDecimal.valueOf(d).setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
+        // Distance calculation not available without coordinates
+        return BigDecimal.ZERO;
     }
 
     private String formatAddress(Address a) {
-        return Stream.of(a.getStreet(), a.getDistrict(), a.getCity(), a.getGovernorate())
+        return Stream.of(a.getStreetAddress(), a.getDistrictName(), a.getLandmark())
                 .filter(part -> part != null && !part.isBlank())
                 .collect(Collectors.joining(", "));
     }

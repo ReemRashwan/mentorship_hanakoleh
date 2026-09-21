@@ -25,10 +25,14 @@ class ArchitectureTest {
                 .consideringAllDependencies()
                 .layer("Controller").definedBy("..controller..")
                 .layer("Service").definedBy("..service..")
+                .layer("Security").definedBy("..security..")
+                .layer("Config").definedBy("..config..")
                 .layer("Repository").definedBy("..repository..")
                 .whereLayer("Controller").mayNotBeAccessedByAnyLayer()
-                .whereLayer("Service").mayOnlyBeAccessedByLayers("Controller")
-                .whereLayer("Repository").mayOnlyBeAccessedByLayers("Service")
+                .whereLayer("Service").mayOnlyBeAccessedByLayers("Controller", "Config")
+                .whereLayer("Security").mayOnlyBeAccessedByLayers("Controller", "Config")
+                .whereLayer("Config").mayNotBeAccessedByAnyLayer()
+                .whereLayer("Repository").mayOnlyBeAccessedByLayers("Service", "Security")
                 .check(classes);
     }
 

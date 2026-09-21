@@ -1,6 +1,6 @@
 package com.mentorship.hanakoleh.domain.checkout.pricing;
 
-import com.mentorship.hanakoleh.config.AppConstants;
+import com.mentorship.hanakoleh.common.AppConstants;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

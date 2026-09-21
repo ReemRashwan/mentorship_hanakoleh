@@ -11,6 +11,7 @@ import java.util.List;
 import com.mentorship.hanakoleh.domain.user.AuthenticationFunction;
 import com.mentorship.hanakoleh.domain.order.service.OrderStatusUpdateService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -53,6 +54,8 @@ public class OrderController {
     }
 
     @GetMapping("/current")
+    @Operation(summary = "Get current orders")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<CurrentOrderResponse>> getCurrentOrders(@RequestHeader("Authorization") String authorizationHeader) {
         Integer customerId = AuthenticationFunction.extractID(authorizationHeader);
         List<CurrentOrderResponse> orders = orderService.getCurrentOrders(customerId).stream()
@@ -62,6 +65,8 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get order details")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<OrderDetailsResponse> getOrder(
             @PathVariable Long id,
             @RequestHeader("Authorization") String authorizationHeader) {
