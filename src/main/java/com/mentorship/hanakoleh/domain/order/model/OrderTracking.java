@@ -1,23 +1,11 @@
 package com.mentorship.hanakoleh.domain.order.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.*;
+
 import java.time.OffsetDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(name = "order_tracking")
@@ -36,16 +24,6 @@ public class OrderTracking {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
-
-    @Column(name = "order_tracking_current_status", nullable = false, length = 30)
-    @NotNull
-    @Size(max = 30)
-    private OrderFinalStatus currentStatus;
-
-    @Column(name = "order_tracking_previous_status", nullable = false, length = 30)
-    @NotNull
-    @Size(max = 30)
-    private OrderFinalStatus previousStatus;
 
     @Column(name = "order_tracking_notes")
     @Size(max = 1000)
