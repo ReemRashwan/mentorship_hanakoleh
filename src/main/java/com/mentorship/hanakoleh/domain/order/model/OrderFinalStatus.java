@@ -1,7 +1,5 @@
 package com.mentorship.hanakoleh.domain.order.model;
 
-import java.util.Optional;
-
 public enum OrderFinalStatus {
     CREATED {
         @Override
@@ -23,7 +21,6 @@ public enum OrderFinalStatus {
         public boolean canTransitionTo(OrderFinalStatus nextState) {
             return nextState == READY_FOR_PICKUP || nextState == CANCELLED;
         }
-
     },
     READY_FOR_PICKUP {
         @Override

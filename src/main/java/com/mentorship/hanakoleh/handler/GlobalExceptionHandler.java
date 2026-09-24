@@ -5,7 +5,7 @@ import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.checkout.exception.*;
-import com.mentorship.hanakoleh.domain.order.exception.InvalidOrderTransitionException;
+import com.mentorship.hanakoleh.domain.order.exception.OrderPersistenceException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRestaurantException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRiderException;
@@ -145,8 +145,8 @@ public class GlobalExceptionHandler {
     ProblemDetail handleOrderNotOwnedByRider(OrderNotOwnedByRiderException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,exception.getMessage());
     }
-    @ExceptionHandler(InvalidOrderTransitionException.class)
-    ProblemDetail handleInvalidTransition(InvalidOrderTransitionException exception) {
+    @ExceptionHandler(OrderPersistenceException.class)
+    ProblemDetail handleInvalidTransition(OrderPersistenceException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 }

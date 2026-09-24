@@ -2,14 +2,16 @@ package com.mentorship.hanakoleh.domain.order.dto;
 
 import com.mentorship.hanakoleh.domain.order.model.OrderCancellationTrigger;
 import lombok.Builder;
-import lombok.Data;
 
-@Data
+
 @Builder
-public class CancelOrderRequest {
-    Long orderId;
-    Integer userId;
-    OrderCancellationTrigger cancellationTrigger;
-    String reason;
-    String notes;
+public record CancelOrderRequest (
+    Long orderId,
+    Integer restaurantId,
+    OrderCancellationTrigger cancellationTrigger,
+    String reason,
+    String notes
+)
+    {
+
 }

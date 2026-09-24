@@ -1,9 +1,7 @@
 package com.mentorship.hanakoleh.domain.restaurant.service;
 
-import com.mentorship.hanakoleh.domain.order.event.OrderAcceptedByRestaurantEvent;
 import com.mentorship.hanakoleh.domain.order.event.OrderConfirmedEvent;
 import com.mentorship.hanakoleh.domain.order.event.OrderPreparedEvent;
-import com.mentorship.hanakoleh.domain.order.service.OrderStatusUpdateService;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
@@ -23,17 +21,10 @@ import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMI
 public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final MenuItemRepository menuItemRepository;
-    private final OrderStatusUpdateService orderStatusUpdateService;
 
-    public RestaurantService(OrderStatusUpdateService orderStatusUpdateService, RestaurantRepository restaurantRepository, MenuItemRepository menuItemRepository) {
-        this.orderStatusUpdateService = orderStatusUpdateService;
+    public RestaurantService( RestaurantRepository restaurantRepository, MenuItemRepository menuItemRepository) {
         this.restaurantRepository = restaurantRepository;
         this.menuItemRepository = menuItemRepository;
-    }
-
-    public Restaurant getRestaurantById(Integer restaurantId) {
-        return restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found with ID: " + restaurantId));
     }
 
     public Restaurant getRestaurantReferenceById(Integer restaurantId) {
@@ -52,18 +43,15 @@ public class RestaurantService {
         return availableQuantity.orElseThrow(() -> new EntityNotFoundException("Quantity for Menu Item with ID " + menuItemId + " not found."));
     }
 
-    public void acceptOrderByRestaurant(Integer authenticatedRestaurantId, Long orderId, String notes) {
-        orderStatusUpdateService.acceptOrder(authenticatedRestaurantId, orderId, notes);
-    }
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void handleIncomingConfirmedOrders(OrderConfirmedEvent orderConfirmedEvent) {
-        log.info("Incoming Order{}that is {}is received. \n1-matching the order to correct restaurant. 2-checking restaurant status and ability to process.\n3-pushing notification to restaurant.", orderConfirmedEvent.getOrderId(), orderConfirmedEvent.getOrderFinalStatus());
-    };
+        log.info("Incoming Order{}that is {}is received. \n1-matching the order to correct restaurant. 2-checking restaurant status and ability to process.\n3-pushing notification to restaurant.", orderConfirmedEvent.getOrderId(), orderConfirmedEvent.getFinalStatus());
+    }
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void handleIncomingDeliveredOrders(OrderPreparedEvent orderPreparedEvent) {
         log.info("Order {} that is {} is received. \n1-marking order as ready in restaurant dashboard. 2-releasing order for courier pickup eligibility.\n3-restaurant's job on this order effectively ends here.",
-                orderPreparedEvent.getOrderId(), orderPreparedEvent.getOrderFinalStatus());
+                orderPreparedEvent.getOrderId(), orderPreparedEvent.getFinalStatus());
     }
 }

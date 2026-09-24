@@ -1,11 +1,12 @@
 package com.mentorship.hanakoleh.domain.order.dto;
 
-import com.mentorship.hanakoleh.domain.order.model.OrderPaymentMethod;
-import com.mentorship.hanakoleh.domain.order.model.OrderPaymentStatus;
+import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
 
 public record UpdateOrderStatusRequest (
+        OrderFinalStatus nextOrderStatus,
         Integer restaurantId,
-        Integer deliveryAddressId,
-        OrderPaymentMethod paymentMethod,
-        OrderPaymentStatus paymentStatusStatus
-) {}
+        String eventTrigger,
+        boolean cashPaymentCollected,
+        String notes
+) {
+}

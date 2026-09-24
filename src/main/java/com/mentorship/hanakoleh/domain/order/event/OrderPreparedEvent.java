@@ -1,12 +1,7 @@
 package com.mentorship.hanakoleh.domain.order.event;
 
-import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
-import lombok.Builder;
-import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
-@Data
-@Builder
-public class OrderPreparedEvent {
-    private Long orderId;
-    private OrderFinalStatus orderFinalStatus;
+@SuperBuilder
+public class OrderPreparedEvent extends OrderEvent {
 }

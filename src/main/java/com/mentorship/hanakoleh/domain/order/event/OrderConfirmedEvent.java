@@ -1,16 +1,14 @@
 package com.mentorship.hanakoleh.domain.order.event;
 
-import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
 import com.mentorship.hanakoleh.domain.order.model.OrderPaymentMethod;
 import com.mentorship.hanakoleh.domain.order.model.OrderPaymentStatus;
-import lombok.Builder;
 import lombok.Data;
-
+import lombok.experimental.SuperBuilder;
 @Data
-@Builder
-public class OrderConfirmedEvent   {
-    private Long orderId;
-    private OrderFinalStatus orderFinalStatus;
+@SuperBuilder
+
+public class OrderConfirmedEvent extends OrderEvent   {
     private OrderPaymentMethod orderPaymentMethod;
     private OrderPaymentStatus orderPaymentStatus;
+    String notes;
 }
