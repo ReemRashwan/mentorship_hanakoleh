@@ -115,9 +115,8 @@ public class OrderService {
     @Transactional // Fixed missing transaction
     public RefundOrderResponse refundOrder(Long activeOrderId, Integer actorUserId, RefundOrderRequest refundOrderRequest) {
         Order activeOrder = findOrderById(activeOrderId);
-
-        updateAndSaveOrder(activeOrder, OrderFinalStatus.REFUNDED, actorUserId, refundOrderRequest.notes());
         OrderEvent event = orderStatusUpdateService.refundOrder(activeOrder, refundOrderRequest);
+        updateAndSaveOrder(activeOrder, OrderFinalStatus.REFUNDED, actorUserId, refundOrderRequest.notes());
         publisher.publishEvent(event);
         log.info(" Order Refunded for Order {} is published.", activeOrder.getId());
         return RefundOrderResponse.builder().orderId(activeOrderId).build();

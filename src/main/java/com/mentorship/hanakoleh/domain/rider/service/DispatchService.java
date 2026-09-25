@@ -2,15 +2,14 @@ package com.mentorship.hanakoleh.domain.rider.service;
 
 import com.mentorship.hanakoleh.domain.order.event.OrderConfirmedEvent;
 import com.mentorship.hanakoleh.domain.rider.exception.RiderNotFoundException;
-import com.mentorship.hanakoleh.domain.rider.repository.RiderRepository;
 import com.mentorship.hanakoleh.domain.user.model.Rider;
+import com.mentorship.hanakoleh.domain.user.repository.RiderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 import com.mentorship.hanakoleh.domain.order.event.OrderAcceptedByRestaurantEvent;
 import com.mentorship.hanakoleh.domain.order.event.OrderPreparedEvent;
-import com.mentorship.hanakoleh.domain.order.service.OrderStatusUpdateService;
 
 
 @Slf4j
