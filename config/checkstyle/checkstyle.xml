@@ -74,5 +74,9 @@
             <property name="format" value="^[A-Z][0-9]?$"/>
         </module>
 
+        <!-- 10. Add this filter to handle annotation-based suppressions -->
+        <module name="SuppressionXpathFilter">
+            <property name="file" value="${checkstyle.suppressions.file}" default="checkstyle-suppressions.xml"/>
+        </module>
     </module>
 </module>
