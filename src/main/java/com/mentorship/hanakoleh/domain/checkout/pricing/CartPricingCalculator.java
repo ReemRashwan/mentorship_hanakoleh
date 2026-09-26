@@ -1,11 +1,11 @@
 package com.mentorship.hanakoleh.domain.checkout.pricing;
 
-import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
+import com.mentorship.hanakoleh.common.AppConstants;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
+import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
 import org.springframework.stereotype.Component;
-import com.mentorship.hanakoleh.config.AppConstants;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

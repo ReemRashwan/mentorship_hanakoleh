@@ -12,11 +12,16 @@ import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRiderExcep
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
+import com.mentorship.hanakoleh.domain.user.exception.AddressNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.UserTokenNotFoundException;
+import org.slf4j.Logger;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -24,6 +29,8 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @ExceptionHandler(UserTokenNotFoundException.class)
     public ResponseEntity<?> handleUserTokenNotFoundException() {
@@ -148,6 +155,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OrderPersistenceException.class)
     ProblemDetail handleInvalidTransition(OrderPersistenceException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException exception) {
+        ResponseMessage badCredentialsMessage = new ResponseMessage(
+                "Authentication Failed",
+                "Invalid email or password",
+                LocalDateTime.now());
+        return new ResponseEntity<>(badCredentialsMessage, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleException(Exception exception) {
+        log.error("An unexpected error occurred", exception);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
     }
 }
 
