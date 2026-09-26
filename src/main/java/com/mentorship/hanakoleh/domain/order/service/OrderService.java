@@ -3,6 +3,7 @@ package com.mentorship.hanakoleh.domain.order.service;
 import com.mentorship.hanakoleh.domain.order.constants.OrderConstants;
 import com.mentorship.hanakoleh.domain.order.dto.*;
 import com.mentorship.hanakoleh.domain.order.event.OrderEvent;
+import com.mentorship.hanakoleh.domain.order.event.OrderStatusChangedEvent;
 import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderPersistenceException;
 import com.mentorship.hanakoleh.domain.order.mapper.OrderMapper;
@@ -91,7 +92,9 @@ public class OrderService {
         Order activeOrder = findOrderByIdAndThrow(activeOrderId);
         OrderEvent cancelEvent = orderStatusUpdateService.cancelOrder(activeOrder, actorUserId, cancelRequest);
 
-        persistOrderStatusUpdate(activeOrder, OrderFinalStatus.CANCELLED, actorUserId, cancelRequest.notes());
+        OrderFinalStatus previousStatus = persistOrderStatusUpdate(
+                activeOrder, OrderFinalStatus.CANCELLED, actorUserId, cancelRequest.notes());
+        publishStatusChangedEvent(activeOrder, previousStatus);
         publisher.publishEvent(cancelEvent);
         log.info("published Order {} is cancelled.", activeOrder.getId());
         return CancelOrderResponse.builder().orderId(activeOrderId).build();
@@ -112,7 +115,9 @@ public class OrderService {
                     throw new IllegalArgumentException("Unsupported status update target: " + request.nextOrderStatus());
         };
 
-        persistOrderStatusUpdate(activeOrder, request.nextOrderStatus(), actorUserId, request.notes());
+        OrderFinalStatus previousStatus = persistOrderStatusUpdate(
+                activeOrder, request.nextOrderStatus(), actorUserId, request.notes());
+        publishStatusChangedEvent(activeOrder, previousStatus);
         publisher.publishEvent(event);
         log.info(" Order Event {} for Order {} is published.", request.nextOrderStatus(), activeOrder.getId());
 
@@ -123,7 +128,9 @@ public class OrderService {
     public RefundOrderResponse refundOrder(Long activeOrderId, Integer actorUserId, RefundOrderRequest refundOrderRequest) {
         Order activeOrder = findOrderByIdAndThrow(activeOrderId);
         OrderEvent event = orderStatusUpdateService.refundOrder(activeOrder, refundOrderRequest);
-        persistOrderStatusUpdate(activeOrder, OrderFinalStatus.REFUNDED, actorUserId, refundOrderRequest.notes());
+        OrderFinalStatus previousStatus = persistOrderStatusUpdate(
+                activeOrder, OrderFinalStatus.REFUNDED, actorUserId, refundOrderRequest.notes());
+        publishStatusChangedEvent(activeOrder, previousStatus);
         publisher.publishEvent(event);
         log.info(" Order Refunded for Order {} is published.", activeOrder.getId());
         return RefundOrderResponse.builder().orderId(activeOrderId).build();
@@ -138,7 +145,7 @@ public class OrderService {
         return orderRepository.findById(orderId);
     }
 
-    private void persistOrderStatusUpdate(Order activeOrder, OrderFinalStatus newStatus, Integer actorUserId, String notes) {
+    private OrderFinalStatus persistOrderStatusUpdate(Order activeOrder, OrderFinalStatus newStatus, Integer actorUserId, String notes) {
         OrderFinalStatus previousStatus = activeOrder.getFinalStatus();
         activeOrder.setFinalStatus(newStatus);
         activeOrder.setUpdatedAt(OffsetDateTime.now());
@@ -153,6 +160,7 @@ public class OrderService {
         }
 
         persistOrderTrackingRecord(activeOrder, newStatus, actorUserId, notes, previousStatus);
+        return previousStatus;
     }
 
     private void persistOrderTrackingRecord(Order activeOrder, OrderFinalStatus newStatus, Integer actorUserId, String notes, OrderFinalStatus previousStatus) {
@@ -164,6 +172,15 @@ public class OrderService {
                 .triggeredByUserId(actorUserId)
                 .createdAt(OffsetDateTime.now())
                 .build());
+    }
+
+    private void publishStatusChangedEvent(Order order, OrderFinalStatus previousStatus) {
+        publisher.publishEvent(new OrderStatusChangedEvent(
+                order.getId(),
+                order.getCustomer().getId(),
+                previousStatus,
+                order.getFinalStatus(),
+                order.getUpdatedAt()));
     }
 
 }
