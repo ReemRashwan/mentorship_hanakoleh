@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS restaurant_representatives
     user_id                            INTEGER NOT NULL,
     restaurant_id                      INTEGER NOT NULL,
     representative_notification_status BOOLEAN NOT NULL DEFAULT TRUE,
-    CONSTRAINT pk__users PRIMARY KEY (restaurant_representative_id),
+    CONSTRAINT pk__restaurant_representatives PRIMARY KEY (restaurant_representative_id),
     CONSTRAINT fk__restaurant_representative__user_id FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE RESTRICT,
     CONSTRAINT fk__restaurant_representative__restaurant_id FOREIGN KEY (restaurant_id) REFERENCES restaurant (restaurant_id) ON DELETE RESTRICT,
     CONSTRAINT uq__restaurant_representative__user_id UNIQUE (user_id),
