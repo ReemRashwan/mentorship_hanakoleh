@@ -2,6 +2,8 @@ package com.mentorship.hanakoleh.domain.user.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -37,6 +39,15 @@ public class Customer {
     @Column(name = "customer_notification_status", nullable = false)
     @NotNull
     private Boolean notificationStatus = true;
+
+    @Column(name = "profile_picture_url", length = 500)
+    private String profilePictureUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_status", nullable = false, length = 20)
+    @Builder.Default
+    @NotNull
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
 
     @Override
     public boolean equals(Object other) {
