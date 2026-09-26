@@ -8,6 +8,8 @@ import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -20,10 +22,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             Pageable pageable);
 
     @EntityGraph(attributePaths = "restaurant")
-    List<Order> findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
+    List<Order> findByCustomerIdAndFinalStatusNotInOrderByCreatedAtDesc(
             Integer customerId,
             Collection<OrderFinalStatus> statuses);
 
     @EntityGraph(attributePaths = "restaurant")
-    Optional<Order> findByIdAndCustomer_Id(Long orderId, Integer userId);
+    Optional<Order> findByIdAndCustomerId(Long orderId, Integer userId);
+    boolean existsByIdempotencyKey(UUID idempotencyKey);
+
 }
+

@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class HanakolehApplication {
+public class
+HanakolehApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(HanakolehApplication.class, args);
