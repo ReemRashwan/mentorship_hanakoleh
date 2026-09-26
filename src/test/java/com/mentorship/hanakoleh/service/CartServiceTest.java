@@ -110,7 +110,7 @@ class CartServiceTest {
 
         @Test
         @DisplayName("Should successfully add new item to cart when item doesn't exist in cart")
-        void shouldSuccessfullyAddNewItemToCart_WhenCartIsAvailableAndItemDoesNotExistInCart() {
+        void shouldSuccessfullyAddNewItemToCartWhenCartIsAvailableAndItemDoesNotExistInCart() {
             addCartItemRequest = new AddCartItemRequest(menuItemId, restaurantId, 2, "No onions");
 
             when(customerService.retrieveCustomerIdByUserId(anyInt())).thenReturn(customerId);
