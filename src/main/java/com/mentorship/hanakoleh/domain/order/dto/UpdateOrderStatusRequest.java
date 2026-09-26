@@ -1,11 +1,17 @@
 package com.mentorship.hanakoleh.domain.order.dto;
 
-import com.mentorship.hanakoleh.domain.order.model.OrderPaymentMethod;
-import com.mentorship.hanakoleh.domain.order.model.OrderPaymentStatus;
+import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record UpdateOrderStatusRequest (
+        @NotBlank
+        OrderFinalStatus nextOrderStatus,
+        @NotNull
         Integer restaurantId,
-        Integer deliveryAddressId,
-        OrderPaymentMethod paymentMethod,
-        OrderPaymentStatus paymentStatusStatus
-) {}
+        @NotBlank
+        String eventTrigger,
+        boolean cashPaymentCollected,
+        String notes
+) {
+}

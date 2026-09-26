@@ -2,12 +2,10 @@ package com.mentorship.hanakoleh.domain.order.controller;
 
 import com.mentorship.hanakoleh.domain.order.dto.*;
 import com.mentorship.hanakoleh.domain.order.mapper.OrderMapper;
-import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
 import com.mentorship.hanakoleh.domain.order.service.OrderService;
-import java.util.List;
 import com.mentorship.hanakoleh.domain.user.AuthenticationFunction;
-import com.mentorship.hanakoleh.domain.order.service.OrderStatusUpdateService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -26,34 +26,41 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
-    private final OrderStatusUpdateService orderStatusUpdateService;
     private final OrderMapper orderMapper;
 
     @PatchMapping("/{orderId}/status")
     @Operation(summary = "Update order status")
-    public ResponseEntity<OrderFinalStatus> updateOrderStatus(
-            @PathVariable("orderId") String orderId,
+    public ResponseEntity<UpdateOrderStatusResponse> updateOrderStatus(
+            @PathVariable("orderId") Long orderId,
+            @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody UpdateOrderStatusRequest updateOrderStatusRequest) {
-
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
-    }
-    @PatchMapping(path = "/updateStatus/{customerId}")
-    ResponseEntity<UpdateOrderStatusResponse> changeOrderStatus(
-            @PathVariable Integer customerId,
-            @RequestBody @Valid UpdateOrderStatusRequest request
-    ) {
-        UpdateOrderStatusResponse response = orderService.changeOrderStatus(customerId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        Integer actorUserId = AuthenticationFunction.extractID(authorizationHeader);
+        UpdateOrderStatusResponse response = orderService.updateOrderStatus(orderId, actorUserId, updateOrderStatusRequest);
+        return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping(path = "{orderId}/cancel/{userId}")
+    @PatchMapping(path = "{orderId}/cancel")
+    @Operation(summary = "Cancel Order")
     ResponseEntity<CancelOrderResponse> cancelOrder(
             @PathVariable Long orderId,
-            @PathVariable Integer userId,
+            @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody @Valid CancelOrderRequest request
     ) {
-        CancelOrderResponse response = orderService.cancelOrder(userId,orderId,request.getCancellationTrigger(), request.getReason(), request.getNotes());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+        Integer actorUserId = AuthenticationFunction.extractID(authorizationHeader);
+        CancelOrderResponse response = orderService.cancelOrder(orderId, actorUserId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(path = "{orderId}/refund")
+    @Operation(summary = "Refund Order")
+    ResponseEntity<RefundOrderResponse> refundOrder(
+            @PathVariable Long orderId,
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody @Valid RefundOrderRequest request
+    ) {
+        Integer actorUserId = AuthenticationFunction.extractID(authorizationHeader);
+        RefundOrderResponse response = orderService.refundOrder(orderId, actorUserId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/history")
@@ -69,6 +76,8 @@ public class OrderController {
     }
 
     @GetMapping("/current")
+    @Operation(summary = "Get current orders")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<List<CurrentOrderResponse>> getCurrentOrders(@RequestHeader("Authorization") String authorizationHeader) {
         Integer customerId = AuthenticationFunction.extractID(authorizationHeader);
         List<CurrentOrderResponse> orders = orderService.getCurrentOrders(customerId).stream()
@@ -78,12 +87,14 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get order details")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<OrderDetailsResponse> getOrder(
-            @PathVariable Long id,
+            @PathVariable Long orderId,
             @RequestHeader("Authorization") String authorizationHeader) {
         Integer customerId = AuthenticationFunction.extractID(authorizationHeader);
         OrderDetailsResponse response = orderMapper.toOrderDetailsResponse(
-                orderService.getOrder(id, customerId));
+                orderService.getOrder(orderId, customerId));
         return ResponseEntity.ok(response);
     }
 }

@@ -15,9 +15,8 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public Customer getCustomerById(Integer customerId) {
-        return customerRepository.findById(customerId)
-                .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + customerId));
+    public Optional<Customer> getCustomerById(Integer customerId) {
+        return customerRepository.findById(customerId);
     }
 
 
@@ -29,12 +28,12 @@ public class CustomerService {
     }
 
     public Integer retrieveCustomerIdByUserId(Integer userId) {
-        Optional<Integer> returnedCustomerId = customerRepository.findCustomerIdByUserId(userId);
-        if (returnedCustomerId.isPresent()) {
-            return returnedCustomerId.get();
-        } else
+        // Since customer.id is now the same as user_id via @MapsId,
+        // we can directly return the userId after verifying the customer exists
+        if (!customerRepository.existsById(userId)) {
             throw new CustomerNotFoundException("Customer not found with User ID: " + userId);
-
+        }
+        return userId;
     }
 
 }
