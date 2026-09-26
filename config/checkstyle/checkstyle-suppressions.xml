@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Suppress MethodName checks for test files -->
+    <suppress checks="MethodName" files=".*Test\.java$"/>
+    <!-- Suppress MethodName checks for repository files (Spring Data JPA naming convention) -->
+    <suppress checks="MethodName" files=".*Repository\.java$"/>
+</suppressions>

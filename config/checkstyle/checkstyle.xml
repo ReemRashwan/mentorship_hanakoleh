@@ -7,6 +7,11 @@
     <property name="severity" value="error"/>
     <property name="fileExtensions" value="java"/>
 
+    <!-- Suppression filter for classic file-pattern suppressions -->
+    <module name="SuppressionFilter">
+        <property name="file" value="${checkstyle.suppressions.file}" default="checkstyle-suppressions.xml"/>
+    </module>
+
     <module name="TreeWalker">
 
         <!-- 1. Package Names: lowercase -->
@@ -73,6 +78,5 @@
         <module name="MethodTypeParameterName">
             <property name="format" value="^[A-Z][0-9]?$"/>
         </module>
-
     </module>
 </module>
