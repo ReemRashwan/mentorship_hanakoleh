@@ -27,57 +27,40 @@ public class OrderStatusUpdateService {
         transitionControl.checkSuccessfulPaymentGuard(activeOrder);
         Integer customerId = customerService.retrieveCustomerIdByUserId(actorUserId);
         transitionControl.checkCustomerOwnershipGuard(activeOrder, customerId);
-        return OrderConfirmedEvent.builder().orderId(activeOrder.getId())
-                .orderPaymentMethod(activeOrder.getPaymentMethod())
-                .orderPaymentStatus(activeOrder.getPaymentStatus())
-                .notes(updateStatusRequest.notes())
-                .eventTrigger(updateStatusRequest.eventTrigger())
-                .actorUserId(actorUserId)
-                .finalStatus(OrderFinalStatus.CONFIRMED).build();
+        return OrderConfirmedEvent.fromOrder(activeOrder, updateStatusRequest, actorUserId);
     }
+
 
     public OrderEvent acceptOrder(Order activeOrder, Integer actorUserId, UpdateOrderStatusRequest updateStatusRequest) {
         transitionControl.checkTransitionAbilityGuard(activeOrder, updateStatusRequest.nextOrderStatus());
         transitionControl.checkRestaurantOwnershipGuard(activeOrder, updateStatusRequest.restaurantId());
-        return OrderAcceptedByRestaurantEvent.builder().orderId(activeOrder.getId())
-                .finalStatus(OrderFinalStatus.IN_PROGRESS)
-                .eventTrigger(updateStatusRequest.eventTrigger())
-                .actorUserId(actorUserId)
-                .build();
+        return OrderAcceptedByRestaurantEvent.fromOrder(activeOrder, updateStatusRequest, actorUserId);
     }
 
     OrderEvent markOrderReadyForPickup(Order activeOrder, Integer actorUserId, UpdateOrderStatusRequest updateStatusRequest) {
         transitionControl.checkTransitionAbilityGuard(activeOrder, updateStatusRequest.nextOrderStatus());
         transitionControl.checkRestaurantOwnershipGuard(activeOrder, updateStatusRequest.restaurantId());
-        return OrderPreparedEvent.builder().orderId(activeOrder.getId())
-                .finalStatus(OrderFinalStatus.READY_FOR_PICKUP)
-                .eventTrigger(updateStatusRequest.eventTrigger())
-                .actorUserId(actorUserId).build();
+        return OrderPreparedEvent.fromOrder(activeOrder, updateStatusRequest, actorUserId);
     }
+
 
     public OrderEvent pickupOrderByRider(Order activeOrder, Integer actorUserId, UpdateOrderStatusRequest updateStatusRequest) {
         Rider authenticatedRider = dispatchService.retrieveRiderByUserId(actorUserId);
         transitionControl.checkRiderOwnershipGuard(activeOrder, authenticatedRider.getId());
-        return OrderPickedUpEvent.builder().orderId(activeOrder.getId())
-                .finalStatus(updateStatusRequest.nextOrderStatus())
-                .eventTrigger(updateStatusRequest.eventTrigger())
-                .actorUserId(actorUserId).build();
+        return OrderPickedUpEvent.fromOrder(activeOrder, updateStatusRequest, actorUserId);
     }
 
-    public OrderEvent deliverOrder(Order activeOrder,Integer actorUserId, UpdateOrderStatusRequest updateStatusRequest) {
+
+    public OrderEvent deliverOrder(Order activeOrder, Integer actorUserId, UpdateOrderStatusRequest updateStatusRequest) {
         transitionControl.checkTransitionAbilityGuard(activeOrder, updateStatusRequest.nextOrderStatus());
         Rider authenticatedRider = dispatchService.retrieveRiderByUserId(actorUserId);
         transitionControl.checkRiderOwnershipGuard(activeOrder, authenticatedRider.getId());
         transitionControl.checkCashPaymentCollectionGuard(activeOrder, updateStatusRequest.cashPaymentCollected());
-        return OrderDeliveredEvent.builder()
-                .orderId(activeOrder.getId())
-                .finalStatus(updateStatusRequest.nextOrderStatus())
-                .eventTrigger(updateStatusRequest.eventTrigger())
-                .actorUserId(actorUserId).build();
+        return OrderDeliveredEvent.fromOrder(activeOrder , updateStatusRequest, actorUserId);
     }
 
-    public OrderEvent cancelOrder(Order activeOrder,Integer actorUserId, CancelOrderRequest cancelRequest) {
-        transitionControl.checkTransitionAbilityGuard(activeOrder,OrderFinalStatus.CANCELLED);
+    public OrderEvent cancelOrder(Order activeOrder, Integer actorUserId, CancelOrderRequest cancelRequest) {
+        transitionControl.checkTransitionAbilityGuard(activeOrder, OrderFinalStatus.CANCELLED);
         OrderCancellationTrigger cancellationTrigger = cancelRequest.cancellationTrigger();
         String reason = cancelRequest.reason();
         switch (cancellationTrigger) {
@@ -87,25 +70,19 @@ public class OrderStatusUpdateService {
             }
             case RESTAURANT_CANCELLED -> {
                 transitionControl.checkRestaurantOwnershipGuard(activeOrder, cancelRequest.restaurantId());
-                if (reason == null || reason.isBlank()) {
-                    throw new IllegalArgumentException("Reason is required for restaurant emergency cancellation");
-                }
                 transitionControl.checkRestaurantCancellationAbilityGuard(activeOrder, reason);
             }
             case SLA_BREACH -> {
                 transitionControl.checkSLABreachGuard(activeOrder);
             }
         }
-        return OrderCancelledEvent.builder().orderId(activeOrder.getId())
-                .finalStatus(OrderFinalStatus.CANCELLED)
-                .eventTrigger(cancelRequest.cancellationTrigger().name())
-                .reason(cancelRequest.reason())
-                .actorUserId(actorUserId).build();
+        return OrderCancelledEvent.fromOrder(activeOrder, cancelRequest, actorUserId);
     }
 
+
     public OrderEvent refundOrder(Order activeOrder, RefundOrderRequest refundOrderRequest) {
-        transitionControl.checkTransitionAbilityGuard(activeOrder,OrderFinalStatus.REFUNDED);
-        return OrderRefundProcessedEvent.builder().orderId(activeOrder.getId()).build();
+        transitionControl.checkTransitionAbilityGuard(activeOrder, OrderFinalStatus.REFUNDED);
+        return OrderRefundProcessedEvent.fromOrder(activeOrder);
     }
 
 

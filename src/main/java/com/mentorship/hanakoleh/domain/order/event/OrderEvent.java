@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.order.event;
 
+
 import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,4 +14,5 @@ public abstract class OrderEvent {
     final OrderFinalStatus finalStatus;
     final String eventTrigger;
     final Integer actorUserId;
+
 }

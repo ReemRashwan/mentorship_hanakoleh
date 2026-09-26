@@ -1,6 +1,8 @@
 package com.mentorship.hanakoleh.domain.order.event;
 
 
+import com.mentorship.hanakoleh.domain.order.dto.UpdateOrderStatusRequest;
+import com.mentorship.hanakoleh.domain.order.model.Order;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
@@ -9,4 +11,10 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 public class OrderAcceptedByRestaurantEvent extends OrderEvent {
+    public static OrderAcceptedByRestaurantEvent fromOrder(Order activeOrder, UpdateOrderStatusRequest request, Integer userId) {
+        return OrderAcceptedByRestaurantEvent.builder().orderId(activeOrder.getId())
+                .finalStatus(activeOrder.getFinalStatus())
+                .eventTrigger(request.eventTrigger())
+                .actorUserId(userId).build();
+    }
 }

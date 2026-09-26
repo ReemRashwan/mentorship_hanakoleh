@@ -24,6 +24,10 @@ import static com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus.IN_PR
 @Component
 public class OrderStatusTransitionControl {
 
+    public static final int IN_PROGRESS_BUFFER_TIME = 15;
+    public static final int READY_FOR_PICKUP_BUFFER_TIME = 25;
+    public static final int IN_DELIVERY_BUFFER_TIME = 25;
+
     public void checkTransitionAbilityGuard(Order activeOrder, OrderFinalStatus nextOrderStatus) {
         if (!activeOrder.getFinalStatus().canTransitionTo(nextOrderStatus)) {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), nextOrderStatus);
@@ -92,16 +96,16 @@ public class OrderStatusTransitionControl {
         Duration threshold = switch (activeOrder.getFinalStatus()) {
             case IN_PROGRESS -> {
                 int prepTime = activeOrder.getRestaurant().getAvgPreparationTimeInMins();
-                yield Duration.ofMinutes(15 + prepTime);
+                yield Duration.ofMinutes(IN_PROGRESS_BUFFER_TIME + prepTime);
             }
-            case READY_FOR_PICKUP -> Duration.ofMinutes(25);
+            case READY_FOR_PICKUP -> Duration.ofMinutes(READY_FOR_PICKUP_BUFFER_TIME);
             case IN_DELIVERY -> {
                 OffsetDateTime eta = activeOrder.getEstimatedDeliveryAt();
                 if (eta == null) {
                     throw new IllegalStateException("Estimated delivery time is missing for order in IN_DELIVERY status");
                 }
                 // Total allowed delivery duration: (ETA - CreatedAt) + 25 minutes buffer
-                yield Duration.between(activeOrder.getCreatedAt(), eta).plusMinutes(25);
+                yield Duration.between(activeOrder.getCreatedAt(), eta).plusMinutes(IN_DELIVERY_BUFFER_TIME);
             }
             default -> throw new InvalidOrderTransitionException(
                     activeOrder.getFinalStatus(),

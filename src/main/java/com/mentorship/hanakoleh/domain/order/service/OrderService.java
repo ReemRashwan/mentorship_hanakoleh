@@ -13,12 +13,14 @@ import com.mentorship.hanakoleh.domain.order.projection.OrderItemLineCountProjec
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.OffsetDateTime;
 
 import com.mentorship.hanakoleh.domain.order.repository.OrderTrackingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
@@ -83,10 +85,10 @@ public class OrderService {
 
     @Transactional
     public CancelOrderResponse cancelOrder(Long activeOrderId, Integer actorUserId, CancelOrderRequest cancelRequest) {
-        Order activeOrder = findOrderById(activeOrderId);
+        Order activeOrder = findOrderByIdAndThrow(activeOrderId);
         OrderEvent cancelEvent = orderStatusUpdateService.cancelOrder(activeOrder, actorUserId, cancelRequest);
 
-        updateAndSaveOrder(activeOrder, OrderFinalStatus.CANCELLED, actorUserId, cancelRequest.notes());
+        persistOrderStatusUpdate(activeOrder, OrderFinalStatus.CANCELLED, actorUserId, cancelRequest.notes());
         publisher.publishEvent(cancelEvent);
         log.info("published Order {} is cancelled.",  activeOrder.getId());
         return CancelOrderResponse.builder().orderId(activeOrderId).build();
@@ -94,7 +96,7 @@ public class OrderService {
 
     @Transactional
     public UpdateOrderStatusResponse updateOrderStatus(Long activeOrderId, Integer actorUserId, UpdateOrderStatusRequest request) {
-        Order activeOrder = findOrderById(activeOrderId);
+        Order activeOrder = findOrderByIdAndThrow(activeOrderId);
 
         OrderEvent event = switch (request.nextOrderStatus()) {
             case CONFIRMED -> orderStatusUpdateService.confirmOrder(activeOrder, actorUserId, request);
@@ -105,7 +107,7 @@ public class OrderService {
             default -> throw new IllegalArgumentException("Unsupported status update target: " + request.nextOrderStatus());
         };
 
-        updateAndSaveOrder(activeOrder, request.nextOrderStatus(), actorUserId, request.notes());
+        persistOrderStatusUpdate(activeOrder, request.nextOrderStatus(), actorUserId, request.notes());
         publisher.publishEvent(event);
         log.info(" Order Event {} for Order {} is published.", request.nextOrderStatus(),activeOrder.getId());
 
@@ -114,20 +116,24 @@ public class OrderService {
 
     @Transactional // Fixed missing transaction
     public RefundOrderResponse refundOrder(Long activeOrderId, Integer actorUserId, RefundOrderRequest refundOrderRequest) {
-        Order activeOrder = findOrderById(activeOrderId);
+        Order activeOrder = findOrderByIdAndThrow(activeOrderId);
         OrderEvent event = orderStatusUpdateService.refundOrder(activeOrder, refundOrderRequest);
-        updateAndSaveOrder(activeOrder, OrderFinalStatus.REFUNDED, actorUserId, refundOrderRequest.notes());
+        persistOrderStatusUpdate(activeOrder, OrderFinalStatus.REFUNDED, actorUserId, refundOrderRequest.notes());
         publisher.publishEvent(event);
         log.info(" Order Refunded for Order {} is published.", activeOrder.getId());
         return RefundOrderResponse.builder().orderId(activeOrderId).build();
     }
 
-    private Order findOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
+    private Order findOrderByIdAndThrow(Long orderId) {
+        return findOrderById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with id %d not found", orderId)));
     }
 
-    private void updateAndSaveOrder(Order activeOrder, OrderFinalStatus newStatus, Integer actorUserId, String notes) {
+    private @NonNull Optional<Order> findOrderById(Long orderId) {
+        return orderRepository.findById(orderId);
+    }
+
+    private void persistOrderStatusUpdate(Order activeOrder, OrderFinalStatus newStatus, Integer actorUserId, String notes) {
         OrderFinalStatus previousStatus = activeOrder.getFinalStatus();
         activeOrder.setFinalStatus(newStatus);
         activeOrder.setUpdatedAt(OffsetDateTime.now());
@@ -141,6 +147,10 @@ public class OrderService {
 
         }
 
+        persistOrderTrackingRecord(activeOrder, newStatus, actorUserId, notes, previousStatus);
+    }
+
+    private void persistOrderTrackingRecord(Order activeOrder, OrderFinalStatus newStatus, Integer actorUserId, String notes, OrderFinalStatus previousStatus) {
         orderTrackingRepository.save(OrderTracking.builder()
                 .order(activeOrder)
                 .currentStatus(newStatus)
