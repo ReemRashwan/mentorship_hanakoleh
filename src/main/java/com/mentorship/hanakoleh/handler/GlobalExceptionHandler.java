@@ -14,6 +14,9 @@ import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderable
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.AddressNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
+import com.mentorship.hanakoleh.domain.user.exception.InvalidPasswordException;
+import com.mentorship.hanakoleh.domain.user.exception.InvalidTokenException;
+import com.mentorship.hanakoleh.domain.user.exception.PaymentMethodNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.UserTokenNotFoundException;
 import org.slf4j.Logger;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -169,6 +172,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ProblemDetail handleInvalidPassword(InvalidPasswordException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ProblemDetail handleInvalidToken(InvalidTokenException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(PaymentMethodNotFoundException.class)
+    public ProblemDetail handlePaymentMethodNotFound(PaymentMethodNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
