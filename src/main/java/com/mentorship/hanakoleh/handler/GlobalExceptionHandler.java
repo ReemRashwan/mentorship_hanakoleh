@@ -5,14 +5,23 @@ import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.checkout.exception.*;
+import com.mentorship.hanakoleh.domain.order.exception.OrderPersistenceException;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRestaurantException;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRiderException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
+import com.mentorship.hanakoleh.domain.user.exception.AddressNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
 import com.mentorship.hanakoleh.domain.user.exception.UserTokenNotFoundException;
+import org.slf4j.Logger;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +29,8 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @ExceptionHandler(UserTokenNotFoundException.class)
     public ResponseEntity<?> handleUserTokenNotFoundException() {
@@ -122,6 +133,48 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PromotionNotApplicableException.class)
     public ProblemDetail handlePromotionNotApplicable(PromotionNotApplicableException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+    }
+    @ExceptionHandler(PaymentNotSatisfiedException.class)
+    ProblemDetail handlePaymentNotSatisfied(PaymentNotSatisfiedException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.PAYMENT_REQUIRED, exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    ProblemDetail handleNotFound(OrderNotFoundException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotOwnedByRestaurantException.class)
+    ProblemDetail handleOrderNotOwnedByRestaurant(OrderNotOwnedByRestaurantException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,exception.getMessage());
+    }
+    @ExceptionHandler(OrderNotOwnedByRiderException.class)
+    ProblemDetail handleOrderNotOwnedByRider(OrderNotOwnedByRiderException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,exception.getMessage());
+    }
+    @ExceptionHandler(OrderPersistenceException.class)
+    ProblemDetail handleInvalidTransition(OrderPersistenceException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException exception) {
+        ResponseMessage badCredentialsMessage = new ResponseMessage(
+                "Authentication Failed",
+                "Invalid email or password",
+                LocalDateTime.now());
+        return new ResponseEntity<>(badCredentialsMessage, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleException(Exception exception) {
+        log.error("An unexpected error occurred", exception);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
     }
 }
 

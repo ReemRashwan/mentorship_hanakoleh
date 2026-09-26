@@ -10,6 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
+    Optional<User> findByEmail(String email);
+
     @Query("SELECT c.id FROM Customer c WHERE c.user.id = :userId")
     Optional<Integer> retrieveCustomerIdByUserId(@Param("userId") Integer userId);
 }
