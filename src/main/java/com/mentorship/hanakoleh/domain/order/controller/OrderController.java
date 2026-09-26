@@ -3,7 +3,6 @@ package com.mentorship.hanakoleh.domain.order.controller;
 import com.mentorship.hanakoleh.domain.order.dto.*;
 import com.mentorship.hanakoleh.domain.order.mapper.OrderMapper;
 import com.mentorship.hanakoleh.domain.order.service.OrderService;
-import java.util.List;
 import com.mentorship.hanakoleh.domain.user.AuthenticationFunction;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -16,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -34,7 +35,7 @@ public class OrderController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody UpdateOrderStatusRequest updateOrderStatusRequest) {
         Integer actorUserId = AuthenticationFunction.extractID(authorizationHeader);
-        UpdateOrderStatusResponse response = orderService.updateOrderStatus(orderId,actorUserId, updateOrderStatusRequest);
+        UpdateOrderStatusResponse response = orderService.updateOrderStatus(orderId, actorUserId, updateOrderStatusRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -46,7 +47,7 @@ public class OrderController {
             @RequestBody @Valid CancelOrderRequest request
     ) {
         Integer actorUserId = AuthenticationFunction.extractID(authorizationHeader);
-        CancelOrderResponse response = orderService.cancelOrder(orderId, actorUserId,request);
+        CancelOrderResponse response = orderService.cancelOrder(orderId, actorUserId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -89,11 +90,11 @@ public class OrderController {
     @Operation(summary = "Get order details")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<OrderDetailsResponse> getOrder(
-            @PathVariable Long id,
+            @PathVariable Long orderId,
             @RequestHeader("Authorization") String authorizationHeader) {
         Integer customerId = AuthenticationFunction.extractID(authorizationHeader);
         OrderDetailsResponse response = orderMapper.toOrderDetailsResponse(
-                orderService.getOrder(id, customerId));
+                orderService.getOrder(orderId, customerId));
         return ResponseEntity.ok(response);
     }
 }

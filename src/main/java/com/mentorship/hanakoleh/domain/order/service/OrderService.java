@@ -3,24 +3,19 @@ package com.mentorship.hanakoleh.domain.order.service;
 import com.mentorship.hanakoleh.domain.order.constants.OrderConstants;
 import com.mentorship.hanakoleh.domain.order.dto.*;
 import com.mentorship.hanakoleh.domain.order.event.OrderEvent;
-import com.mentorship.hanakoleh.domain.order.model.*;
+import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderPersistenceException;
 import com.mentorship.hanakoleh.domain.order.mapper.OrderMapper;
-import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
+import com.mentorship.hanakoleh.domain.order.model.Order;
+import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
+import com.mentorship.hanakoleh.domain.order.model.OrderTracking;
+import com.mentorship.hanakoleh.domain.order.projection.OrderItemLineCountProjection;
 import com.mentorship.hanakoleh.domain.order.repository.OrderItemRepository;
 import com.mentorship.hanakoleh.domain.order.repository.OrderRepository;
-import com.mentorship.hanakoleh.domain.order.projection.OrderItemLineCountProjection;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.time.OffsetDateTime;
-
 import com.mentorship.hanakoleh.domain.order.repository.OrderTrackingRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
@@ -28,13 +23,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
-    private static final List<OrderFinalStatus> NON_CURRENT_STATUSES = List.of(OrderFinalStatus.COMPLETED, OrderFinalStatus.CANCELLED, OrderFinalStatus.REFUNDED);
-
+    private static final List<OrderFinalStatus> NON_CURRENT_STATUSES = List.of(
+            OrderFinalStatus.COMPLETED,
+            OrderFinalStatus.CANCELLED,
+            OrderFinalStatus.REFUNDED);
+    private static Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper orderMapper;
@@ -90,7 +93,7 @@ public class OrderService {
 
         persistOrderStatusUpdate(activeOrder, OrderFinalStatus.CANCELLED, actorUserId, cancelRequest.notes());
         publisher.publishEvent(cancelEvent);
-        log.info("published Order {} is cancelled.",  activeOrder.getId());
+        log.info("published Order {} is cancelled.", activeOrder.getId());
         return CancelOrderResponse.builder().orderId(activeOrderId).build();
     }
 
@@ -101,15 +104,17 @@ public class OrderService {
         OrderEvent event = switch (request.nextOrderStatus()) {
             case CONFIRMED -> orderStatusUpdateService.confirmOrder(activeOrder, actorUserId, request);
             case IN_PROGRESS -> orderStatusUpdateService.acceptOrder(activeOrder, actorUserId, request);
-            case READY_FOR_PICKUP -> orderStatusUpdateService.markOrderReadyForPickup(activeOrder, actorUserId, request);
+            case READY_FOR_PICKUP ->
+                    orderStatusUpdateService.markOrderReadyForPickup(activeOrder, actorUserId, request);
             case IN_DELIVERY -> orderStatusUpdateService.pickupOrderByRider(activeOrder, actorUserId, request);
             case COMPLETED -> orderStatusUpdateService.deliverOrder(activeOrder, actorUserId, request);
-            default -> throw new IllegalArgumentException("Unsupported status update target: " + request.nextOrderStatus());
+            default ->
+                    throw new IllegalArgumentException("Unsupported status update target: " + request.nextOrderStatus());
         };
 
         persistOrderStatusUpdate(activeOrder, request.nextOrderStatus(), actorUserId, request.notes());
         publisher.publishEvent(event);
-        log.info(" Order Event {} for Order {} is published.", request.nextOrderStatus(),activeOrder.getId());
+        log.info(" Order Event {} for Order {} is published.", request.nextOrderStatus(), activeOrder.getId());
 
         return new UpdateOrderStatusResponse(activeOrder.getId(), activeOrder.getFinalStatus());
     }
@@ -129,7 +134,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with id %d not found", orderId)));
     }
 
-    private @NonNull Optional<Order> findOrderById(Long orderId) {
+    private Optional<Order> findOrderById(Long orderId) {
         return orderRepository.findById(orderId);
     }
 
