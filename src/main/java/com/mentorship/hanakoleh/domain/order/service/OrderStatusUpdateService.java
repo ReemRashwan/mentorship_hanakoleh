@@ -48,6 +48,7 @@ public class OrderStatusUpdateService {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.CONFIRMED);
         }
         persistOrderTrackingRecord(activeOrder.getCustomer().getUser().getId(),activeOrder, previousStatus, notes);
+        publishStatusChangedEvent(activeOrder, previousStatus);
         log.info("Order {} status updated to CONFIRMED.", activeOrder.getId());
 
 
@@ -82,6 +83,7 @@ public class OrderStatusUpdateService {
         }
 
         persistOrderTrackingRecord(activeOrder.getRestaurant().getId(),activeOrder, previousStatus, notes);
+        publishStatusChangedEvent(activeOrder, previousStatus);
         log.info("Order {} status updated to IN_PROGRESS.", activeOrder.getId());
 
         publisher.publishEvent(OrderAcceptedByRestaurantEvent.builder().orderId(activeOrder.getId()).build());
@@ -110,6 +112,7 @@ public class OrderStatusUpdateService {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.READY_FOR_PICKUP);
         }
             persistOrderTrackingRecord(activeOrder.getRestaurant().getId(),activeOrder, previousStatus, notes);
+            publishStatusChangedEvent(activeOrder, previousStatus);
             log.info("Order status updated successfully to READY_FOR_PICKUP.");
             publisher.publishEvent(OrderPreparedEvent.builder().orderId(activeOrder.getId()).build());
             log.info("published Order marked READY_FOR_PICKUP.");
@@ -136,6 +139,7 @@ public class OrderStatusUpdateService {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.IN_DELIVERY);
         }
         persistOrderTrackingRecord(activeOrder.getRider().getUser().getId(),activeOrder, previousStatus, notes);
+        publishStatusChangedEvent(activeOrder, previousStatus);
         log.info("Order status updated successfully to In_Delivery.");
         publisher.publishEvent(OrderPickedUpEvent.builder().orderId(activeOrder.getId()).build());
         log.info("published Order PICKED UP.");
@@ -165,6 +169,7 @@ public class OrderStatusUpdateService {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.COMPLETED);
         }
             persistOrderTrackingRecord(activeOrder.getRider().getUser().getId(),activeOrder, previousStatus, notes);
+            publishStatusChangedEvent(activeOrder, previousStatus);
             log.info("Order status updated successfully to COMPLETED.");
             publisher.publishEvent(OrderDeliveredEvent.builder().orderId(activeOrder.getId()).build());
             log.info("published Order DELIVERED");
@@ -189,6 +194,7 @@ public class OrderStatusUpdateService {
             throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.CANCELLED);
         }
             persistOrderTrackingRecord(cancelingActorUserId,activeOrder, previousStatus, notes);
+            publishStatusChangedEvent(activeOrder, previousStatus);
             log.info("Order status updated successfully to CANCELLED.");
             publisher.publishEvent(OrderCancelledEvent.builder().orderId(activeOrder.getId()).build());
             log.info("published Order CANCELLED.");
@@ -213,6 +219,7 @@ public class OrderStatusUpdateService {
                 throw new InvalidOrderTransitionException(activeOrder.getFinalStatus(), OrderFinalStatus.REFUNDED);
             }
             persistOrderTrackingRecord(cancelingActorUserId, activeOrder, previousStatus, notes);
+            publishStatusChangedEvent(activeOrder, previousStatus);
             log.info("Order status updated successfully to REFUNDED.");
             publisher.publishEvent(OrderRefundProcessedEvent.builder().orderId(activeOrder.getId()).build());
             log.info("published Order REFUND PROCESSED.");
@@ -240,6 +247,15 @@ public class OrderStatusUpdateService {
                 .triggeredByUserId(actorUserId)
                 .createdAt(OffsetDateTime.now())
                 .build());
+    }
+
+    private void publishStatusChangedEvent(Order order, OrderFinalStatus previousStatus) {
+        publisher.publishEvent(new OrderStatusChangedEvent(
+                order.getId(),
+                order.getCustomer().getId(),
+                previousStatus,
+                order.getFinalStatus(),
+                order.getUpdatedAt()));
     }
 
 }
