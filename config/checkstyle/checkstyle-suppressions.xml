@@ -4,6 +4,7 @@
         "https://checkstyle.org/dtds/suppressions_1_2_xpath.dtd">
 
 <suppressions>
-    <!-- Suppress MethodName checks for any method annotated with @Test -->
-    <suppress-xpath checks="MethodName" query="//METHOD_DEF[./ANNOTATIONS/ANNOTATION/IDENT[@text='Test']]"/>
+    <!-- Suppress MethodName check only for @Test methods containing an underscore -->
+    <suppress-xpath checks="MethodName"
+                    query="//METHOD_DEF[contains(./IDENT/@text, '_') and .//ANNOTATION/IDENT[@text='Test' or @text='ParameterizedTest']]"/>
 </suppressions>
