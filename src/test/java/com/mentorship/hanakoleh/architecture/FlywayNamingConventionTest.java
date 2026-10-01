@@ -1,6 +1,7 @@
 package com.mentorship.hanakoleh.architecture;
 
 import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +29,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class FlywayNamingConventionTest {
 
-    /** Directory path where Flyway SQL migration scripts are located. */
+    /**
+     * Directory path where Flyway SQL migration scripts are located.
+     */
     private static final String MIGRATIONS_DIR = "src/main/resources/db/migration";
 
     /**
@@ -44,53 +47,23 @@ class FlywayNamingConventionTest {
     private static final Pattern FLYWAY_FILE_NAME_PATTERN =
             Pattern.compile("^((V|U)\\d+([._]\\d+)*|R)__[a-z0-9_]+\\.sql$");
 
-    /** Regex pattern to extract constraint names following the {@code CONSTRAINT} keyword. */
+    /**
+     * Regex pattern to extract constraint names following the {@code CONSTRAINT} keyword.
+     */
     private static final Pattern CONSTRAINT_PATTERN =
-            Pattern.compile("(?i)CONSTRAINT\\s+([a-zA-Z0-9_]+)", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("(?i)CONSTRAINT\\s+(?!IF\\s+EXISTS)([a-z][a-z0-9_]*)", Pattern.CASE_INSENSITIVE);
 
-    /** Regex pattern to extract index names following {@code CREATE [UNIQUE] INDEX}. */
+    /**
+     * Regex pattern to extract index names following {@code CREATE [UNIQUE] INDEX}.
+     */
     private static final Pattern INDEX_PATTERN =
             Pattern.compile("(?i)CREATE\\s+(UNIQUE\\s+)?INDEX\\s+([a-zA-Z0-9_]+)", Pattern.CASE_INSENSITIVE);
 
-    /** Regex pattern validating constraint/index prefix, double-underscore, and lowercase body. */
+    /**
+     * Regex pattern validating constraint/index prefix, double-underscore, and lowercase body.
+     */
     private static final Pattern VALID_CONSTRAINT_NAME_PATTERN =
             Pattern.compile("^(pk|fk|idx|ux|uq|chk)__[a-z0-9_]+$");
-
-    /**
-     * Scans the Flyway migrations directory and validates file names and SQL contents.
-     *
-     * @throws IOException if an I/O error occurs while reading the directory
-     */
-    @Test
-    void testFlywayMigrationNamingConventions() throws IOException {
-        Path migrationPath = Paths.get(MIGRATIONS_DIR);
-        if (!Files.exists(migrationPath)) {
-            return;
-        }
-
-        try (Stream<Path> paths = Files.walk(migrationPath)) {
-            paths.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".sql"))
-                    .forEach(this::validateSqlFile);
-        }
-    }
-
-    /**
-     * Validates both the file name format and the SQL constraint/index contents.
-     *
-     * @param path the {@link Path} of the SQL migration file to validate
-     */
-    private void validateSqlFile(Path path) {
-        checkFileName(path);
-
-        try {
-            String content = Files.readString(path);
-            checkConstraints(path, content);
-            checkIndexes(path, content);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read migration file: " + path, e);
-        }
-    }
 
     /**
      * Validates that the migration file name matches Flyway standards.
@@ -134,6 +107,42 @@ class FlywayNamingConventionTest {
             assertTrue(VALID_CONSTRAINT_NAME_PATTERN.matcher(name).matches(),
                     String.format("Invalid constraint name '%s' in %s. Must start with valid prefix (pk__, fk__, uq__, chk__) and use lowercase.",
                             name, path.getFileName()));
+        }
+    }
+
+    /**
+     * Scans the Flyway migrations directory and validates file names and SQL contents.
+     *
+     * @throws IOException if an I/O error occurs while reading the directory
+     */
+    @Test
+    void testFlywayMigrationNamingConventions() throws IOException {
+        Path migrationPath = Paths.get(MIGRATIONS_DIR);
+        if (!Files.exists(migrationPath)) {
+            return;
+        }
+
+        try (Stream<Path> paths = Files.walk(migrationPath)) {
+            paths.filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".sql"))
+                    .forEach(this::validateSqlFile);
+        }
+    }
+
+    /**
+     * Validates both the file name format and the SQL constraint/index contents.
+     *
+     * @param path the {@link Path} of the SQL migration file to validate
+     */
+    private void validateSqlFile(Path path) {
+        checkFileName(path);
+
+        try {
+            String contentWithoutComments = Files.readString(path).replaceAll("(?m)--.*$", "");
+            checkConstraints(path, contentWithoutComments);
+            checkIndexes(path, contentWithoutComments);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read migration file: " + path, e);
         }
     }
 }

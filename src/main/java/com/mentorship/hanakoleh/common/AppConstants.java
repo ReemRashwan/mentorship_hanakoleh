@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.config;
+package com.mentorship.hanakoleh.common;
 
 import java.math.BigDecimal;
 
@@ -13,6 +13,7 @@ public final class AppConstants {
     public static final BigDecimal SERVICE_FEE = BigDecimal.ZERO.setScale(MONEY_SCALE);
     public static final BigDecimal TAX_AMOUNT = BigDecimal.ZERO.setScale(MONEY_SCALE);
     public static final String CURRENCY = "EGP";
+
     private AppConstants() {
         // utility class
     }
