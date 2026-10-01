@@ -7,11 +7,16 @@ import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
 import com.mentorship.hanakoleh.domain.order.dto.OrderDetails;
 import com.mentorship.hanakoleh.domain.order.model.Order;
 import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
+import com.mentorship.hanakoleh.domain.order.model.OrderItem;
+import com.mentorship.hanakoleh.domain.order.model.OrderTracking;
 import com.mentorship.hanakoleh.domain.order.repository.OrderItemRepository;
 import com.mentorship.hanakoleh.domain.order.repository.OrderRepository;
+import com.mentorship.hanakoleh.domain.order.repository.OrderTrackingRepository;
 import com.mentorship.hanakoleh.domain.order.projection.OrderItemLineCountProjection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.time.OffsetDateTime;
 import org.springframework.data.domain.Page;
@@ -29,14 +34,17 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final OrderTrackingRepository orderTrackingRepository;
     private final OrderMapper orderMapper;
 
     public OrderService(
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository,
+            OrderTrackingRepository orderTrackingRepository,
             OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.orderTrackingRepository = orderTrackingRepository;
         this.orderMapper = orderMapper;
     }
 
@@ -70,8 +78,6 @@ public class OrderService {
 
     }
 
-    // Helper methods
-    // Helper method to get the start date for the historical orders
     private OffsetDateTime getHistoricalOrderStartDate() {
         return OffsetDateTime.now().minusMonths(OrderConstants.NUMBER_OF_MONTHS_FOR_HISTORICAL_ORDERS);
     }
@@ -90,4 +96,28 @@ public class OrderService {
         return new OrderDetails(order, orderItemRepository.findByOrderIdOrderByIdAsc(orderId));
     }
 
+    public Optional<Order> findByIdempotencyKey(UUID idempotencyKey) {
+        return orderRepository.findByIdempotencyKey(idempotencyKey);
+    }
+
+    public List<OrderItem> items(Long orderId) {
+        return orderItemRepository.findByOrderIdOrderByIdAsc(orderId);
+    }
+
+    public Order persist(Order order) {
+        return orderRepository.save(order);
+    }
+
+    public void persistItems(List<OrderItem> items) {
+        orderItemRepository.saveAll(items);
+    }
+
+    public void recordInitialTracking(Order order) {
+        orderTrackingRepository.save(OrderTracking.builder()
+                .order(order)
+                .status(OrderFinalStatus.CREATED)
+                .notes("Order placed")
+                .createdAt(OffsetDateTime.now())
+                .build());
+    }
 }

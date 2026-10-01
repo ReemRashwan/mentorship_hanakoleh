@@ -5,6 +5,8 @@ import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.checkout.exception.*;
+import com.mentorship.hanakoleh.domain.payment.exception.PaymentMethodNotSupportedException;
+import com.mentorship.hanakoleh.exception.InvalidEnumValueException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
@@ -123,5 +125,14 @@ public class GlobalExceptionHandler {
     public ProblemDetail handlePromotionNotApplicable(PromotionNotApplicableException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
     }
-}
 
+    @ExceptionHandler(PaymentMethodNotSupportedException.class)
+    public ProblemDetail handlePaymentMethodNotSupported(PaymentMethodNotSupportedException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidEnumValueException.class)
+    public ProblemDetail handleInvalidEnumValue(InvalidEnumValueException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+}

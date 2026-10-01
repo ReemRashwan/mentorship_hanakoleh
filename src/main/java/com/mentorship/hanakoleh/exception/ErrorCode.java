@@ -19,7 +19,11 @@ public enum ErrorCode {
     PROMOTION_NOT_ACTIVE("PROMO_002", "Promotion %s is not currently active."),
     PROMOTION_BELOW_MIN_ORDER("PROMO_003", "Promotion %s requires a minimum order of %s."),
     PROMOTION_USAGE_EXHAUSTED("PROMO_004", "Promotion %s has reached its usage limit."),
-    RIDER_TIP_NEGATIVE("TOTAL_001", "Rider tip cannot be negative.");
+    PROMOTION_USAGE_PER_CUSTOMER_EXHAUSTED(
+            "PROMO_005", "You have already used promotion %s the maximum number of times."),
+    RIDER_TIP_NEGATIVE("TOTAL_001", "Rider tip cannot be negative."),
+    PAYMENT_METHOD_NOT_SUPPORTED("PAY_001", "Payment method %s is not supported."),
+    INVALID_ENUM_VALUE("VAL_001", "'%s' is not a valid %s. Allowed values: %s.");
 
     public static final String QUANTITY_REQUIRED_MESSAGE = "Quantity is required.";
     public static final String QUANTITY_MUST_BE_POSITIVE_MESSAGE =

@@ -25,6 +25,11 @@ public class OrderTracking {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_tracking_status", nullable = false, length = 30)
+    @NotNull
+    private OrderFinalStatus status;
+
     @Column(name = "order_tracking_notes")
     @Size(max = 1000)
     private String notes;

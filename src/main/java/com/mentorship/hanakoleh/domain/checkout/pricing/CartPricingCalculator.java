@@ -1,28 +1,22 @@
 package com.mentorship.hanakoleh.domain.checkout.pricing;
 
-import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
+import com.mentorship.hanakoleh.common.MoneyUtils;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
+import com.mentorship.hanakoleh.domain.checkout.dto.CartPricingResponse;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItem;
-import org.springframework.stereotype.Component;
-import com.mentorship.hanakoleh.config.AppConstants;
-
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
-
-/**
- * Re-prices a cart from live menu prices and computes the subtotal
- */
 @Component
 public class CartPricingCalculator {
 
-
     public CartPricingResponse reprice(Cart cart) {
         List<CartPricingResponse.PricedItem> items = new ArrayList<>();
-        BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal currentSubtotal = BigDecimal.ZERO;
+        BigDecimal previousSubtotal = BigDecimal.ZERO;
         boolean anyPriceChanged = false;
 
         for (CartItem item : cart.getItems()) {
@@ -33,28 +27,40 @@ public class CartPricingCalculator {
             }
 
             MenuItem menuItem = item.getMenuItem();
-            BigDecimal unitPrice = scaled(menuItem.getPrice());
-            BigDecimal previousUnitPrice = scaled(item.getPrice());
-            BigDecimal lineSubtotal = scaled(unitPrice.multiply(BigDecimal.valueOf(quantity)));
-            boolean priceChanged = unitPrice.compareTo(previousUnitPrice) != 0;
 
+            // Current price is read straight from the menu item (source of truth).
+            BigDecimal currentUnitPrice = MoneyUtils.scale(menuItem.getPrice());
+            // Previous price is the snapshot captured on the cart item when it was added.
+            BigDecimal previousUnitPrice = MoneyUtils.scale(item.getPrice());
+            BigDecimal unitPriceDifference = MoneyUtils.scale(currentUnitPrice.subtract(previousUnitPrice));
+
+            BigDecimal currentLineSubtotal = MoneyUtils.lineTotal(menuItem.getPrice(), quantity);
+            BigDecimal previousLineSubtotal = MoneyUtils.lineTotal(item.getPrice(), quantity);
+            BigDecimal lineDifference = MoneyUtils.scale(currentLineSubtotal.subtract(previousLineSubtotal));
+
+            boolean priceChanged = unitPriceDifference.signum() != 0;
             anyPriceChanged = anyPriceChanged || priceChanged;
-            subtotal = subtotal.add(lineSubtotal);
+
+            currentSubtotal = currentSubtotal.add(currentLineSubtotal);
+            previousSubtotal = previousSubtotal.add(previousLineSubtotal);
 
             items.add(new CartPricingResponse.PricedItem(
                     item.getId(), menuItem.getId(), menuItem.getName(), quantity,
-                    unitPrice, lineSubtotal, priceChanged, previousUnitPrice));
+                    currentUnitPrice, previousUnitPrice, unitPriceDifference,
+                    currentLineSubtotal, previousLineSubtotal, lineDifference, priceChanged));
         }
+
+        BigDecimal subtotal = MoneyUtils.scale(currentSubtotal);
+        BigDecimal prevSubtotal = MoneyUtils.scale(previousSubtotal);
+        BigDecimal subtotalDifference = MoneyUtils.scale(subtotal.subtract(prevSubtotal));
 
         return new CartPricingResponse(
                 cart.getId(),
                 cart.getRestaurant() == null ? null : cart.getRestaurant().getId(),
-                scaled(subtotal),
+                subtotal,
+                prevSubtotal,
+                subtotalDifference,
                 anyPriceChanged,
                 items);
-    }
-
-    private BigDecimal scaled(BigDecimal value) {
-        return value.setScale(AppConstants.MONEY_SCALE, RoundingMode.HALF_UP);
     }
 }
