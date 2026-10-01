@@ -1,13 +1,12 @@
 package com.mentorship.hanakoleh.domain.checkout.service;
 
 import com.mentorship.hanakoleh.common.MoneyUtils;
-import com.mentorship.hanakoleh.config.AppConstants;
+import com.mentorship.hanakoleh.common.AppConstants;
 import com.mentorship.hanakoleh.domain.cart.exception.CartNotFoundException;
 import com.mentorship.hanakoleh.domain.cart.model.Cart;
 import com.mentorship.hanakoleh.domain.cart.model.CartItem;
 import com.mentorship.hanakoleh.domain.cart.model.CartStatus;
 import com.mentorship.hanakoleh.domain.cart.repository.CartRepository;
-import com.mentorship.hanakoleh.domain.checkout.delivery.GeoDistanceCalculator;
 import com.mentorship.hanakoleh.domain.checkout.dto.DeliveryOptionResponse;
 import com.mentorship.hanakoleh.domain.checkout.dto.OrderTotalsResponse;
 import com.mentorship.hanakoleh.domain.checkout.exception.AddressNotFoundException;
@@ -15,7 +14,6 @@ import com.mentorship.hanakoleh.domain.checkout.exception.CartNotActiveException
 import com.mentorship.hanakoleh.domain.checkout.exception.DeliveryOptionNotAvailableException;
 import com.mentorship.hanakoleh.domain.checkout.exception.EmptyCartException;
 import com.mentorship.hanakoleh.domain.checkout.exception.InvalidDeliveryAddressException;
-import com.mentorship.hanakoleh.domain.checkout.exception.OutOfDeliveryZoneException;
 import com.mentorship.hanakoleh.domain.checkout.pricing.CartPricingCalculator;
 import com.mentorship.hanakoleh.domain.checkout.pricing.OrderTotalsCalculator;
 import com.mentorship.hanakoleh.domain.order.model.OrderDeliveryOption;
@@ -42,7 +40,6 @@ public class CheckoutService {
     private final CartPricingCalculator cartPricingCalculator;
     private final AddressRepository addressRepository;
     private final RestaurantDeliveryOptionRepository deliveryOptionRepository;
-    private final GeoDistanceCalculator geoDistanceCalculator;
     private final OrderTotalsCalculator orderTotalsCalculator;
     private final PromotionService promotionService;
 
@@ -76,9 +73,6 @@ public class CheckoutService {
                   .orElseThrow(() -> new InvalidDeliveryAddressException(
                           ErrorCode.NO_DEFAULT_ADDRESS.getMessage()));
 
-        if (address.getLatitude() == null || address.getLongitude() == null) {
-            throw new InvalidDeliveryAddressException(ErrorCode.ADDRESS_MISSING_LOCATION.getMessage());
-        }
         return address;
     }
 
@@ -100,13 +94,8 @@ public class CheckoutService {
             return new DeliveryOptionResponse(config.getId(), option, true, fee, estimatedMinutes, null);
         }
 
-        Address address = resolveDeliveryAddressEntity(customerId, addressId);
-        BigDecimal distance = distanceKm(address, restaurant);
-        if (distance.compareTo(restaurant.getDeliveryRadiusKm()) > 0) {
-            throw new OutOfDeliveryZoneException(
-                    ErrorCode.OUT_OF_DELIVERY_ZONE.format(distance, restaurant.getDeliveryRadiusKm()));
-        }
-        return new DeliveryOptionResponse(config.getId(), option, false, fee, estimatedMinutes, distance);
+        resolveDeliveryAddressEntity(customerId, addressId);
+        return new DeliveryOptionResponse(config.getId(), option, false, fee, estimatedMinutes, null);
     }
 
     @Transactional(readOnly = true)
@@ -135,10 +124,4 @@ public class CheckoutService {
                 promotionService.validate(code, subtotal, customerId), subtotal);
     }
 
-    private BigDecimal distanceKm(Address address, Restaurant restaurant) {
-        double d = geoDistanceCalculator.distanceKm(
-                address.getLatitude(), address.getLongitude(),
-                restaurant.getLatitude(), restaurant.getLongitude());
-        return MoneyUtils.scale(BigDecimal.valueOf(d));
-    }
 }

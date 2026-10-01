@@ -175,26 +175,22 @@ public final class OrderBuilder {
             snapshot.put("fulfillment", deliveryOption.name());
             return snapshot;
         }
-        snapshot.put("governorate", address.getGovernorate());
-        snapshot.put("city", address.getCity());
-        if (address.getDistrict() != null) {
-            snapshot.put("district", address.getDistrict());
+        snapshot.put("street", address.getStreetAddress());
+        if (address.getDistrictName() != null) {
+            snapshot.put("district", address.getDistrictName());
         }
-        snapshot.put("street", address.getStreet());
         if (address.getBuildingNumber() != null) {
             snapshot.put("building", address.getBuildingNumber());
         }
         if (address.getFloor() != null) {
             snapshot.put("floor", address.getFloor());
         }
-        if (address.getApartment() != null) {
-            snapshot.put("apartment", address.getApartment());
+        if (address.getApartmentNumber() != null) {
+            snapshot.put("apartment", address.getApartmentNumber());
         }
-        if (address.getLabel() != null) {
-            snapshot.put("label", address.getLabel());
+        if (address.getLandmark() != null) {
+            snapshot.put("landmark", address.getLandmark());
         }
-        snapshot.put("latitude", address.getLatitude());
-        snapshot.put("longitude", address.getLongitude());
         return snapshot;
     }
 

@@ -1,6 +1,6 @@
 package com.mentorship.hanakoleh.domain.checkout.placeorder.service;
 
-import com.mentorship.hanakoleh.config.AppConstants;
+import com.mentorship.hanakoleh.common.AppConstants;
 import com.mentorship.hanakoleh.domain.checkout.pricing.OrderTotalsCalculator;
 import com.mentorship.hanakoleh.domain.checkout.placeorder.PlaceOrderChain;
 import com.mentorship.hanakoleh.domain.checkout.placeorder.PlaceOrderContext;

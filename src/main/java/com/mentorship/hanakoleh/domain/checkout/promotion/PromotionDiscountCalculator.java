@@ -1,7 +1,7 @@
 package com.mentorship.hanakoleh.domain.checkout.promotion;
 
 import com.mentorship.hanakoleh.common.MoneyUtils;
-import com.mentorship.hanakoleh.config.AppConstants;
+import com.mentorship.hanakoleh.common.AppConstants;
 import com.mentorship.hanakoleh.domain.order.model.Promotion;
 import com.mentorship.hanakoleh.domain.order.model.PromotionDiscountType;
 import java.math.BigDecimal;

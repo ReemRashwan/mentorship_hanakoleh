@@ -1,6 +1,6 @@
 package com.mentorship.hanakoleh.common;
 
-import com.mentorship.hanakoleh.config.AppConstants;
+import com.mentorship.hanakoleh.common.AppConstants;
 import com.mentorship.hanakoleh.exception.ErrorCode;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
