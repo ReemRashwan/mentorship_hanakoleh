@@ -222,4 +222,11 @@ public class CartService {
         if (availableInventory < requestedQuantity)
             throw new MenuItemOutOfStock("Menu Item with ID: " + selectedMenuItem.getId() + " is out of Stock.");
     }
+
+    @Transactional
+    public void completeCart(Cart cart) {
+        cart.setStatus(CartStatus.COMPLETED);
+        cart.setUpdatedAt(OffsetDateTime.now().toInstant());
+        cartRepository.save(cart);
+    }
 }

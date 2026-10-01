@@ -9,5 +9,5 @@ public record DeliveryOptionResponse(
         boolean pickup,
         BigDecimal deliveryFee,
         int estimatedMinutes,
-        BigDecimal distanceKm) {   // null when picked up in person
+        BigDecimal distanceKm) {
 }
