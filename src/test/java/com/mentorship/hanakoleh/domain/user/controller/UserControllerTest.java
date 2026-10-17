@@ -4,6 +4,7 @@ import com.mentorship.hanakoleh.config.SecurityConfig;
 import com.mentorship.hanakoleh.domain.user.dto.UpdateUserProfileRequest;
 import com.mentorship.hanakoleh.domain.user.dto.UserProfileResponse;
 import com.mentorship.hanakoleh.domain.user.model.User;
+import com.mentorship.hanakoleh.domain.user.service.CustomerService;
 import com.mentorship.hanakoleh.domain.user.service.UserService;
 import com.mentorship.hanakoleh.handler.GlobalExceptionHandler;
 import com.mentorship.hanakoleh.security.CustomUserDetailsService;
@@ -45,6 +46,9 @@ class UserControllerTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private CustomerService customerService;
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
