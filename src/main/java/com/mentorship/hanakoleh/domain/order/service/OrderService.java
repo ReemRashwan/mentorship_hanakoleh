@@ -9,11 +9,18 @@ import com.mentorship.hanakoleh.domain.order.exception.OrderPersistenceException
 import com.mentorship.hanakoleh.domain.order.mapper.OrderMapper;
 import com.mentorship.hanakoleh.domain.order.model.Order;
 import com.mentorship.hanakoleh.domain.order.model.OrderFinalStatus;
+import com.mentorship.hanakoleh.domain.order.model.OrderItem;
 import com.mentorship.hanakoleh.domain.order.model.OrderTracking;
 import com.mentorship.hanakoleh.domain.order.projection.OrderItemLineCountProjection;
 import com.mentorship.hanakoleh.domain.order.repository.OrderItemRepository;
 import com.mentorship.hanakoleh.domain.order.repository.OrderRepository;
 import com.mentorship.hanakoleh.domain.order.repository.OrderTrackingRepository;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,28 +31,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     private static final List<OrderFinalStatus> NON_CURRENT_STATUSES = List.of(
             OrderFinalStatus.COMPLETED,
             OrderFinalStatus.CANCELLED,
             OrderFinalStatus.REFUNDED);
-    private static Logger log = LoggerFactory.getLogger(OrderService.class);
+
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final OrderTrackingRepository orderTrackingRepository;
     private final OrderMapper orderMapper;
     private final OrderStatusUpdateService orderStatusUpdateService;
-    private final OrderTrackingRepository orderTrackingRepository;
     private final ApplicationEventPublisher publisher;
-
 
     @Transactional(readOnly = true)
     public Page<OrderHistoryResponse> getHistoricalOrders(Integer customerId, Pageable pageable) {
@@ -59,18 +61,16 @@ public class OrderService {
 
         List<OrderItemLineCountProjection> lineCounts = orderItemRepository.findLineCountByOrderIds(orderIds);
 
-        Map<Long, Long> lineCountByOrderId = lineCounts.stream().collect(Collectors.toMap(OrderItemLineCountProjection::getOrderId, OrderItemLineCountProjection::getLineCount));
+        Map<Long, Long> lineCountByOrderId = lineCounts.stream()
+                .collect(Collectors.toMap(OrderItemLineCountProjection::getOrderId,
+                        OrderItemLineCountProjection::getLineCount));
 
         return orders.map(order -> {
             long lineCount = lineCountByOrderId.getOrDefault(order.getId(), 0L);
-
             return orderMapper.toOrderHistoryResponse(order, lineCount);
         });
-
     }
 
-    // Helper methods
-    // Helper method to get the start date for the historical orders
     private OffsetDateTime getHistoricalOrderStartDate() {
         return OffsetDateTime.now().minusMonths(OrderConstants.NUMBER_OF_MONTHS_FOR_HISTORICAL_ORDERS);
     }
@@ -82,10 +82,40 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderDetails getOrder(Long orderId, Integer customerId) {
-        Order order = orderRepository.findByIdAndCustomerId(orderId, customerId).orElseThrow(() -> new OrderNotFoundException(orderId));
+        Order order = orderRepository.findByIdAndCustomerId(orderId, customerId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
         return new OrderDetails(order, orderItemRepository.findByOrderIdOrderByIdAsc(orderId));
     }
 
+    // --- place-order cycle persistence (used by checkout) --------------------------
+
+    public Optional<Order> findByIdempotencyKey(UUID idempotencyKey) {
+        return orderRepository.findByIdempotencyKey(idempotencyKey);
+    }
+
+    public List<OrderItem> items(Long orderId) {
+        return orderItemRepository.findByOrderIdOrderByIdAsc(orderId);
+    }
+
+    public Order persist(Order order) {
+        return orderRepository.save(order);
+    }
+
+    public void persistItems(List<OrderItem> items) {
+        orderItemRepository.saveAll(items);
+    }
+
+    public void recordInitialTracking(Order order) {
+        orderTrackingRepository.save(OrderTracking.builder()
+                .order(order)
+                .currentStatus(OrderFinalStatus.CREATED)
+                .previousStatus(OrderFinalStatus.CREATED)
+                .notes("Order placed")
+                .createdAt(OffsetDateTime.now())
+                .build());
+    }
+
+    // --- order status lifecycle --------------------------------------------------
 
     @Transactional
     public CancelOrderResponse cancelOrder(Long activeOrderId, Integer actorUserId, CancelOrderRequest cancelRequest) {
@@ -107,12 +137,10 @@ public class OrderService {
         OrderEvent event = switch (request.nextOrderStatus()) {
             case CONFIRMED -> orderStatusUpdateService.confirmOrder(activeOrder, actorUserId, request);
             case IN_PROGRESS -> orderStatusUpdateService.acceptOrder(activeOrder, actorUserId, request);
-            case READY_FOR_PICKUP ->
-                    orderStatusUpdateService.markOrderReadyForPickup(activeOrder, actorUserId, request);
+            case READY_FOR_PICKUP -> orderStatusUpdateService.markOrderReadyForPickup(activeOrder, actorUserId, request);
             case IN_DELIVERY -> orderStatusUpdateService.pickupOrderByRider(activeOrder, actorUserId, request);
             case COMPLETED -> orderStatusUpdateService.deliverOrder(activeOrder, actorUserId, request);
-            default ->
-                    throw new IllegalArgumentException("Unsupported status update target: " + request.nextOrderStatus());
+            default -> throw new IllegalArgumentException("Unsupported status update target: " + request.nextOrderStatus());
         };
 
         OrderFinalStatus previousStatus = persistOrderStatusUpdate(
@@ -124,7 +152,7 @@ public class OrderService {
         return new UpdateOrderStatusResponse(activeOrder.getId(), activeOrder.getFinalStatus());
     }
 
-    @Transactional // Fixed missing transaction
+    @Transactional
     public RefundOrderResponse refundOrder(Long activeOrderId, Integer actorUserId, RefundOrderRequest refundOrderRequest) {
         Order activeOrder = findOrderByIdAndThrow(activeOrderId);
         OrderEvent event = orderStatusUpdateService.refundOrder(activeOrder, refundOrderRequest);
@@ -153,10 +181,8 @@ public class OrderService {
         try {
             orderRepository.save(activeOrder);
             log.info("Order {}  save Successfully .", activeOrder.getId());
-
         } catch (OptimisticLockingFailureException e) {
             throw new OrderPersistenceException("Optimistic locking failure");
-
         }
 
         persistOrderTrackingRecord(activeOrder, newStatus, actorUserId, notes, previousStatus);
@@ -182,5 +208,4 @@ public class OrderService {
                 order.getFinalStatus(),
                 order.getUpdatedAt()));
     }
-
 }

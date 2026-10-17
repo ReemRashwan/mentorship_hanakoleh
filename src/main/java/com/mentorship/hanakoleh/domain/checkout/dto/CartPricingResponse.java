@@ -7,6 +7,8 @@ public record CartPricingResponse(
         Integer cartId,
         Integer restaurantId,
         BigDecimal subtotal,
+        BigDecimal previousSubtotal,
+        BigDecimal subtotalDifference,
         boolean priceChanged,
         List<PricedItem> items) {
 
@@ -15,10 +17,12 @@ public record CartPricingResponse(
             Integer menuItemId,
             String menuItemName,
             int quantity,
-            BigDecimal unitPrice,         // current live menu price
-            BigDecimal lineSubtotal,      // unitPrice * quantity
-            boolean priceChanged,         // live price differs from the stored snapshot
-            BigDecimal previousUnitPrice  // the price stored on the cart item
-    ) {
+            BigDecimal unitPrice,
+            BigDecimal previousUnitPrice,
+            BigDecimal unitPriceDifference,
+            BigDecimal lineSubtotal,
+            BigDecimal previousLineSubtotal,
+            BigDecimal lineDifference,
+            boolean priceChanged) {
     }
 }
