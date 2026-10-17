@@ -12,6 +12,8 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -30,6 +32,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdAndCustomerId(Long orderId, Integer userId);
     boolean existsByIdempotencyKey(UUID idempotencyKey);
 
+    Optional<Order> findByIdempotencyKey(UUID idempotencyKey);
+
+    long countByCustomer_IdAndPromotion_Id(Integer customerId, Long promotionId);
+
+
 
     @EntityGraph(attributePaths = "restaurant")
     List<Order> findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
@@ -39,7 +46,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = "restaurant")
     Optional<Order> findByIdAndCustomer_Id(Long orderId, Integer userId);
 
-    Optional<Order> findByIdempotencyKey(UUID idempotencyKey);
+    @Query("SELECT o.restaurant.id FROM Order o WHERE o.customer.id = :customerId "
+            + "GROUP BY o.restaurant.id ORDER BY MAX(o.createdAt) DESC")
+    List<Integer> findDistinctRestaurantIdsOrderedByRecency(
+            @Param("customerId") Integer customerId, Pageable pageable);
 
-    long countByCustomer_IdAndPromotion_Id(Integer customerId, Long promotionId);
 }
