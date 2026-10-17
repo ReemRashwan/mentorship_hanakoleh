@@ -2,6 +2,8 @@ package com.mentorship.hanakoleh.domain.user.controller;
 
 import com.mentorship.hanakoleh.domain.user.dto.AuthResponse;
 import com.mentorship.hanakoleh.domain.user.dto.LoginRequest;
+import com.mentorship.hanakoleh.domain.user.dto.ResetPasswordRequest;
+import com.mentorship.hanakoleh.domain.user.service.CustomerService;
 import com.mentorship.hanakoleh.security.JwtTokenProvider;
 import com.mentorship.hanakoleh.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +27,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomerService customerService;
 
     @PostMapping("/login")
     @Operation(summary = "Authenticate user and generate JWT token")
@@ -47,5 +50,12 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/password/reset")
+    @Operation(summary = "Reset password with token (unauthenticated)")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        customerService.resetPassword(request);
+        return ResponseEntity.ok().build();
     }
 }
