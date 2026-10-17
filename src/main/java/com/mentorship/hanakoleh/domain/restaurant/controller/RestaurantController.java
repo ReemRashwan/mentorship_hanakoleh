@@ -1,10 +1,13 @@
 package com.mentorship.hanakoleh.domain.restaurant.controller;
 
 import com.mentorship.hanakoleh.domain.restaurant.dto.MenuListResponse;
+import com.mentorship.hanakoleh.domain.restaurant.dto.RestaurantSummaryResponse;
 import com.mentorship.hanakoleh.domain.restaurant.service.MenuQueryService;
 import com.mentorship.hanakoleh.domain.restaurant.service.RestaurantService;
+import com.mentorship.hanakoleh.domain.restaurant.service.TopRatedRestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,10 +25,26 @@ public class RestaurantController {
 
     private final RestaurantService restaurantService;
     private final MenuQueryService menuQueryService;
+    private final TopRatedRestaurantService topRatedRestaurantService;
 
-    public RestaurantController(RestaurantService restaurantService, MenuQueryService menuQueryService) {
+    public RestaurantController(
+            RestaurantService restaurantService,
+            MenuQueryService menuQueryService,
+            TopRatedRestaurantService topRatedRestaurantService) {
         this.restaurantService = restaurantService;
         this.menuQueryService = menuQueryService;
+        this.topRatedRestaurantService = topRatedRestaurantService;
+    }
+
+    @GetMapping("/top-rated")
+    @Operation(summary = "Top-rated restaurants",
+            description = "Highest-rated restaurants for the home/discovery section, sorted by rating "
+                    + "desc then review count desc. Optional category and minReviews filters.")
+    public ResponseEntity<List<RestaurantSummaryResponse>> topRated(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "minReviews", required = false) Integer minReviews) {
+        return ResponseEntity.ok(topRatedRestaurantService.getTopRated(category, minReviews, limit));
     }
 
     @GetMapping("/{restaurantId}/menus")
