@@ -32,6 +32,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdAndCustomerId(Long orderId, Integer userId);
     boolean existsByIdempotencyKey(UUID idempotencyKey);
 
+    Optional<Order> findByIdempotencyKey(UUID idempotencyKey);
+
+    long countByCustomer_IdAndPromotion_Id(Integer customerId, Long promotionId);
+
+
 
     @EntityGraph(attributePaths = "restaurant")
     List<Order> findByCustomer_IdAndFinalStatusNotInOrderByCreatedAtDesc(
