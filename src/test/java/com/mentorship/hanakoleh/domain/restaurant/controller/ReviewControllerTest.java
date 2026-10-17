@@ -3,13 +3,17 @@ package com.mentorship.hanakoleh.domain.restaurant.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mentorship.hanakoleh.config.SecurityConfig;
 import com.mentorship.hanakoleh.domain.restaurant.dto.CreateReviewRequest;
-import com.mentorship.hanakoleh.domain.restaurant.dto.ReviewResponse;
+import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
+import com.mentorship.hanakoleh.domain.restaurant.model.Review;
 import com.mentorship.hanakoleh.domain.restaurant.service.ReviewService;
+import com.mentorship.hanakoleh.domain.user.model.Customer;
+import com.mentorship.hanakoleh.domain.user.model.User;
 import com.mentorship.hanakoleh.handler.GlobalExceptionHandler;
 import com.mentorship.hanakoleh.security.CustomUserDetailsService;
 import com.mentorship.hanakoleh.security.JwtAuthenticationEntryPoint;
 import com.mentorship.hanakoleh.security.JwtAuthenticationFilter;
 import com.mentorship.hanakoleh.security.JwtTokenProvider;
+import com.mentorship.hanakoleh.security.TokenRevocationService;
 import com.mentorship.hanakoleh.security.UserPrincipal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,8 +45,7 @@ class ReviewControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @MockitoBean
     private ReviewService reviewService;
@@ -51,6 +55,9 @@ class ReviewControllerTest {
 
     @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private TokenRevocationService tokenRevocationService;
 
     private final UserPrincipal userPrincipal = new UserPrincipal(
             8,
@@ -63,9 +70,16 @@ class ReviewControllerTest {
     @DisplayName("POST /api/v1/restaurants/{restaurantId}/reviews creates review")
     void addReview_returnsCreatedReview() throws Exception {
         CreateReviewRequest request = new CreateReviewRequest(5, "Excellent food!");
-        ReviewResponse response = new ReviewResponse(1, 10, 8, 5, "Excellent food!", OffsetDateTime.now());
+        Review review = Review.builder()
+                .id(1)
+                .restaurant(Restaurant.builder().id(10).build())
+                .customer(Customer.builder().id(8).user(User.builder().id(8).email("customer@example.com").build()).build())
+                .rating(5)
+                .comment("Excellent food!")
+                .createdAt(OffsetDateTime.now())
+                .build();
 
-        when(reviewService.addReview(eq(10), eq(8), any(CreateReviewRequest.class))).thenReturn(response);
+        when(reviewService.addReview(eq(10), eq(8), any(CreateReviewRequest.class))).thenReturn(review);
 
         mockMvc.perform(post("/api/v1/restaurants/{restaurantId}/reviews", 10)
                         .with(SecurityMockMvcRequestPostProcessors.user(userPrincipal))
@@ -80,8 +94,15 @@ class ReviewControllerTest {
     @Test
     @DisplayName("GET /api/v1/restaurants/{restaurantId}/reviews returns reviews")
     void getReviews_returnsReviewList() throws Exception {
-        ReviewResponse response = new ReviewResponse(1, 10, 8, 4, "Very good", OffsetDateTime.now());
-        when(reviewService.getReviews(10)).thenReturn(java.util.List.of(response));
+        Review review = Review.builder()
+                .id(1)
+                .restaurant(Restaurant.builder().id(10).build())
+                .customer(Customer.builder().id(8).user(User.builder().id(8).email("customer@example.com").build()).build())
+                .rating(4)
+                .comment("Very good")
+                .createdAt(OffsetDateTime.now())
+                .build();
+        when(reviewService.getReviews(10)).thenReturn(List.of(review));
 
         mockMvc.perform(get("/api/v1/restaurants/{restaurantId}/reviews", 10))
                 .andExpect(status().isOk())
@@ -89,4 +110,3 @@ class ReviewControllerTest {
                 .andExpect(jsonPath("$[0].comment").value("Very good"));
     }
 }
-

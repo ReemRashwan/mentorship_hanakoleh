@@ -15,7 +15,7 @@ import com.mentorship.hanakoleh.security.CustomUserDetailsService;
 import com.mentorship.hanakoleh.security.JwtAuthenticationEntryPoint;
 import com.mentorship.hanakoleh.security.JwtAuthenticationFilter;
 import com.mentorship.hanakoleh.security.JwtTokenProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mentorship.hanakoleh.security.TokenRevocationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +24,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -46,7 +48,7 @@ class RestaurantCatalogControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper objectMapper;
 
     @MockitoBean
     private ItemCategoryService itemCategoryService;
@@ -59,6 +61,9 @@ class RestaurantCatalogControllerTest {
 
     @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private TokenRevocationService tokenRevocationService;
 
     @Test
     @DisplayName("GET /api/v1/menu-categories returns categories")
@@ -92,7 +97,7 @@ class RestaurantCatalogControllerTest {
     void updateCategory_returnsUpdatedCategory() throws Exception {
         UpdateItemCategoryRequest request = new UpdateItemCategoryRequest("Updated Pizza");
         ItemCategoryResponse response = new ItemCategoryResponse(1, "Updated Pizza");
-        when(itemCategoryService.updateCategory(1, any(UpdateItemCategoryRequest.class))).thenReturn(response);
+        when(itemCategoryService.updateCategory(eq(1), any(UpdateItemCategoryRequest.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/v1/menu-categories/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +154,7 @@ class RestaurantCatalogControllerTest {
                 new BigDecimal("16.50"), 15, 3, MenuItemOnDemandStatus.PREORDER, 1);
         MenuItemResponse response = new MenuItemResponse(1, 10, 1, "Updated Pizza", "updated.png",
                 new BigDecimal("16.50"), 15, 3, MenuItemOnDemandStatus.PREORDER);
-        when(menuItemService.updateMenuItem(1, any(UpdateMenuItemRequest.class))).thenReturn(response);
+        when(menuItemService.updateMenuItem(eq(1), any(UpdateMenuItemRequest.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/v1/menu-items/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -168,4 +173,3 @@ class RestaurantCatalogControllerTest {
                 .andExpect(status().isNoContent());
     }
 }
-

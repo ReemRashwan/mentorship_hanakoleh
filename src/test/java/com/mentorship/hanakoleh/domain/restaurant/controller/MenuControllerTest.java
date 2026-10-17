@@ -11,6 +11,7 @@ import com.mentorship.hanakoleh.security.CustomUserDetailsService;
 import com.mentorship.hanakoleh.security.JwtAuthenticationEntryPoint;
 import com.mentorship.hanakoleh.security.JwtAuthenticationFilter;
 import com.mentorship.hanakoleh.security.JwtTokenProvider;
+import com.mentorship.hanakoleh.security.TokenRevocationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,7 +40,7 @@ class MenuControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper objectMapper;
 
     @MockitoBean
     private MenuService menuService;
@@ -47,6 +50,9 @@ class MenuControllerTest {
 
     @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private TokenRevocationService tokenRevocationService;
 
     @Test
     @DisplayName("GET /api/v1/menus returns menu list")
@@ -93,7 +99,7 @@ class MenuControllerTest {
     void updateMenu_returnsUpdatedMenu() throws Exception {
         UpdateMenuRequest request = new UpdateMenuRequest("Updated Menu", "updated.png", 4, false);
         MenuResponse response = new MenuResponse(1, 10, "Updated Menu", "updated.png", 4, false);
-        when(menuService.updateMenu(1, any(UpdateMenuRequest.class))).thenReturn(response);
+        when(menuService.updateMenu(eq(1), any(UpdateMenuRequest.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/v1/menus/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
