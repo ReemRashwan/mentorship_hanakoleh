@@ -8,11 +8,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +40,10 @@ public class Menu {
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menu_category_id")
+    private MenuCategory category;
+
     @Column(name = "menu_name", nullable = false, length = 150)
     @NotBlank
     @Size(max = 150)
@@ -56,6 +63,16 @@ public class Menu {
     @Column(name = "menu_is_visible", nullable = false)
     @NotNull
     private Boolean visible = true;
+
+    @Column(name = "menu_updated_at", nullable = false)
+    @NotNull
+    private OffsetDateTime updatedAt;
+
+    @PrePersist
+    @PreUpdate
+    private void touchUpdatedAt() {
+        updatedAt = OffsetDateTime.now();
+    }
 
     @Override
     public boolean equals(Object other) {
