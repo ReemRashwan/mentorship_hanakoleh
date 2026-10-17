@@ -4,7 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
@@ -66,6 +69,16 @@ public class Restaurant {
     @NotNull
     @DecimalMin(value = "0.00")
     private BigDecimal deliveryRadiusKm = BigDecimal.ZERO;
+
+    @Builder.Default
+    @Column(name = "restaurant_review_count", nullable = false)
+    @NotNull
+    @Min(0)
+    private Integer reviewCount = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_category_id")
+    private RestaurantCategory category;
 
     @PrePersist
     private void prePersist() {
