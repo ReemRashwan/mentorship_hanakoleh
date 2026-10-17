@@ -25,7 +25,7 @@ public class PasswordResetToken {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     @NotNull
     private Customer customer;
 

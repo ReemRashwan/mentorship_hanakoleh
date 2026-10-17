@@ -19,12 +19,12 @@ import java.time.Instant;
 public class NotificationPreferences {
 
     @Id
-    @Column(name = "customer_id")
+    @Column(name = "user_id")
     private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
-    @JoinColumn(name = "customer_id", nullable = false, referencedColumnName = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "user_id")
     private Customer customer;
 
     @Builder.Default
