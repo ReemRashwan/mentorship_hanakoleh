@@ -13,11 +13,31 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.mentorship.hanakoleh.domain.user.dto.UpdateUserProfileRequest;
+import com.mentorship.hanakoleh.domain.user.dto.UserProfileResponse;
+import com.mentorship.hanakoleh.domain.user.service.UserService;
+import com.mentorship.hanakoleh.security.UserPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/me")
 @RequiredArgsConstructor
 @Tag(name = "Customer Management", description = "APIs for customer profile, password, payment methods, and preferences")
+@RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+@Tag(name = "User Profile", description = "Customer profile management APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final CustomerService customerService;
@@ -90,5 +110,19 @@ public class UserController {
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         PreferencesResponse response = customerService.updatePreferences(userPrincipal.getId(), request);
         return ResponseEntity.ok(response);
+    }
+    private final UserService userService;
+
+    @GetMapping("/profile")
+    @Operation(summary = "Get current customer profile")
+    public ResponseEntity<UserProfileResponse> getProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(userService.getProfile(userPrincipal.getId()));
+    }
+
+    @PutMapping("/profile")
+    @Operation(summary = "Update current customer profile")
+    public ResponseEntity<UserProfileResponse> updateProfile(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                            @Valid @RequestBody UpdateUserProfileRequest request) {
+        return ResponseEntity.ok(userService.updateProfile(userPrincipal.getId(), request));
     }
 }

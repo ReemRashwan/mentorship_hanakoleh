@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.restaurant.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mentorship.hanakoleh.config.SecurityConfig;
 import com.mentorship.hanakoleh.domain.restaurant.dto.CreateMenuRequest;
 import com.mentorship.hanakoleh.domain.restaurant.dto.MenuResponse;
@@ -10,7 +11,6 @@ import com.mentorship.hanakoleh.security.CustomUserDetailsService;
 import com.mentorship.hanakoleh.security.JwtAuthenticationEntryPoint;
 import com.mentorship.hanakoleh.security.JwtAuthenticationFilter;
 import com.mentorship.hanakoleh.security.JwtTokenProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +25,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -116,4 +113,3 @@ class MenuControllerTest {
                 .andExpect(status().isNoContent());
     }
 }
-
