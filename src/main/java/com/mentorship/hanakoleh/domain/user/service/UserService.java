@@ -1,7 +1,5 @@
 package com.mentorship.hanakoleh.domain.user.service;
 
-import com.mentorship.hanakoleh.domain.user.dto.UpdateUserProfileRequest;
-import com.mentorship.hanakoleh.domain.user.dto.UserProfileResponse;
 import com.mentorship.hanakoleh.domain.user.model.Customer;
 import com.mentorship.hanakoleh.domain.user.model.User;
 import com.mentorship.hanakoleh.domain.user.repository.CustomerRepository;
@@ -19,43 +17,32 @@ public class UserService {
     private final CustomerRepository customerRepository;
 
     @Transactional
-    public UserProfileResponse getProfile(Integer userId) {
-        User user = userRepository.findById(userId)
+    public User getProfile(Integer userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
-        return toProfileResponse(user);
     }
 
     @Transactional
-    public UserProfileResponse updateProfile(Integer userId, UpdateUserProfileRequest request) {
+    public User updateProfile(Integer userId, String firstName, String lastName, String phoneNumber) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-        if (request.firstName() != null) {
-            user.setFirstName(request.firstName());
+        if (firstName != null) {
+            user.setFirstName(firstName);
         }
-        if (request.lastName() != null) {
-            user.setLastName(request.lastName());
+        if (lastName != null) {
+            user.setLastName(lastName);
         }
-        if (request.phoneNumber() != null) {
-            user.setPhoneNumber(request.phoneNumber());
+        if (phoneNumber != null) {
+            user.setPhoneNumber(phoneNumber);
         }
 
-        User savedUser = userRepository.save(user);
-        return toProfileResponse(savedUser);
+        return userRepository.save(user);
     }
 
-    private UserProfileResponse toProfileResponse(User user) {
-        Boolean notificationStatus = customerRepository.findById(user.getId())
+    public Boolean getNotificationStatus(Integer userId) {
+        return customerRepository.findById(userId)
                 .map(Customer::getNotificationStatus)
                 .orElse(null);
-
-        return new UserProfileResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getPhoneNumber(),
-                notificationStatus
-        );
     }
 }

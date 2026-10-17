@@ -5,6 +5,7 @@ import com.mentorship.hanakoleh.domain.user.dto.LoginRequest;
 import com.mentorship.hanakoleh.domain.user.dto.ResetPasswordRequest;
 import com.mentorship.hanakoleh.domain.user.service.CustomerService;
 import com.mentorship.hanakoleh.security.JwtTokenProvider;
+import com.mentorship.hanakoleh.security.TokenRevocationService;
 import com.mentorship.hanakoleh.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -33,6 +34,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomerService customerService;
+    private final TokenRevocationService tokenRevocationService;
 
     @PostMapping("/login")
     @Operation(summary = "Authenticate user and generate JWT token")
@@ -67,7 +69,14 @@ public class AuthController {
     @PostMapping("/logout")
     @Operation(summary = "Logout the authenticated user")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Map<String, String>> logout(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<Map<String, String>> logout(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                     org.springframework.web.context.request.WebRequest webRequest) {
+        String authorizationHeader = webRequest.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            tokenRevocationService.revoke(token);
+        }
+
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(Map.of("message", "Logout successful"));
     }

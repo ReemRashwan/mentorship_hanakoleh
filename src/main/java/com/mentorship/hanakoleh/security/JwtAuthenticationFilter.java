@@ -25,25 +25,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final TokenRevocationService tokenRevocationService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                     HttpServletResponse response,
+                                     FilterChain filterChain) throws ServletException, IOException {
         String jwt = getJwtFromRequest(request);
 
-        if (jwt != null && jwtTokenProvider.validateToken(jwt)) {
-            String email = jwtTokenProvider.getEmailFromToken(jwt);
-
-            try {
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
-
-                UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (UsernameNotFoundException e) {
+        if (jwt != null) {
+            if (tokenRevocationService.isRevoked(jwt)) {
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
@@ -51,13 +42,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 body.put("timestamp", LocalDateTime.now());
                 body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
                 body.put("error", "Unauthorized");
-                body.put("message", "User not found. Please log in again.");
+                body.put("message", "Token is no longer valid.");
                 body.put("path", request.getRequestURI());
 
                 com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
                 mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
                 mapper.writeValue(response.getOutputStream(), body);
                 return;
+            }
+
+            if (jwtTokenProvider.validateToken(jwt)) {
+                String email = jwtTokenProvider.getEmailFromToken(jwt);
+
+                try {
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+                    UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } catch (UsernameNotFoundException e) {
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("timestamp", LocalDateTime.now());
+                    body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+                    body.put("error", "Unauthorized");
+                    body.put("message", "User not found. Please log in again.");
+                    body.put("path", request.getRequestURI());
+
+                    com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                    mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+                    mapper.writeValue(response.getOutputStream(), body);
+                    return;
+                }
             }
         }
 

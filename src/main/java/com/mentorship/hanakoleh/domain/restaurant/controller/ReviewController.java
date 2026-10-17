@@ -2,6 +2,7 @@ package com.mentorship.hanakoleh.domain.restaurant.controller;
 
 import com.mentorship.hanakoleh.domain.restaurant.dto.CreateReviewRequest;
 import com.mentorship.hanakoleh.domain.restaurant.dto.ReviewResponse;
+import com.mentorship.hanakoleh.domain.restaurant.model.Review;
 import com.mentorship.hanakoleh.domain.restaurant.service.ReviewService;
 import com.mentorship.hanakoleh.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,14 +36,26 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> addReview(@PathVariable Integer restaurantId,
                                                   @AuthenticationPrincipal UserPrincipal userPrincipal,
                                                   @Valid @RequestBody CreateReviewRequest request) {
-        ReviewResponse response = reviewService.addReview(restaurantId, userPrincipal.getId(), request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        Review review = reviewService.addReview(restaurantId, userPrincipal.getId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(review));
     }
 
     @GetMapping("/{restaurantId}/reviews")
     @Operation(summary = "View all reviews for a restaurant")
     public ResponseEntity<List<ReviewResponse>> getReviews(@PathVariable Integer restaurantId) {
-        return ResponseEntity.ok(reviewService.getReviews(restaurantId));
+        return ResponseEntity.ok(reviewService.getReviews(restaurantId).stream()
+                .map(this::toResponse)
+                .toList());
+    }
+
+    private ReviewResponse toResponse(Review review) {
+        return new ReviewResponse(
+                review.getId(),
+                review.getRestaurant().getId(),
+                review.getCustomer().getId(),
+                review.getRating(),
+                review.getComment(),
+                review.getCreatedAt()
+        );
     }
 }
-

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import com.mentorship.hanakoleh.domain.user.dto.UpdateUserProfileRequest;
 import com.mentorship.hanakoleh.domain.user.dto.UserProfileResponse;
+import com.mentorship.hanakoleh.domain.user.model.User;
 import com.mentorship.hanakoleh.domain.user.service.UserService;
 import com.mentorship.hanakoleh.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -116,13 +117,26 @@ public class UserController {
     @GetMapping("/profile")
     @Operation(summary = "Get current customer profile")
     public ResponseEntity<UserProfileResponse> getProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return ResponseEntity.ok(userService.getProfile(userPrincipal.getId()));
+        User user = userService.getProfile(userPrincipal.getId());
+        return ResponseEntity.ok(toResponse(user));
     }
 
     @PutMapping("/profile")
     @Operation(summary = "Update current customer profile")
     public ResponseEntity<UserProfileResponse> updateProfile(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                                             @Valid @RequestBody UpdateUserProfileRequest request) {
-        return ResponseEntity.ok(userService.updateProfile(userPrincipal.getId(), request));
+        User user = userService.updateProfile(userPrincipal.getId(), request.firstName(), request.lastName(), request.phoneNumber());
+        return ResponseEntity.ok(toResponse(user));
+    }
+
+    private UserProfileResponse toResponse(User user) {
+        return new UserProfileResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhoneNumber(),
+                userService.getNotificationStatus(user.getId())
+        );
     }
 }
