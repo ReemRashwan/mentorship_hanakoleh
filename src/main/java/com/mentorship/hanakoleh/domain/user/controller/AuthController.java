@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.Map;
 
@@ -39,24 +40,14 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "Authenticate user and generate JWT token")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
-
+        Authentication authentication = authenticate(loginRequest);
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        Integer customerId = userPrincipal.getId();
+        String token = jwtTokenProvider.generateToken(userPrincipal.getUsername(), userPrincipal.getId());
 
-        String token = jwtTokenProvider.generateToken(userPrincipal.getUsername(), customerId);
-
-        AuthResponse response = AuthResponse.builder()
+        return ResponseEntity.ok(AuthResponse.builder()
                 .accessToken(token)
                 .tokenType("Bearer")
-                .build();
-
-        return ResponseEntity.ok(response);
+                .build());
     }
 
     @PostMapping("/password/reset")
@@ -70,14 +61,22 @@ public class AuthController {
     @Operation(summary = "Logout the authenticated user")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Map<String, String>> logout(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                                                     org.springframework.web.context.request.WebRequest webRequest) {
-        String authorizationHeader = webRequest.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            tokenRevocationService.revoke(token);
-        }
-
+                                                     WebRequest webRequest) {
+        revokeTokenIfPresent(webRequest);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(Map.of("message", "Logout successful"));
+    }
+
+    private Authentication authenticate(LoginRequest loginRequest) {
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
+    }
+
+    private void revokeTokenIfPresent(WebRequest webRequest) {
+        String authorizationHeader = webRequest.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            tokenRevocationService.revoke(authorizationHeader.substring(7));
+        }
     }
 }

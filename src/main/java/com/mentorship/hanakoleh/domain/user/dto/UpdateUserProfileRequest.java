@@ -10,8 +10,7 @@ public record UpdateUserProfileRequest(
         @Size(max = 100, message = "Last name must not exceed 100 characters")
         String lastName,
 
-        @Pattern(regexp = "^[0-9+\-()\s]{7,20}$", message = "Invalid phone number format")
+        @Pattern(regexp = "^[0-9+\\-()\\s]{7,20}$", message = "Invalid phone number format")
         String phoneNumber
 ) {
 }
-

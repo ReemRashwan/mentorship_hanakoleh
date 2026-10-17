@@ -18,15 +18,28 @@ public class UserService {
 
     @Transactional
     public User getProfile(Integer userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        return findUserById(userId);
     }
 
     @Transactional
     public User updateProfile(Integer userId, String firstName, String lastName, String phoneNumber) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        User user = findUserById(userId);
+        applyProfileUpdates(user, firstName, lastName, phoneNumber);
+        return userRepository.save(user);
+    }
 
+    public Boolean getNotificationStatus(Integer userId) {
+        return customerRepository.findById(userId)
+                .map(Customer::getNotificationStatus)
+                .orElse(null);
+    }
+
+    private User findUserById(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+    }
+
+    private void applyProfileUpdates(User user, String firstName, String lastName, String phoneNumber) {
         if (firstName != null) {
             user.setFirstName(firstName);
         }
@@ -36,13 +49,5 @@ public class UserService {
         if (phoneNumber != null) {
             user.setPhoneNumber(phoneNumber);
         }
-
-        return userRepository.save(user);
-    }
-
-    public Boolean getNotificationStatus(Integer userId) {
-        return customerRepository.findById(userId)
-                .map(Customer::getNotificationStatus)
-                .orElse(null);
     }
 }

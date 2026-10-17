@@ -117,8 +117,7 @@ public class UserController {
     @GetMapping("/profile")
     @Operation(summary = "Get current customer profile")
     public ResponseEntity<UserProfileResponse> getProfile(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        User user = userService.getProfile(userPrincipal.getId());
-        return ResponseEntity.ok(toResponse(user));
+        return ResponseEntity.ok(toResponse(userService.getProfile(userPrincipal.getId())));
     }
 
     @PutMapping("/profile")

@@ -43,7 +43,8 @@ public class ReviewController {
     @GetMapping("/{restaurantId}/reviews")
     @Operation(summary = "View all reviews for a restaurant")
     public ResponseEntity<List<ReviewResponse>> getReviews(@PathVariable Integer restaurantId) {
-        return ResponseEntity.ok(reviewService.getReviews(restaurantId).stream()
+        List<Review> reviews = reviewService.getReviews(restaurantId);
+        return ResponseEntity.ok(reviews.stream()
                 .map(this::toResponse)
                 .toList());
     }

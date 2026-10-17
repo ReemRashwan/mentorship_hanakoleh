@@ -23,21 +23,27 @@ public class ReviewService {
     @Transactional
     public Review addReview(Integer restaurantId, Integer customerId, CreateReviewRequest request) {
         Restaurant restaurant = restaurantService.getRestaurantReferenceById(restaurantId);
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerId));
-
-        Review review = Review.builder()
-                .restaurant(restaurant)
-                .customer(customer)
-                .rating(request.rating())
-                .comment(request.comment())
-                .build();
-
+        Customer customer = findCustomerById(customerId);
+        Review review = buildReview(restaurant, customer, request);
         return reviewRepository.save(review);
     }
 
     @Transactional
     public List<Review> getReviews(Integer restaurantId) {
         return reviewRepository.findByRestaurantId(restaurantId);
+    }
+
+    private Customer findCustomerById(Integer customerId) {
+        return customerRepository.findById(customerId)
+                .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerId));
+    }
+
+    private Review buildReview(Restaurant restaurant, Customer customer, CreateReviewRequest request) {
+        return Review.builder()
+                .restaurant(restaurant)
+                .customer(customer)
+                .rating(request.rating())
+                .comment(request.comment())
+                .build();
     }
 }
