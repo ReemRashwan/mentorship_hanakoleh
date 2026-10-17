@@ -61,6 +61,9 @@ class AddressControllerTest {
     @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
 
+    @MockitoBean
+    private TokenRevocationService tokenRevocationService;
+
     private Integer customerId;
     private Long addressId;
     private UserPrincipal userPrincipal;

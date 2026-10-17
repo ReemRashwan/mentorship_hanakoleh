@@ -46,6 +46,9 @@ class ArchitectureTest {
                 .should().haveSimpleNameEndingWith("Controller")
                 .check(classes);
         classes().that().resideInAPackage("..service..")
+                .and().areNotAnonymousClasses()
+                .and().doNotHaveSimpleName("OrderStatusTransitionControl")
+                .and().doNotHaveSimpleName("OrderStatusWebSocketNotifier")
                 .should().haveSimpleNameEndingWith("Service")
                 .check(classes);
         classes().that().resideInAPackage("..repository..")

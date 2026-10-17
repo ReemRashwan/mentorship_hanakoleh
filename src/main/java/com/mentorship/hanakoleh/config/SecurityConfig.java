@@ -6,6 +6,7 @@ import com.mentorship.hanakoleh.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -34,17 +35,20 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                // TODO: UNIFY URLS OR MOVE TO CONFIG
+                // TODO: MAKE SURE ALL USER'S ENDPOINTS ARE PROTECTED
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/password/reset").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/restaurants/*/reviews").authenticated()
                         .requestMatchers("/api/v1/me/**").authenticated()
+                        .requestMatchers("/api/v1/users/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
-                // 2. Add JWT filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

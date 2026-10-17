@@ -1,35 +1,32 @@
 package com.mentorship.hanakoleh.domain.rider.service;
 
+import com.mentorship.hanakoleh.domain.order.event.OrderAcceptedByRestaurantEvent;
 import com.mentorship.hanakoleh.domain.order.event.OrderConfirmedEvent;
-import com.mentorship.hanakoleh.domain.rider.exception.RiderNotFoundException;
+import com.mentorship.hanakoleh.domain.order.event.OrderPreparedEvent;
 import com.mentorship.hanakoleh.domain.user.model.Rider;
-import com.mentorship.hanakoleh.domain.user.repository.RiderRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
+
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
-import com.mentorship.hanakoleh.domain.order.event.OrderAcceptedByRestaurantEvent;
-import com.mentorship.hanakoleh.domain.order.event.OrderPreparedEvent;
 
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DispatchService {
 
-    private final RiderRepository riderRepository;
+    private final RiderService riderService;
 
-    public DispatchService( RiderRepository riderRepository) {
-        this.riderRepository = riderRepository;
+    public Rider retrieveRiderByUserId(Integer userId) {
+        return riderService.retrieveRiderByUserId(userId);
     }
-    public Rider retrieveRiderByUserId(Integer userId){
-        return riderRepository.findRiderByUserId(userId).orElseThrow(() -> new RiderNotFoundException(String.format("Requested Rider with user id %d not found",userId)));
-    }
+
     @TransactionalEventListener
     public void handlingIncomingConfirmedOrders(OrderConfirmedEvent orderConfirmedEvent) {
         log.info("Incoming confirmed order event received. Contacting Rider...\nchecking Rider Status...\nrecording coordinates.");
     }
-
-
 
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void handleIncomingConfirmedOrders(OrderConfirmedEvent orderConfirmedEvent) {
@@ -50,4 +47,3 @@ public class DispatchService {
     }
 
 }
-
