@@ -19,12 +19,12 @@ import java.time.Instant;
 public class Preferences {
 
     @Id
-    @Column(name = "user_id")
+    @Column(name = "customer_id")
     private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @MapsId
-    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "user_id")
+    @JoinColumn(name = "customer_id", nullable = false, referencedColumnName = "user_id")
     private Customer customer;
 
     @Enumerated(EnumType.STRING)

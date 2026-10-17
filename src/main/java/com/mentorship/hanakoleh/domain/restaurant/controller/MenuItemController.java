@@ -5,6 +5,7 @@ import com.mentorship.hanakoleh.domain.restaurant.dto.MenuItemSearchCriteria;
 import com.mentorship.hanakoleh.domain.restaurant.dto.MenuItemSearchResponse;
 import com.mentorship.hanakoleh.domain.restaurant.dto.UpdateMenuItemRequest;
 import com.mentorship.hanakoleh.domain.restaurant.service.MenuItemSearchService;
+import com.mentorship.hanakoleh.domain.restaurant.service.MenuItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
@@ -30,9 +31,11 @@ import java.util.List;
 public class MenuItemController {
 
     private final MenuItemSearchService menuItemSearchService;
+    private final MenuItemService menuItemService;
 
-    public MenuItemController(MenuItemSearchService menuItemSearchService) {
+    public MenuItemController(MenuItemSearchService menuItemSearchService, MenuItemService menuItemService) {
         this.menuItemSearchService = menuItemSearchService;
+        this.menuItemService = menuItemService;
     }
 
     @GetMapping("/search")
