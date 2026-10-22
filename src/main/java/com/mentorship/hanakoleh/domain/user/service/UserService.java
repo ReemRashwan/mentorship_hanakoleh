@@ -1,16 +1,23 @@
 package com.mentorship.hanakoleh.domain.user.service;
 
+import com.mentorship.hanakoleh.domain.user.exception.UserAccessDeniedException;
+import com.mentorship.hanakoleh.domain.user.exception.UserNotFoundException;
 import com.mentorship.hanakoleh.domain.user.model.Customer;
 import com.mentorship.hanakoleh.domain.user.model.User;
 import com.mentorship.hanakoleh.domain.user.repository.CustomerRepository;
 import com.mentorship.hanakoleh.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
+import java.util.Optional;
 
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -18,12 +25,12 @@ public class UserService {
 
     @Transactional
     public User getProfile(Integer userId) {
-        return findUserById(userId);
+        return getUserOrThrow(userId);
     }
 
     @Transactional
     public User updateProfile(Integer userId, String firstName, String lastName, String phoneNumber) {
-        User user = findUserById(userId);
+        User user = getUserOrThrow(userId);
         applyProfileUpdates(user, firstName, lastName, phoneNumber);
         return userRepository.save(user);
     }
@@ -34,9 +41,8 @@ public class UserService {
                 .orElse(null);
     }
 
-    private User findUserById(Integer userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+    private Optional<User> getUserById(Integer userId) {
+        return userRepository.findById(userId);
     }
 
     private void applyProfileUpdates(User user, String firstName, String lastName, String phoneNumber) {
@@ -48,6 +54,20 @@ public class UserService {
         }
         if (phoneNumber != null) {
             user.setPhoneNumber(phoneNumber);
+        }
+    }
+
+    public User getUserOrThrow(Integer userId) {
+        return getUserById(userId).orElseThrow(()->new UserNotFoundException("User with ID "+userId+" not found."));
+    }
+
+    @Transactional
+    public void verifyUserType(Integer userId, String requiredType) {
+        User user = getUserOrThrow(userId);
+
+        if (!Objects.equals(user.getUserType().getName(), requiredType)) {
+            log.warn("User {} has type {} but {} is required", userId, user.getUserType().getName(), requiredType);
+            throw new UserAccessDeniedException("You are not allowed to perform this action");
         }
     }
 }

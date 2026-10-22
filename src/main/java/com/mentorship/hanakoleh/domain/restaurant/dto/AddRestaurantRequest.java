@@ -1,25 +1,17 @@
 package com.mentorship.hanakoleh.domain.restaurant.dto;
 
-import com.mentorship.hanakoleh.domain.restaurant.model.Restaurant;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
-import lombok.Data;
 
 import java.math.BigDecimal;
-@Data
 @Builder
-public class AddRestaurantRequest {
-    //Restaurant restaurant = Restaurant.builder().id().name().phone().email().rating().longitude().latitude().avgPreparationTimeInMins().createdAt().deliveryRadiusKm().build()
-    @NotBlank
-    String name;
-    @NotBlank
-    String phone;
-    @NotBlank
-    String email;
-    BigDecimal longitude;
-    BigDecimal latitude;
-    Integer avgPreparationTimeInMins;
-
-
-
-}
+    public record AddRestaurantRequest(
+            @NotBlank String name,
+            @NotBlank String phone,
+            @NotBlank @Email String email,
+            @NotNull @DecimalMin("-180.0") @DecimalMax("180.0") BigDecimal longitude,
+            @NotNull @DecimalMin("-90.0") @DecimalMax("90.0") BigDecimal latitude,
+            @Min(0) BigDecimal deliveryRadiusInKm,
+            @Min(0) Integer avgPreparationTimeInMins,
+            @NotNull Integer restaurantCategoryId
+    ) {}

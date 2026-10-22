@@ -1,4 +1,8 @@
 package com.mentorship.hanakoleh.domain.restaurant.dto;
 
-public class UpdateRestaurantResponse {
+import lombok.Builder;
+
+
+@Builder
+public record UpdateRestaurantResponse (Integer id, String name) {
 }
