@@ -100,14 +100,14 @@ public class RestaurantController {
     }
 
     @GetMapping
-    public Page<RestaurantDTO> searchRestaurants(
+    public ResponseEntity<Page<RestaurantDTO>> searchRestaurants(
             @Valid RestaurantSearchCriteria criteria,
-            @PageableDefault(size = 20, sort = "name") Pageable pageable) {
-        return restaurantService.searchRestaurants(criteria, pageable);
+            @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+        return ResponseEntity.ok(restaurantService.searchRestaurants(criteria, pageable));
     }
 
     @GetMapping
-    public Page<RestaurantDTO> listRestaurants(@PageableDefault(size = 20, sort = "category") Pageable pageable) {
-        return restaurantService.listAllRestaurants(pageable);
+    public ResponseEntity<Page<RestaurantDTO>> listRestaurants(@PageableDefault(size = 10, sort = "category") Pageable pageable) {
+        return ResponseEntity.ok(restaurantService.listAllRestaurants(pageable));
     }
 }
