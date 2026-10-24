@@ -1,22 +1,25 @@
 package com.mentorship.hanakoleh.domain.restaurant.controller;
 
-import com.mentorship.hanakoleh.domain.restaurant.dto.MenuListResponse;
-import com.mentorship.hanakoleh.domain.restaurant.dto.RestaurantSummaryResponse;
+import com.mentorship.hanakoleh.domain.restaurant.dto.*;
+import com.mentorship.hanakoleh.domain.restaurant.model.RestaurantSearchCriteria;
 import com.mentorship.hanakoleh.domain.restaurant.service.MenuQueryService;
 import com.mentorship.hanakoleh.domain.restaurant.service.RestaurantService;
 import com.mentorship.hanakoleh.domain.restaurant.service.TopRatedRestaurantService;
+import com.mentorship.hanakoleh.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
+
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/restaurants")
@@ -56,5 +59,55 @@ public class RestaurantController {
             @RequestParam(value = "category", required = false) String category,
             @PageableDefault(size = 20, sort = "name") Pageable pageable) {
         return ResponseEntity.ok(menuQueryService.listMenus(restaurantId, category, pageable));
+    }
+
+    @PostMapping
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<AddRestaurantResponse> addRestaurant(@AuthenticationPrincipal UserPrincipal principal,
+                                                               @RequestBody @Valid AddRestaurantRequest addRestaurantRequest) {
+        Integer userId = principal.getId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(restaurantService.addRestaurant(userId, addRestaurantRequest));
+    }
+
+    @PatchMapping("/{restaurant_id}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<UpdateRestaurantResponse> updateRestaurant(@AuthenticationPrincipal UserPrincipal principal,
+                                                                     @PathVariable(name = "restaurant_id") Integer restaurantId,
+                                                                     @RequestBody @Valid UpdateRestaurantRequest updateRestaurantRequest
+    ) {
+        Integer userId = principal.getId();
+        UpdateRestaurantResponse response = restaurantService.updateRestaurant(userId, restaurantId, updateRestaurantRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @SecurityRequirement(name = "bearerAuth")
+    @PatchMapping({"/{restaurant_id}/enable"})
+    public ResponseEntity<Integer> enableRestaurant(@AuthenticationPrincipal UserPrincipal principal,
+                                                    @PathVariable(name="restaurant_id") Integer restaurantId) {
+        Integer userId = principal.getId();
+        restaurantService.enableRestaurant(userId,restaurantId);
+        return ResponseEntity.status(HttpStatus.OK).body(restaurantId);
+
+    }
+
+    @SecurityRequirement(name = "bearerAuth")
+    @PatchMapping({"/{restaurant_id}/disable"})
+    public ResponseEntity<Integer> disableRestaurant(@AuthenticationPrincipal UserPrincipal principal,
+                                  @PathVariable(name="restaurant_id") Integer restaurantId) {
+        Integer userId = principal.getId();
+        restaurantService.disableRestaurant(userId,restaurantId);
+        return ResponseEntity.status(HttpStatus.OK).body(restaurantId);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<RestaurantDTO>> searchRestaurants(
+            @Valid RestaurantSearchCriteria criteria,
+            @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+        return ResponseEntity.ok(restaurantService.searchRestaurants(criteria, pageable));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<RestaurantDTO>> listRestaurants(@PageableDefault(size = 10, sort = "category") Pageable pageable) {
+        return ResponseEntity.ok(restaurantService.listAllRestaurants(pageable));
     }
 }
