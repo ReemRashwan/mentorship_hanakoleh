@@ -110,7 +110,7 @@ class AddressServiceTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getIsDefault()).isTrue();
-            verify(addressRepository, never()).clearDefaultAddressByCustomerId(customerId);
+            verify(addressRepository, never()).findDefaultByCustomerId(customerId);
             verify(addressRepository).save(any(Address.class));
         }
 
@@ -127,7 +127,7 @@ class AddressServiceTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getIsDefault()).isTrue();
-            verify(addressRepository, times(1)).clearDefaultAddressByCustomerId(customerId);
+            verify(addressRepository, times(1)).findDefaultByCustomerId(customerId);
             verify(addressRepository).save(any(Address.class));
         }
 
@@ -144,7 +144,7 @@ class AddressServiceTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getIsDefault()).isFalse();
-            verify(addressRepository, never()).clearDefaultAddressByCustomerId(customerId);
+            verify(addressRepository, never()).findDefaultByCustomerId(customerId);
             verify(addressRepository).save(any(Address.class));
         }
 
@@ -308,7 +308,7 @@ class AddressServiceTest {
             addressService.setDefaultAddress(addressId, customerId);
 
             assertThat(mockAddress.getIsDefault()).isTrue();
-            verify(addressRepository, times(1)).clearDefaultAddressByCustomerId(customerId);
+            verify(addressRepository, times(1)).findDefaultByCustomerId(customerId);
         }
 
         @Test
@@ -320,7 +320,7 @@ class AddressServiceTest {
                     .isInstanceOf(AddressNotFoundException.class)
                     .hasMessageContaining("Address not found with ID: " + addressId);
 
-            verify(addressRepository, never()).clearDefaultAddressByCustomerId(customerId);
+            verify(addressRepository, never()).findDefaultByCustomerId(customerId);
         }
     }
 
