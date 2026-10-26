@@ -9,6 +9,7 @@ import com.mentorship.hanakoleh.domain.restaurant.dto.UpdateItemCategoryRequest;
 import com.mentorship.hanakoleh.domain.restaurant.dto.UpdateMenuItemRequest;
 import com.mentorship.hanakoleh.domain.restaurant.model.MenuItemOnDemandStatus;
 import com.mentorship.hanakoleh.domain.restaurant.service.ItemCategoryService;
+import com.mentorship.hanakoleh.domain.restaurant.service.MenuItemSearchService;
 import com.mentorship.hanakoleh.domain.restaurant.service.MenuItemService;
 import com.mentorship.hanakoleh.handler.GlobalExceptionHandler;
 import com.mentorship.hanakoleh.security.CustomUserDetailsService;
@@ -55,6 +56,9 @@ class RestaurantCatalogControllerTest {
 
     @MockitoBean
     private MenuItemService menuItemService;
+
+    @MockitoBean
+    private MenuItemSearchService menuItemSearchService;
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
