@@ -78,11 +78,13 @@ public class AddressService {
     @Transactional
     public void deleteAddress(Long addressId, Integer customerId) {
         Address address = getAddressOrThrow(addressId, customerId);
-        if (address.getIsDefault()) {
-            markAnyExistingAddressAsDefault(addressId, customerId);
-        }
+        boolean wasDefault = address.getIsDefault();
 
         addressRepository.delete(address);
+        if (wasDefault) {
+            addressRepository.flush();
+            markAnyExistingAddressAsDefault(addressId, customerId);
+        }
         log.info("Address deleted with ID: {}", addressId);
     }
 
@@ -100,6 +102,10 @@ public class AddressService {
     }
 
     private void removeDefaultAddressIfExist(Integer customerId) {
-        addressRepository.clearDefaultAddressByCustomerId(customerId);
+        addressRepository.findDefaultByCustomerId(customerId).ifPresent(currentDefault -> {
+            currentDefault.setIsDefault(false);
+            // Flush the old default off before the caller sets a new one, so the partial unique index is never violated.
+            addressRepository.flush();
+        });
     }
 }

@@ -1,5 +1,6 @@
 package com.mentorship.hanakoleh.domain.restaurant.controller;
 
+import com.mentorship.hanakoleh.domain.restaurant.dto.CreateMenuItemRequest;
 import com.mentorship.hanakoleh.domain.restaurant.dto.MenuItemResponse;
 import com.mentorship.hanakoleh.domain.restaurant.dto.MenuItemSearchCriteria;
 import com.mentorship.hanakoleh.domain.restaurant.dto.MenuItemSearchResponse;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,6 +62,13 @@ public class MenuItemController {
         return ResponseEntity.ok(menuItemSearchService.search(criteria, sort, direction, page, size));
     }
 
+
+    @PostMapping
+    @Operation(summary = "Create a menu item")
+    public ResponseEntity<MenuItemResponse> createMenuItem(@Valid @RequestBody CreateMenuItemRequest request) {
+        MenuItemResponse response = menuItemService.createMenuItem(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     @GetMapping
     @Operation(summary = "Get all menu items")
