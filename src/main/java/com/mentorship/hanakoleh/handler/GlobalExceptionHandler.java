@@ -6,6 +6,9 @@ import com.mentorship.hanakoleh.domain.cart.exception.ItemUnavailableException;
 import com.mentorship.hanakoleh.domain.cart.exception.OperationNotAllowedException;
 import com.mentorship.hanakoleh.domain.checkout.exception.*;
 import com.mentorship.hanakoleh.domain.payment.exception.PaymentMethodNotSupportedException;
+import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantCategoryNotFoundException;
+import com.mentorship.hanakoleh.domain.user.exception.*;
+import com.mentorship.hanakoleh.domain.user.exception.AddressNotFoundException;
 import com.mentorship.hanakoleh.exception.InvalidEnumValueException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderPersistenceException;
 import com.mentorship.hanakoleh.domain.order.exception.OrderNotFoundException;
@@ -14,12 +17,6 @@ import com.mentorship.hanakoleh.domain.order.exception.OrderNotOwnedByRiderExcep
 import com.mentorship.hanakoleh.domain.restaurant.exception.InvalidRestaurantIdException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.MenuItemNotOrderableException;
 import com.mentorship.hanakoleh.domain.restaurant.exception.RestaurantNotFoundException;
-import com.mentorship.hanakoleh.domain.user.exception.AddressNotFoundException;
-import com.mentorship.hanakoleh.domain.user.exception.CustomerNotFoundException;
-import com.mentorship.hanakoleh.domain.user.exception.InvalidPasswordException;
-import com.mentorship.hanakoleh.domain.user.exception.InvalidTokenException;
-import com.mentorship.hanakoleh.domain.user.exception.PaymentMethodNotFoundException;
-import com.mentorship.hanakoleh.domain.user.exception.UserTokenNotFoundException;
 import org.slf4j.Logger;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.slf4j.LoggerFactory;
@@ -31,6 +28,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,12 +36,25 @@ public class GlobalExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @ExceptionHandler(UserTokenNotFoundException.class)
-    public ResponseEntity<?> handleUserTokenNotFoundException() {
-        ResponseMessage userTokenNotFoundMessage = new ResponseMessage(
-                "Unauthorized User Access",
-                "User Access Denied due to lack of credentials",
-                LocalDateTime.now());
-        return new ResponseEntity<>(userTokenNotFoundMessage, HttpStatus.UNAUTHORIZED);
+    public ProblemDetail handleUserTokenNotFound(UserTokenNotFoundException exception) {
+        log.debug("Request rejected, no credentials supplied: {}", exception.getMessage());
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNAUTHORIZED, "Authentication is required to access this resource");
+        problem.setTitle("Authentication Required");
+        problem.setProperty("timestamp", OffsetDateTime.now());
+        return problem;
+    }
+
+    @ExceptionHandler(UserAccessDeniedException.class)
+    public ProblemDetail handleUserAccessDenied(UserAccessDeniedException exception) {
+        log.warn("Access denied: {}", exception.getMessage());
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.FORBIDDEN, "You do not have permission to perform this action");
+        problem.setTitle("Access Denied");
+        problem.setProperty("timestamp", OffsetDateTime.now());
+        return problem;
     }
 
     @ExceptionHandler(CustomerNotFoundException.class)
@@ -205,5 +216,9 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleException(Exception exception) {
         log.error("An unexpected error occurred", exception);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+    }
+    @ExceptionHandler(RestaurantCategoryNotFoundException.class)
+    public ProblemDetail handleRestaurantCategoryNotFoundException(RestaurantCategoryNotFoundException exception){
+     return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,"The specified Restaurant Category Not Found")   ;
     }
 }

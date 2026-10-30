@@ -64,6 +64,10 @@ public class Restaurant {
     @NotNull
     private OffsetDateTime createdAt;
 
+    @Column(name = "restaurant_updated_at", nullable = false)
+    @NotNull
+    private OffsetDateTime updatedAt;
+
     @Builder.Default
     @Column(name = "restaurant_delivery_radius_km", nullable = false, precision = 6, scale = 2)
     @NotNull
@@ -79,6 +83,10 @@ public class Restaurant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_category_id")
     private RestaurantCategory category;
+
+    @Column(name="status", nullable = false)
+    @NotNull
+    private RestaurantStatus status;
 
     @PrePersist
     private void prePersist() {
