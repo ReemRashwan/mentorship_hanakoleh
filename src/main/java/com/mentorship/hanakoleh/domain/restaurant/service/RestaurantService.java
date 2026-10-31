@@ -15,7 +15,7 @@ import com.mentorship.hanakoleh.domain.user.exception.UserAccessDeniedException;
 import com.mentorship.hanakoleh.domain.user.repository.RestaurantRepresentativeRepository;
 import com.mentorship.hanakoleh.domain.user.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -99,7 +99,8 @@ public class RestaurantService {
         return AddRestaurantResponse.builder()
                 .restaurantId(savedRestaurant.getId())
                 .restaurantName(savedRestaurant.getName())
-                .restaurantCategory(savedRestaurant.getCategory()).build();
+                .categoryId(savedRestaurant.getCategory().getId())
+                .categoryName(savedRestaurant.getCategory().getName()).build();
     }
 
     @Transactional
@@ -159,20 +160,21 @@ public class RestaurantService {
         toBeActiveRestaurant.setStatus(RestaurantStatus.ACTIVE);
     }
 
+    @Transactional
     public void disableRestaurant(Integer userId, Integer restaurantId) {
         verifyUserIsRestaurantRepresentative(userId,restaurantId);
         Restaurant toBeActiveRestaurant = getRestaurantOrThrow(restaurantId);
         toBeActiveRestaurant.setStatus(RestaurantStatus.INACTIVE);
     }
 
-    @Transactional
+    @Transactional (readOnly = true)
     public Page<RestaurantDTO> searchRestaurants(RestaurantSearchCriteria criteria, Pageable pageable) {
         return restaurantRepository
                 .findAll(RestaurantSpecifications.from(criteria), pageable)
                 .map(restaurantMapper::toRestaurantDTO);
     }
 
-    @Transactional
+    @Transactional  (readOnly = true)
     public Page<RestaurantDTO> listAllRestaurants(Pageable pageable) {
 
         return restaurantRepository.findAll(pageable).map(restaurantMapper::toRestaurantDTO);

@@ -1,4 +1,4 @@
-package com.mentorship.hanakoleh.service;
+package com.mentorship.hanakoleh.domain.cart.service;
 
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemRequest;
 import com.mentorship.hanakoleh.domain.cart.dto.AddCartItemResponse;
