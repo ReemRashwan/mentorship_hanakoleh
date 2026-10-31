@@ -7,7 +7,8 @@ import lombok.Builder;
 public record AddRestaurantResponse (
     Integer restaurantId,
     String restaurantName,
-    RestaurantCategory restaurantCategory
+    Integer categoryId,
+    String categoryName
 ){
 
 }
