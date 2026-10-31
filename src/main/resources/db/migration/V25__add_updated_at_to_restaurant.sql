@@ -1,0 +1,1 @@
+ALTER TABLE restaurant ADD COLUMN restaurant_updated_at TIMESTAMPTZ;
