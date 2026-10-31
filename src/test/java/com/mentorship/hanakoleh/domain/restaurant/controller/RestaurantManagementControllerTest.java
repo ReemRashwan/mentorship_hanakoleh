@@ -1,24 +1,32 @@
 package com.mentorship.hanakoleh.domain.restaurant.controller;
 
+import com.mentorship.hanakoleh.TestcontainersConfiguration;
 import com.mentorship.hanakoleh.domain.restaurant.dto.AddRestaurantRequest;
 import com.mentorship.hanakoleh.domain.restaurant.dto.AddRestaurantResponse;
 import com.mentorship.hanakoleh.domain.restaurant.service.MenuQueryService;
 import com.mentorship.hanakoleh.domain.restaurant.service.RestaurantService;
 import com.mentorship.hanakoleh.domain.restaurant.service.TopRatedRestaurantService;
+import com.mentorship.hanakoleh.security.CustomUserDetailsService;
+import com.mentorship.hanakoleh.security.TokenRevocationService;
 import com.mentorship.hanakoleh.security.UserPrincipal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;            // Boot 4: moved
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;        // replaces @MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;                                       // Jackson 3 (Boot 4 default)
+import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import com.mentorship.hanakoleh.security.JwtTokenProvider;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,13 +39,24 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(RestaurantController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@Import(TestcontainersConfiguration.class)
+@Testcontainers
+@DisplayName("Restaurant Management Integration Test")
 class RestaurantControllerIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
 
     @MockitoBean private RestaurantService restaurantService;
+    @MockitoBean private MenuQueryService menuQueryService;
+    @MockitoBean private TopRatedRestaurantService topRatedRestaurantService;
+
+    @MockitoBean private JwtTokenProvider jwtTokenProvider;
+    @MockitoBean private CustomUserDetailsService customUserDetailsService;
+    @MockitoBean private TokenRevocationService tokenRevocationService;
+
 
     private UsernamePasswordAuthenticationToken authenticatedUser() {
         UserPrincipal principal = new UserPrincipal(

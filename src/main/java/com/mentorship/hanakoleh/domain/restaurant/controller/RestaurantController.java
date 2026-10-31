@@ -5,6 +5,7 @@ import com.mentorship.hanakoleh.domain.restaurant.model.RestaurantSearchCriteria
 import com.mentorship.hanakoleh.domain.restaurant.service.MenuQueryService;
 import com.mentorship.hanakoleh.domain.restaurant.service.RestaurantService;
 import com.mentorship.hanakoleh.domain.restaurant.service.TopRatedRestaurantService;
+import com.mentorship.hanakoleh.domain.user.exception.UserTokenNotFoundException;
 import com.mentorship.hanakoleh.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -65,6 +66,7 @@ public class RestaurantController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<AddRestaurantResponse> addRestaurant(@AuthenticationPrincipal UserPrincipal principal,
                                                                @RequestBody @Valid AddRestaurantRequest addRestaurantRequest) {
+        if (principal == null) throw new UserTokenNotFoundException("UnAuthorized User");
         Integer userId = principal.getId();
         return ResponseEntity.status(HttpStatus.CREATED).body(restaurantService.addRestaurant(userId, addRestaurantRequest));
     }
@@ -75,6 +77,7 @@ public class RestaurantController {
                                                                      @PathVariable(name = "restaurant_id") Integer restaurantId,
                                                                      @RequestBody @Valid UpdateRestaurantRequest updateRestaurantRequest
     ) {
+        if (principal == null) throw new UserTokenNotFoundException("UnAuthorized User");
         Integer userId = principal.getId();
         UpdateRestaurantResponse response = restaurantService.updateRestaurant(userId, restaurantId, updateRestaurantRequest);
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -84,6 +87,7 @@ public class RestaurantController {
     @PatchMapping({"/{restaurant_id}/enable"})
     public ResponseEntity<Integer> enableRestaurant(@AuthenticationPrincipal UserPrincipal principal,
                                                     @PathVariable(name="restaurant_id") Integer restaurantId) {
+        if (principal == null) throw new UserTokenNotFoundException("UnAuthorized User");
         Integer userId = principal.getId();
         restaurantService.enableRestaurant(userId,restaurantId);
         return ResponseEntity.status(HttpStatus.OK).body(restaurantId);
@@ -94,12 +98,13 @@ public class RestaurantController {
     @PatchMapping({"/{restaurant_id}/disable"})
     public ResponseEntity<Integer> disableRestaurant(@AuthenticationPrincipal UserPrincipal principal,
                                   @PathVariable(name="restaurant_id") Integer restaurantId) {
+        if (principal == null) throw new UserTokenNotFoundException("UnAuthorized User");
         Integer userId = principal.getId();
         restaurantService.disableRestaurant(userId,restaurantId);
         return ResponseEntity.status(HttpStatus.OK).body(restaurantId);
     }
 
-    @GetMapping
+    @GetMapping("/search")
     public ResponseEntity<Page<RestaurantDTO>> searchRestaurants(
             @Valid RestaurantSearchCriteria criteria,
             @PageableDefault(size = 10, sort = "name") Pageable pageable) {

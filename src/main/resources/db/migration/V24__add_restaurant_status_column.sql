@@ -1,1 +1,1 @@
-ALTER TABLE restaurant add column (status varchar(20) not null;
+ALTER TABLE restaurant add column status varchar(20) DEFAULT 'ACTIVE' not null;
