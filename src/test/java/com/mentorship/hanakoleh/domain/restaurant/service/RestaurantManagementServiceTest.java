@@ -370,4 +370,59 @@ public class RestaurantManagementServiceTest {
 
     }
 
+    @Nested
+    @DisplayName("List/Search Restaurant Tests")
+    class ListSearchRestaurantTests{
+
+        @BeforeEach
+        void setUp() {
+
+            existingRestaurant = Restaurant.builder()
+                    .id(RESTAURANT_ID).name("Old Rest Name").phone("+201000000000").email("old@oldrest.com")
+                    .longitude(new BigDecimal("31.0")).latitude(new BigDecimal("30.0"))
+                    .avgPreparationTimeInMins(20).deliveryRadiusKm(new BigDecimal("5.0"))
+                    .category(existingCategory).status(RestaurantStatus.ACTIVE)
+                    .build();
+        }
+
+        @Test
+        void searchRestaurants_mapsEntitiesToDTOs() {
+            Pageable pageable = PageRequest.of(0, 10);
+            RestaurantDTO dto = mock(RestaurantDTO.class);
+            when(restaurantRepository.findAll(ArgumentMatchers.<Specification<Restaurant>>any(), eq(pageable)))
+                    .thenReturn(new PageImpl<>(List.of(existingRestaurant), pageable, 1));
+            when(restaurantMapper.toRestaurantDTO(existingRestaurant)).thenReturn(dto);
+
+            Page<RestaurantDTO> result = restaurantService.searchRestaurants(
+                    new RestaurantSearchCriteria(null, null, null, null, null), pageable);
+
+            assertEquals(1, result.getTotalElements());
+            assertSame(dto, result.getContent().get(0));
+        }
+
+        @Test
+        void searchRestaurants_noMatches_returnsEmptyPage() {
+            Pageable pageable = PageRequest.of(0, 10);
+            when(restaurantRepository.findAll(ArgumentMatchers.<Specification<Restaurant>>any(), eq(pageable)))
+                    .thenReturn(Page.empty(pageable));
+
+            Page<RestaurantDTO> result = restaurantService.searchRestaurants(
+                    new RestaurantSearchCriteria("Burger King", null, null, null, null), pageable);
+
+            assertTrue(result.isEmpty());
+            verifyNoInteractions(restaurantMapper);
+        }
+
+        @Test
+        void listAllRestaurants_mapsEntitiesToDTOs() {
+            Pageable pageable = PageRequest.of(0, 10);
+            RestaurantDTO dto = mock(RestaurantDTO.class);
+            when(restaurantRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(existingRestaurant), pageable, 1));
+            when(restaurantMapper.toRestaurantDTO(existingRestaurant)).thenReturn(dto);
+
+            Page<RestaurantDTO> result = restaurantService.listAllRestaurants(pageable);
+
+            assertSame(dto, result.getContent().get(0));
+        }
+    }
 }
